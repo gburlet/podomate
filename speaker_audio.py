@@ -121,3 +121,11 @@ class SpeakerAudio(object):
         duration (float): duration of the audio waveform in seconds
         """
         return np.shape(self.x)[0] / float(self.fs)
+
+    def apply_offset(self, offset_s):
+        offset_samples = int(offset_s * float(self.fs))
+        if offset_s > 0:
+            offset_samples = int(offset_s * float(self.fs))
+            self.x = np.hstack((np.zeros(offset_samples), self.x))
+        elif offset_s < 0:
+            self.x = self.x[offset_samples:]
