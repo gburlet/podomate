@@ -2,6 +2,7 @@ import os
 
 from librosa import load, to_mono, resample
 from librosa.util import normalize as audio_normalize
+import soundfile as sf
 from scipy.io import wavfile
 import numpy as np
 import warnings
@@ -9,35 +10,40 @@ import warnings
 warnings.simplefilter('ignore', wavfile.WavFileWarning)
 
 
-class SpeakerAudio(object):
+class AudioBuffer(object):
     """
-    This class is a data structure for an audio file samples along with its metadata.
+    This class is a data structure for an audio_buffer file samples along with its metadata.
 
-    Whenever reading audio samples from disk and passing these
+    Whenever reading audio_buffer samples from disk and passing these
     samples around for processing, you always need the corresponding sampling rate. This allows us to pass
     around this information together and to do smart resampling (only resample when necessary).
     """
 
-    def __init__(self, path):
-        self._path = path
-        self.fs = None
-        self.x = None
+    DEFAULT_SAMPLING_RATE = 44100
 
-    def read(self, fs=None, normalize=True, min_length_s=0.2):
+    def __init__(self, path=None, x=np.zeros(0), fs=DEFAULT_SAMPLING_RATE):
+        self._path = path
+        self.x = x
+        self.fs = fs
+
+    def read(self, fs=DEFAULT_SAMPLING_RATE, normalize=True, min_length_s=0.2):
         """
-        Reads in audio samples from disk
+        Reads in audio_buffer samples from disk
 
         Parameters
         ----------
         fs (int): desired sampling rate. None uses native sampling rate
-        normalize (bool): whether to normalize the audio samples
-        min_length_s (float): ensure audio file is at least x seconds long
-            Note: this avoids analysis errors where audio length is less than a single window length
+        normalize (bool): whether to normalize the audio_buffer samples
+        min_length_s (float): ensure audio_buffer file is at least x seconds long
+            Note: this avoids analysis errors where audio_buffer length is less than a single window length
 
         Returns
         -------
-        x [num_samples,]: audio samples
+        x [num_samples,]: audio_buffer samples
         """
+
+        if not os.path.isfile(self._path):
+            raise IOError("Can not find audio_buffer file: %s" % self._path)
 
         ext = os.path.splitext(self._path)[-1]
         if ext == ".wav":
@@ -75,9 +81,14 @@ class SpeakerAudio(object):
 
         return self.x
 
+    def write(self, normalize=True):
+        if normalize:
+            self.x = audio_normalize(self.x, norm=np.inf)
+        sf.write(self._path, self.x, self.fs)
+
     def get_resampled_audio(self, target_fs):
         """
-        Calculate resampled audio waveform (don't overwrite)
+        Calculate resampled audio_buffer waveform (don't overwrite)
 
         Parameters
         ----------
@@ -85,11 +96,11 @@ class SpeakerAudio(object):
 
         Returns
         -------
-        sa_resampled (SpeakerAudio): resampled audio file
+        sa_resampled (SpeakerAudio): resampled audio_buffer file
         """
 
         if target_fs != self.fs:
-            sa_resampled = SpeakerAudio(self._path)
+            sa_resampled = AudioBuffer(self._path)
             sa_resampled.x = resample(self.x, self.fs, target_fs, res_type="kaiser_fast")
             sa_resampled.fs = target_fs
             return sa_resampled
@@ -97,15 +108,15 @@ class SpeakerAudio(object):
 
     def resample_audio(self, target_fs):
         """
-        Resample underlying audio signal to target_fs
+        Resample underlying audio_buffer signal to target_fs
 
         Parameters:
-        x [num_samples,]: audio samples
+        x [num_samples,]: audio_buffer samples
         target_fs (int): sampling rate to resample to
 
         Returns
         -------
-        x [num_samples,]: audio samples
+        x [num_samples,]: audio_buffer samples
         """
 
         new_speaker_audio = self.get_resampled_audio(target_fs)
@@ -118,7 +129,7 @@ class SpeakerAudio(object):
         """
         Returns
         -------
-        duration (float): duration of the audio waveform in seconds
+        duration (float): duration of the audio_buffer waveform in seconds
         """
         return np.shape(self.x)[0] / float(self.fs)
 
@@ -129,3 +140,14 @@ class SpeakerAudio(object):
             self.x = np.hstack((np.zeros(offset_samples), self.x))
         elif offset_s < 0:
             self.x = self.x[offset_samples:]
+
+    def pad(self, num_samples):
+        """
+        Zero pad audio_buffer buffer at end
+
+        Args:
+            num_samples: (int) number of samples to pad to
+
+        Modifies self.x in place
+        """
+        self.x = np.pad(self.x, (0, max(0, num_samples-len(self.x))), 'constant')

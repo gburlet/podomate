@@ -10,7 +10,7 @@ from mir.mir.transcription.audio_preprocessors.noise_reducer import NoiseReducer
 
 class LogMSSENoiseReducer(NoiseReducer):
     """
-    Performs logMMSE noise reduction on an input audio waveform
+    Performs logMMSE noise reduction on an input audio_buffer waveform
 
     References:
     [1] Ephraim, Y. and Malah, D. (1985). Speech enhancement using a minimum
@@ -25,7 +25,7 @@ class LogMSSENoiseReducer(NoiseReducer):
 
         self._noise_threshold = noise_threshold
 
-        # noise reduction state (analyzed from silent audio)
+        # noise reduction state (analyzed from silent audio_buffer)
         self._noise_mu2 = np.zeros(2*self._window_size)
         self._Xk_prev = np.zeros(self._hop_size)
         self._x_old = np.zeros(self._hop_size)
@@ -53,7 +53,7 @@ class LogMSSENoiseReducer(NoiseReducer):
 
         Parameters
         ----------
-        sa (SongAudio): audio waveform to reduce noise on
+        sa (SongAudio): audio_buffer waveform to reduce noise on
 
         Note: modifies SongAudio waveform in place!
         """

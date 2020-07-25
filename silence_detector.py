@@ -6,7 +6,7 @@ from scipy import signal
 
 class SilenceDetector(object):
     """
-    Detect silent portions in an audio waveform
+    Detect silent portions in an audio_buffer waveform
     """
 
     THRESHOLD_METHOD_RMSPROP = "rmsprop"
@@ -27,7 +27,7 @@ class SilenceDetector(object):
         window_size (int): analysis window size in samples
         hop_size (int): hop size in samples
         framing_method (string):
-            "time": uses raw audio samples for a given frame
+            "time": uses raw audio_buffer samples for a given frame
             "spectrum": uses average energy spectrum for a given frame
         threshold_method (string):
             rmsprop: threshold proportion of RMS from noise floor to signal max
@@ -50,11 +50,11 @@ class SilenceDetector(object):
 
     def detect_silences(self, sa):
         """
-        Detects silent portions of audio in the given audio waveform
+        Detects silent portions of audio_buffer in the given audio_buffer waveform
 
         Parameters
         ----------
-        sa (SongAudio): audio to analyze
+        sa (SongAudio): audio_buffer to analyze
 
         Returns
         -------
@@ -135,11 +135,11 @@ class SilenceDetector(object):
 
     def get_sample_of_silence(self, sa, method="maxfirstlast"):
         """
-        Helper function to return a silent portion of audio from the waveform using the provided method
+        Helper function to return a silent portion of audio_buffer from the waveform using the provided method
 
         Parameters
         ----------
-        sa (SongAudio): audio to analyze
+        sa (SongAudio): audio_buffer to analyze
         method (string): selection method for silence range in {max, first, last, maxfirstlast}
 
         Returns
@@ -240,12 +240,12 @@ class SilenceDetector(object):
 
         Parameters
         ----------
-        input_sig (np.array([n,d] or np.array([n,]) : framed audio
+        input_sig (np.array([n,d] or np.array([n,]) : framed audio_buffer
         pre [0,1] (float): coefficient the pre-emphasis filter
 
         Returns
         -------
-        filtered frame (np.array([n,d] or np.array([n,]): emphasised framed audio
+        filtered frame (np.array([n,d] or np.array([n,]): emphasised framed audio_buffer
         """
         if input_sig.ndim == 1:
             return (input_sig - np.c_[input_sig[np.newaxis, :][..., :1],

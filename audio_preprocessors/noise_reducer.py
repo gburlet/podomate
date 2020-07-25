@@ -28,7 +28,7 @@ class NoiseReducer(object):
 
         Parameters
         ----------
-        sa (SongAudio): the audio waveform to analyze
+        sa (SongAudio): the audio_buffer waveform to analyze
 
         Returns
         -------
@@ -50,7 +50,7 @@ class NoiseReducer(object):
 
         Parameters
         ----------
-        sa (SongAudio): audio waveform to reduce noise on
+        sa (SongAudio): audio_buffer waveform to reduce noise on
 
         Note: modifies SongAudio waveform in place!
         """
@@ -61,12 +61,12 @@ class NoiseReducer(object):
     @abstractmethod
     def analyze_silence(self, x_silence):
         """
-        Analyze an audio waveform to form a silence profile to use for noise reduction.
+        Analyze an audio_buffer waveform to form a silence profile to use for noise reduction.
         Sets instance member variables with state.
 
         Parameters
         ----------
-        x_silence (np.array): audio waveform
+        x_silence (np.array): audio_buffer waveform
         """
         pass
 
@@ -78,7 +78,7 @@ class NoiseReducer(object):
 
         Parameters
         ----------
-        sa (SongAudio): audio waveform to reduce noise on
+        sa (SongAudio): audio_buffer waveform to reduce noise on
 
         Note: modifies SongAudio waveform in place!
         """

@@ -12,6 +12,13 @@ class TrackAligner(object):
             if offset != 0:
                 track.apply_offset(offset)
 
+        return self
+
+    def pad(self, tracks):
+        max_samples = max(map(lambda t: len(t.audio_buffer.x), tracks))
+        for t in tracks:
+            t.audio_buffer.pad(max_samples)
+
     def _calc_offsets(self, tracks):
         """
         Master track (longest duration) is index 0
@@ -29,7 +36,7 @@ class TrackAligner(object):
         track_offsets = [0.]*len(tracks)
         master_silence_ranges = tracks[0].silence_ranges
         for islave, slave_track in enumerate(tracks[1:]):
-            # locate longest audio activity
+            # locate longest audio_buffer activity
             slave_longest_activity = sorted(slave_track.activity_ranges, key=lambda ar: ar[1]-ar[0], reverse=True)[0]
 
             # try to find fit in master silence
@@ -68,7 +75,7 @@ class TrackAligner(object):
                     activity_overlap += master_activity_end - slave_activity_start
 
         # add overhang error
-        master_track_duration = master_track.audio.get_duration_s()
+        master_track_duration = master_track.audio_buffer.get_duration_s()
         for slave_activity in slave_activity_ranges:
             slave_activity_start = slave_activity[0] + slave_offset
             slave_activity_end = slave_activity[1] + slave_offset

@@ -8,7 +8,7 @@ from mir.mir.transcription.audio_preprocessors.noise_reducer import NoiseReducer
 
 class OneStepWeinerNoiseReducer(NoiseReducer):
     """
-    Performs one-step weiner filter noise reduction on an input audio waveform
+    Performs one-step weiner filter noise reduction on an input audio_buffer waveform
 
     References:
     [1] Cyril Plapous, Claude Marro, Pascal Scalart. Improved Signal-to-Noise Ratio Estimation for Speech
@@ -48,7 +48,7 @@ class OneStepWeinerNoiseReducer(NoiseReducer):
 
         Parameters
         ----------
-        sa (SongAudio): audio waveform to reduce noise on
+        sa (SongAudio): audio_buffer waveform to reduce noise on
 
         Note: modifies SongAudio waveform in place!
         """
