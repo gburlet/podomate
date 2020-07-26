@@ -7,8 +7,6 @@ from scipy.io import wavfile
 import numpy as np
 import warnings
 
-warnings.simplefilter('ignore', wavfile.WavFileWarning)
-
 
 class AudioBuffer(object):
     """
@@ -45,46 +43,52 @@ class AudioBuffer(object):
         if not os.path.isfile(self._path):
             raise IOError("Can not find audio_buffer file: %s" % self._path)
 
-        ext = os.path.splitext(self._path)[-1]
-        if ext == ".wav":
-            # Scipy wavfile is generally better than librosa, but fails on some wavs, so librosa is a backup
-            try:
-                self.fs, x_temp = wavfile.read(self._path)
-                
-                # convert to float in [-1, 1] if int data
-                if x_temp.dtype.name in {'int8', 'int16', 'int32'}:
-                    num_bits = x_temp.dtype.itemsize * 8
-                    max_val = float(2 ** (num_bits - 1))
-                    x_temp = np.asarray(x_temp, dtype=np.float32) / max_val
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
 
-                self.x = to_mono(x_temp.T)
-                if fs and fs != self.fs:
-                    _ = self.resample_audio(fs)
-            except:
+            ext = os.path.splitext(self._path)[-1]
+            if ext == ".wav":
+                # Scipy wavfile is generally better than librosa, but fails on some wavs, so librosa is a backup
+                try:
+                    self.fs, x_temp = wavfile.read(self._path)
+
+                    # convert to float in [-1, 1] if int data
+                    if x_temp.dtype.name in {'int8', 'int16', 'int32'}:
+                        num_bits = x_temp.dtype.itemsize * 8
+                        max_val = float(2 ** (num_bits - 1))
+                        x_temp = np.asarray(x_temp, dtype=np.float32) / max_val
+
+                    self.x = to_mono(x_temp.T)
+                    if fs and fs != self.fs:
+                        _ = self.resample_audio(fs)
+                except:
+                    load_params = {"mono": True}
+                    if fs:
+                        load_params["sr"] = fs
+                    self.x, self.fs = load(self._path, **load_params)
+            else:
                 load_params = {"mono": True}
                 if fs:
                     load_params["sr"] = fs
                 self.x, self.fs = load(self._path, **load_params)
-        else:
-            load_params = {"mono": True}
-            if fs:
-                load_params["sr"] = fs
-            self.x, self.fs = load(self._path, **load_params)
 
-        if normalize:
-            self.x = audio_normalize(self.x, norm=np.inf)
+            if normalize:
+                self.x = audio_normalize(self.x, norm=np.inf)
 
-        min_samps = int(np.ceil(min_length_s * self.fs))
-        if len(self.x) < min_samps:
-            # pad with zeros for length
-            self.x = np.pad(self.x, (0, min_samps - len(self.x) % min_samps), 'constant')
+            min_samps = int(np.ceil(min_length_s * self.fs))
+            if len(self.x) < min_samps:
+                # pad with zeros for length
+                self.x = np.pad(self.x, (0, min_samps - len(self.x) % min_samps), 'constant')
 
         return self.x
 
     def write(self, normalize=True):
         if normalize:
-            self.x = audio_normalize(self.x, norm=np.inf)
+            self.normalize()
         sf.write(self._path, self.x, self.fs)
+
+    def normalize(self):
+        self.x = audio_normalize(self.x, norm=np.inf)
 
     def get_resampled_audio(self, target_fs):
         """
@@ -151,3 +155,13 @@ class AudioBuffer(object):
         Modifies self.x in place
         """
         self.x = np.pad(self.x, (0, max(0, num_samples-len(self.x))), 'constant')
+
+    def apply_silence_to_interval(self, interval):
+        """
+        Silence out an interval of the track
+        Args:
+            interval: (tuple), (interval_start_s, interval_end_s)
+        """
+        interval_start_sample = max(0, int(interval[0]*self.fs))
+        interval_end_sample = min(int(interval[1]*self.fs), len(self.x))
+        self.x[interval_start_sample:interval_end_sample] = 0.

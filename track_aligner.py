@@ -6,8 +6,9 @@ class TrackAligner(object):
     def __init__(self):
         pass
 
-    def align(self, tracks):
-        track_offsets = self._calc_offsets(tracks)
+    def align(self, tracks, track_offsets=None):
+        if track_offsets is None:
+            track_offsets = self.auto_calc_offset(tracks)
         for offset, track in zip(track_offsets, tracks):
             if offset != 0:
                 track.apply_offset(offset)
@@ -19,7 +20,7 @@ class TrackAligner(object):
         for t in tracks:
             t.audio_buffer.pad(max_samples)
 
-    def _calc_offsets(self, tracks):
+    def auto_calc_offset(self, tracks):
         """
         Master track (longest duration) is index 0
         Algorithm is:
