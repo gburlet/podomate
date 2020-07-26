@@ -6,18 +6,19 @@ class Track(object):
     Data structure containing data and metadata for each track
     """
 
-    def __init__(self, audio):
+    def __init__(self, audio, master=False):
         self.audio_buffer = audio
+        self.master = master
 
     @property
     def silence_ranges(self):
-        return SilenceDetector(threshold=0.35, min_silence_len_s=0.3).detect_silences(self.audio_buffer)
+        return SilenceDetector(threshold=0.3, min_silence_len_s=0.3).detect_silences(self.audio_buffer)
 
     @property
     def activity_ranges(self):
         silence_ranges = self.silence_ranges
         if silence_ranges is None or len(silence_ranges) == 0:
-            return [0., self.audio_buffer.get_duration_s()]
+            return [(0., self.audio_buffer.get_duration_s())]
         else:
             activity_ranges = []
             time_cursor = 0.
@@ -41,3 +42,11 @@ class Track(object):
             interval: (tuple), (interval_start_s, interval_end_s)
         """
         self.audio_buffer.apply_silence_to_interval(interval)
+
+    def snip(self, interval):
+        """
+        Snip out a segment of audio
+        Args:
+            interval: (tuple), (interval_start_s, interval_end_s)
+        """
+        self.audio_buffer.snip(interval)

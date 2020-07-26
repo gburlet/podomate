@@ -17,5 +17,5 @@ class Mixer(object):
             mixed_buffer += 1./num_tracks * t.audio_buffer.x
 
         return Track(
-            audio=AudioBuffer(x=mixed_buffer, fs=tracks[0].audio_buffer.fs)
+            audio=AudioBuffer(x=mixed_buffer, fs=tracks[0].audio_buffer.fs), master=True
         )

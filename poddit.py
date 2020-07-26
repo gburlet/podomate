@@ -4,6 +4,7 @@ import json
 from fx_chain import FXChain
 from mixer import Mixer
 from audio_buffer import AudioBuffer
+from silence_remover import SilenceRemover
 from track import Track
 from track_aligner import TrackAligner
 
@@ -23,10 +24,10 @@ if __name__ == "__main__":
     for local_track in config["local_tracks"]:
         audio_buffer = AudioBuffer(local_track["path"])
         audio_buffer.read(normalize=True)
-        tracks.append(Track(audio=audio_buffer))
+        is_master = local_track.get("master", False)
+        tracks.append(Track(audio=audio_buffer, master=is_master))
 
-    # auto calculate track alignment (offsets): sort 1st track is master track
-    tracks.sort(key=lambda t: t.audio_buffer.get_duration_s(), reverse=True)
+    # auto calculate track alignment (offsets) for non master tracks
     track_aligner = TrackAligner()
     track_offsets = track_aligner.auto_calc_offset(tracks)
 
@@ -46,6 +47,24 @@ if __name__ == "__main__":
 
     # mix global track
     mixed_track = Mixer().mix_tracks(tracks)
+
+    # silence global timestamps
+    if "silence_timestamps" in config["global_track"]:
+        for silence_interval in config["global_track"]["silence_timestamps"]:
+            mixed_track.apply_silence_to_interval(silence_interval)
+
+    # VAD
+    mixed_track_silence_ranges = mixed_track.silence_ranges
+
+    # Audio Overlays
+    # TODO
+
+    # Ad Inserts
+    # TODO
+
+    SilenceRemover(config["global_track"]["min_silence_duration"]).remove(
+        mixed_track, mixed_track_silence_ranges, padding_s=0.15
+    )
     mixed_track.audio_buffer.normalize()
 
     mixed_track.audio_buffer._path = args.output

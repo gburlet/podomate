@@ -22,7 +22,6 @@ class TrackAligner(object):
 
     def auto_calc_offset(self, tracks):
         """
-        Master track (longest duration) is index 0
         Algorithm is:
             loop through each track and try to find optimal offset so it merges into master track with
             least amount of overlap
@@ -34,9 +33,13 @@ class TrackAligner(object):
             offsets: list of time (s) offsets for each track
         """
 
+        imaster = [t.master for t in tracks].index(True)
         track_offsets = [0.]*len(tracks)
-        master_silence_ranges = tracks[0].silence_ranges
-        for islave, slave_track in enumerate(tracks[1:]):
+        master_silence_ranges = tracks[imaster].silence_ranges
+        for islave, slave_track in enumerate(tracks):
+            if islave == imaster:
+                continue
+
             # locate longest audio_buffer activity
             slave_longest_activity = sorted(slave_track.activity_ranges, key=lambda ar: ar[1]-ar[0], reverse=True)[0]
 
@@ -49,7 +52,7 @@ class TrackAligner(object):
                 silence_ranges_errors.append(placement_error)
             selected_silence_placement = master_silence_ranges[np.argmin(silence_ranges_errors)]
             slave_offset_s = selected_silence_placement[0]-slave_longest_activity[0]
-            track_offsets[islave+1] = slave_offset_s
+            track_offsets[islave] = slave_offset_s
 
         return track_offsets
 

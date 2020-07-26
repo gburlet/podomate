@@ -106,7 +106,7 @@ class SilenceDetector(object):
 
         # create silence frame mask (1 if silence, 0 if signal above threshold amplitude)
         silent_frames = np.zeros(len(frame_rms)+2, dtype=np.int8)  # pad each end with an extra 0 for processing
-        silent_frames[1:-1] = frame_rms < silence_threshold_rms
+        silent_frames[1:-1] = np.logical_or(frame_rms < silence_threshold_rms, frame_rms == 0)
 
         if self._viterbi_decoding:
             silent_frames[1:-1] = SilenceDetector._viterbi_decoding(silent_frames[1:-1])

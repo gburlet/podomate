@@ -165,3 +165,13 @@ class AudioBuffer(object):
         interval_start_sample = max(0, int(interval[0]*self.fs))
         interval_end_sample = min(int(interval[1]*self.fs), len(self.x))
         self.x[interval_start_sample:interval_end_sample] = 0.
+
+    def snip(self, interval):
+        """
+        Snip out a segment of audio
+        Args:
+            interval: (tuple), (interval_start_s, interval_end_s)
+        """
+        interval_start_sample = max(0, int(interval[0]*self.fs))
+        interval_end_sample = min(int(interval[1]*self.fs), len(self.x))
+        self.x = np.delete(self.x, range(interval_start_sample, interval_end_sample))
