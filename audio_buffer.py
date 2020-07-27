@@ -175,3 +175,6 @@ class AudioBuffer(object):
         interval_start_sample = max(0, int(interval[0]*self.fs))
         interval_end_sample = min(int(interval[1]*self.fs), len(self.x))
         self.x = np.delete(self.x, range(interval_start_sample, interval_end_sample))
+
+    def stereofy(self):
+        self.x = np.array([self.x, self.x]).T

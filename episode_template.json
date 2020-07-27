@@ -1,0 +1,99 @@
+{
+    "local_tracks": [
+        {
+            "path": "/Users/gburlet/Poddit/Ep6_greg_short.mp3",
+            "master": true,
+            "silence_timestamps": [],
+            "fX": [
+                {
+                    "effect": "contrast",
+                    "parameters": {
+                        "amount": 80
+                    }
+                },
+                {
+                    "effect": "equalizer",
+                    "parameters": {
+                        "frequency": 100,
+                        "width_q": 1,
+                        "gain_db": 0
+                    }
+                },
+                {
+                    "effect": "equalizer",
+                    "parameters": {
+                        "frequency": 296.1,
+                        "width_q": 1,
+                        "gain_db": -1.6
+                    }
+                },
+                {
+                    "effect": "equalizer",
+                    "parameters": {
+                        "frequency": 3511,
+                        "width_q": 1,
+                        "gain_db": 1.8
+                    }
+                },
+                {
+                    "effect": "equalizer",
+                    "parameters": {
+                        "frequency": 10000,
+                        "width_q": 1,
+                        "gain_db": 2.2
+                    }
+                }
+            ]
+        },
+        {
+            "path": "/Users/gburlet/Poddit/Ep6_anto_short.mp3",
+            "silence_timestamps": [],
+            "fX": [
+                {
+                    "effect": "contrast",
+                    "parameters": {
+                        "amount": 80
+                    }
+                },
+                {
+                    "effect": "equalizer",
+                    "parameters": {
+                        "frequency": 100,
+                        "width_q": 1,
+                        "gain_db": 0
+                    }
+                },
+                {
+                    "effect": "equalizer",
+                    "parameters": {
+                        "frequency": 296.1,
+                        "width_q": 1,
+                        "gain_db": -1.6
+                    }
+                },
+                {
+                    "effect": "equalizer",
+                    "parameters": {
+                        "frequency": 3511,
+                        "width_q": 1,
+                        "gain_db": 1.8
+                    }
+                },
+                {
+                    "effect": "equalizer",
+                    "parameters": {
+                        "frequency": 10000,
+                        "width_q": 1,
+                        "gain_db": 2.2
+                    }
+                }
+            ]
+        }
+    ],
+    "global_track": {
+        "silence_timestamps": [[0, 57]],
+        "min_silence_duration": 1.25,
+        "headphone_optimize": true,
+        "fX": []
+    }
+}

@@ -17,7 +17,7 @@ Edit, postprocess, and master podcasts and interviews automatically
 ```
 local_t1 -
          |
-local_t2 - -> Mixer -> silence global timestamps -> VAD -> silence removal -> Audio Overlays -> Ad Inserts -> fxChain:[fx2 -> fx5] -> normalize -0.1dB -> -> stereofy -> output
+local_t2 - -> Mixer -> silence global timestamps -> VAD -> Audio Overlays -> Ad Inserts -> silence removal -> fxChain:[fx2 -> fx5] -> normalize -0.1dB -> stereofy -> Output
 ...      |
 local_tn -
 ```
@@ -27,6 +27,9 @@ local_tn -
 mkvirtualenv -p python3 poddit
 workon poddit
 cd <gitrepo>
+brew install sox
 pip install -r requirements.txt
-poddit --speakers path1.mp3 path2.mp3 --output podcast.mp3
+poddit episode_template.json podcast.mp3
 ```
+
+`episode_template.json` contains input paths and processing parameters for the episode

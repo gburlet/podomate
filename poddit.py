@@ -7,6 +7,7 @@ from audio_buffer import AudioBuffer
 from silence_remover import SilenceRemover
 from track import Track
 from track_aligner import TrackAligner
+import librosa
 
 parser = argparse.ArgumentParser(description='Edit a podcast')
 parser.add_argument('config', type=str, help='Parameter JSON file')
@@ -25,7 +26,8 @@ if __name__ == "__main__":
         audio_buffer = AudioBuffer(local_track["path"])
         audio_buffer.read(normalize=True)
         is_master = local_track.get("master", False)
-        tracks.append(Track(audio=audio_buffer, master=is_master))
+        track = Track(audio=audio_buffer, master=is_master)
+        tracks.append(track)
 
     # auto calculate track alignment (offsets) for non master tracks
     track_aligner = TrackAligner()
@@ -62,10 +64,22 @@ if __name__ == "__main__":
     # Ad Inserts
     # TODO
 
+    # TODO: fade in/out on track snipper
     SilenceRemover(config["global_track"]["min_silence_duration"]).remove(
-        mixed_track, mixed_track_silence_ranges, padding_s=0.15
+        mixed_track, mixed_track_silence_ranges, padding_s=0.2
     )
+
+    # global fX chain
+    if "fX" in config["global_track"]:
+        FXChain(config["global_track"]["fX"]).apply(mixed_track)
+
     mixed_track.audio_buffer.normalize()
+
+    # Stereofy
+    mixed_track.audio_buffer.stereofy()
+
+    if config["global_track"]["headphone_optimize"]:
+        FXChain([{"effect": "earwax", "parameters": {}}]).apply(mixed_track)
 
     mixed_track.audio_buffer._path = args.output
     mixed_track.audio_buffer.write()

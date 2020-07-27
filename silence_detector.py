@@ -88,8 +88,9 @@ class SilenceDetector(object):
             frame_rms = librosa.power_to_db(mag).mean(axis=0)
             frame_rms = signal.medfilt(frame_rms, kernel_size=5)
         elif self._framing_method == SilenceDetector.FRAMING_METHOD_ENERGY:
-            frame = SilenceDetector.pre_emphasis(
-                librosa.util.frame(sa.x, frame_length=self._window_size, hop_length=self._hop_size).T, pre=0.97)
+            #frame = SilenceDetector.pre_emphasis(
+            #    librosa.util.frame(sa.x, frame_length=self._window_size, hop_length=self._hop_size).T, pre=0.97)
+            frame = librosa.util.frame(sa.x, frame_length=self._window_size, hop_length=self._hop_size).T
             frame_energy = (frame**2).sum(axis=-1)
             frame_energy[frame_energy == 0] = 1
             frame_rms = np.log(frame_energy)
@@ -293,6 +294,7 @@ class SilenceDetector(object):
         model = hmm.MultinomialHMM(n_components=2)
         model.transmat_ = trans_exp(100, cost0=-5)
         model.startprob_ = np.ones((2,)) / 2.
-        model.emissionprob_ = np.array([[1-1e-10, 1e-10], [1e-10, 1-1e-10]])
+        emission_offset = 1e-10
+        model.emissionprob_ = np.array([[1-emission_offset, emission_offset], [emission_offset, 1-emission_offset]])
         log_prob, final_sequence = model.decode(np.asarray(raw_activity, dtype=np.int8).reshape(-1, 1))
         return final_sequence
