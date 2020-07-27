@@ -50,3 +50,14 @@ class Track(object):
             interval: (tuple), (interval_start_s, interval_end_s)
         """
         self.audio_buffer.snip(interval)
+
+    def slice(self, interval):
+        """
+        Slice out a segment of audio
+        Args:
+            interval: (tuple), (interval_start_s, interval_end_s)
+        """
+        self.audio_buffer.slice(interval)
+
+    def apply_volume_automation(self, automation):
+        self.audio_buffer.apply_volume_automation(automation)

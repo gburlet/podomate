@@ -1,6 +1,7 @@
 import argparse
 import json
 
+from audio_overlayer import AudioOverlayer
 from fx_chain import FXChain
 from mixer import Mixer
 from audio_buffer import AudioBuffer
@@ -50,6 +51,7 @@ if __name__ == "__main__":
     # mix global track
     mixed_track = Mixer().mix_tracks(tracks)
 
+    # TODO: maybe change to user setting active (live) timestamps instead of dead time?
     # silence global timestamps
     if "silence_timestamps" in config["global_track"]:
         for silence_interval in config["global_track"]["silence_timestamps"]:
@@ -59,12 +61,14 @@ if __name__ == "__main__":
     mixed_track_silence_ranges = mixed_track.silence_ranges
 
     # Audio Overlays
-    # TODO
+    for overlay_config in config["global_track"]["overlays"]:
+        mixed_track = AudioOverlayer.from_config(overlay_config).overlay(mixed_track)
 
     # Ad Inserts
     # TODO
 
     # TODO: fade in/out on track snipper
+    # TODO: don't remove silence on audio overlays
     SilenceRemover(config["global_track"]["min_silence_duration"]).remove(
         mixed_track, mixed_track_silence_ranges, padding_s=0.2
     )

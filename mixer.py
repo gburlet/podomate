@@ -12,6 +12,7 @@ class Mixer(object):
 
     def mix_tracks(self, tracks):
         num_tracks = len(tracks)
+        # TODO: tracks[0] should instead be the master track, whatever index that is
         mixed_buffer = np.zeros_like(tracks[0].audio_buffer.x)
         for t in tracks:
             mixed_buffer += 1./num_tracks * t.audio_buffer.x

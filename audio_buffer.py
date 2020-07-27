@@ -137,10 +137,15 @@ class AudioBuffer(object):
         """
         return np.shape(self.x)[0] / float(self.fs)
 
+    def get_sample_from_timestamp(self, timestamp):
+        return int(min(max(0, np.ceil(timestamp*float(self.fs))), self.get_num_samples()))
+
+    def get_num_samples(self):
+        return len(self.x)
+
     def apply_offset(self, offset_s):
         offset_samples = int(offset_s * float(self.fs))
         if offset_s > 0:
-            offset_samples = int(offset_s * float(self.fs))
             self.x = np.hstack((np.zeros(offset_samples), self.x))
         elif offset_s < 0:
             self.x = self.x[offset_samples:]
@@ -162,19 +167,48 @@ class AudioBuffer(object):
         Args:
             interval: (tuple), (interval_start_s, interval_end_s)
         """
-        interval_start_sample = max(0, int(interval[0]*self.fs))
-        interval_end_sample = min(int(interval[1]*self.fs), len(self.x))
+        interval_start_sample = self.get_sample_from_timestamp(interval[0])
+        interval_end_sample = self.get_sample_from_timestamp(interval[1])
         self.x[interval_start_sample:interval_end_sample] = 0.
 
     def snip(self, interval):
         """
-        Snip out a segment of audio
+        Snip out (exclude) a segment of audio
         Args:
             interval: (tuple), (interval_start_s, interval_end_s)
         """
-        interval_start_sample = max(0, int(interval[0]*self.fs))
-        interval_end_sample = min(int(interval[1]*self.fs), len(self.x))
+        interval_start_sample = self.get_sample_from_timestamp(interval[0])
+        interval_end_sample = self.get_sample_from_timestamp(interval[1])
         self.x = np.delete(self.x, range(interval_start_sample, interval_end_sample))
+
+    def slice(self, interval):
+        """
+        Slice (trim) a segment of audio
+        Args:
+            interval: (tuple), (interval_start_s, interval_end_s)
+        """
+        interval_start_sample = self.get_sample_from_timestamp(interval[0])
+        interval_end_sample = self.get_sample_from_timestamp(interval[1])
+        self.x = self.x[interval_start_sample:interval_end_sample]
+
+    def apply_volume_automation(self, automation):
+        if len(automation) == 0:
+            return
+
+        volume_env = np.ones_like(self.x)
+        # continue last automation point until end of track
+        automation.append({"timestamp": self.get_duration_s(), "volume": automation[-1]["volume"]})
+        for i_point in range(1,len(automation)):
+            prev_point_sample = self.get_sample_from_timestamp(automation[i_point-1]["timestamp"])
+            prev_point_volume = automation[i_point-1]["volume"]
+            this_point_sample = self.get_sample_from_timestamp(automation[i_point]["timestamp"])
+            this_point_volume = automation[i_point]["volume"]
+            volume_env[prev_point_sample:this_point_sample] = np.linspace(
+                prev_point_volume, this_point_volume, this_point_sample-prev_point_sample, endpoint=True
+            )
+
+        # apply envelope to audio buffer
+        self.x *= volume_env
 
     def stereofy(self):
         self.x = np.array([self.x, self.x]).T
