@@ -78,8 +78,5 @@ if __name__ == "__main__":
     # Stereofy
     mixed_track.audio_buffer.stereofy()
 
-    if config["global_track"]["headphone_optimize"]:
-        FXChain([{"effect": "earwax", "parameters": {}}]).apply(mixed_track)
-
     mixed_track.audio_buffer._path = args.output
     mixed_track.audio_buffer.write()

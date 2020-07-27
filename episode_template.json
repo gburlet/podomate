@@ -93,7 +93,6 @@
     "global_track": {
         "silence_timestamps": [[0, 57]],
         "min_silence_duration": 1.25,
-        "headphone_optimize": true,
         "fX": []
     }
 }
