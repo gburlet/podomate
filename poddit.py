@@ -66,9 +66,12 @@ if __name__ == "__main__":
         mixed_track.audio_buffer.normalize()
 
     # Ad Inserts
-    # TODO: multiple inserts bug. Insertions offset subsequent insertion timestamps
-    for insert_config in config["global_track"]["inserts"]:
-        AudioInserter.from_config(insert_config).insert_into(mixed_track)
+    track_inserts = config["global_track"]["inserts"]
+    for i_insert, insert_config in enumerate(track_inserts):
+        _, insert_duration = AudioInserter.from_config(insert_config).insert_into(mixed_track)
+        if i_insert+1 < len(track_inserts):
+            for next_insert_config in track_inserts[i_insert+1:]:
+                next_insert_config["timestamp"] += insert_duration
     mixed_track.audio_buffer.normalize()
 
     # TODO: fade in/out on track snipper

@@ -23,3 +23,5 @@ class AudioInserter(object):
         if self._volume_automations and len(self._volume_automations) > 0:
             insert_audio_buffer.apply_volume_automation(self._volume_automations)
         track.audio_buffer.insert(insert_audio_buffer, self._timestamp)
+
+        return self._timestamp, insert_audio_buffer.get_duration_s()
