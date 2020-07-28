@@ -17,6 +17,9 @@ class Track(object):
     @property
     def activity_ranges(self):
         silence_ranges = self.silence_ranges
+        return self.get_activity_ranges_from_silence_ranges(silence_ranges)
+
+    def get_activity_ranges_from_silence_ranges(self, silence_ranges):
         if silence_ranges is None or len(silence_ranges) == 0:
             return [(0., self.audio_buffer.get_duration_s())]
         else:

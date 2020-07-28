@@ -3,8 +3,12 @@ import numpy as np
 
 class TrackAligner(object):
 
-    def __init__(self):
-        pass
+    def __init__(self, tracks_config=None):
+        if tracks_config:
+            self._track_offsets = [0.]*len(tracks_config)
+            for i_track, track_config in enumerate(tracks_config):
+                if "offset" in track_config:
+                    self._track_offsets[i_track] = track_config["offset"]
 
     def align(self, tracks, track_offsets=None):
         if track_offsets is None:
@@ -34,32 +38,33 @@ class TrackAligner(object):
         """
 
         imaster = [t.master for t in tracks].index(True)
-        track_offsets = [0.]*len(tracks)
-        master_silence_ranges = tracks[imaster].silence_ranges
+        master_track = tracks[imaster]
+        master_silence_ranges = master_track.silence_ranges
+        master_activity_ranges = master_track.get_activity_ranges_from_silence_ranges(master_silence_ranges)
         for islave, slave_track in enumerate(tracks):
-            if islave == imaster:
+            if islave == imaster or self._track_offsets[islave] != 0:
+                # skip offset calculation if master track or manual offset provided
                 continue
 
             # locate longest audio_buffer activity
-            slave_longest_activity = sorted(slave_track.activity_ranges, key=lambda ar: ar[1]-ar[0], reverse=True)[0]
+            slave_activity_ranges = slave_track.activity_ranges
+            slave_longest_activity = sorted(slave_activity_ranges, key=lambda ar: ar[1]-ar[0], reverse=True)[0]
 
             # try to find fit in master silence
             silence_ranges_errors = []
             for master_silent_range in master_silence_ranges:
                 placement_error = self._calc_activity_overlap(
-                    tracks[0], slave_track, master_silent_range[0]-slave_longest_activity[0]
+                    master_track, master_activity_ranges, slave_activity_ranges,
+                    master_silent_range[0]-slave_longest_activity[0]
                 )
                 silence_ranges_errors.append(placement_error)
             selected_silence_placement = master_silence_ranges[np.argmin(silence_ranges_errors)]
             slave_offset_s = selected_silence_placement[0]-slave_longest_activity[0]
-            track_offsets[islave] = slave_offset_s
+            self._track_offsets[islave] = slave_offset_s
 
-        return track_offsets
+        return self._track_offsets
 
-    def _calc_activity_overlap(self, master_track, slave_track, slave_offset):
-        master_activity_ranges = master_track.activity_ranges
-        slave_activity_ranges = slave_track.activity_ranges
-
+    def _calc_activity_overlap(self, master_track, master_activity_ranges, slave_activity_ranges, slave_offset):
         activity_overlap = 0.
         for master_activity in master_activity_ranges:
             master_activity_start = master_activity[0]

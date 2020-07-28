@@ -32,7 +32,7 @@ if __name__ == "__main__":
         tracks.append(track)
 
     # auto calculate track alignment (offsets) for non master tracks
-    track_aligner = TrackAligner()
+    track_aligner = TrackAligner(config["local_tracks"])
     track_offsets = track_aligner.auto_calc_offset(tracks)
 
     # silence local timestamps
@@ -51,6 +51,7 @@ if __name__ == "__main__":
 
     # mix global track
     mixed_track = Mixer().mix_tracks(tracks)
+    mixed_track.audio_buffer.normalize()
 
     # TODO: maybe change to user setting active (live) timestamps instead of dead time?
     # silence global timestamps
@@ -62,10 +63,13 @@ if __name__ == "__main__":
     # TODO: allow overlays to start before the master track starts
     for overlay_config in config["global_track"]["overlays"]:
         mixed_track = AudioOverlayer.from_config(overlay_config).overlay(mixed_track)
+        mixed_track.audio_buffer.normalize()
 
     # Ad Inserts
+    # TODO: multiple inserts bug. Insertions offset subsequent insertion timestamps
     for insert_config in config["global_track"]["inserts"]:
         AudioInserter.from_config(insert_config).insert_into(mixed_track)
+    mixed_track.audio_buffer.normalize()
 
     # TODO: fade in/out on track snipper
     # TODO: if audio overlays put over awkward long silence it won't be removed because there's audio activity

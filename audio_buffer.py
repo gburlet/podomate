@@ -148,7 +148,7 @@ class AudioBuffer(object):
         if offset_s > 0:
             self.x = np.hstack((np.zeros(offset_samples), self.x))
         elif offset_s < 0:
-            self.x = self.x[offset_samples:]
+            self.x = self.x[abs(offset_samples):]
 
     def pad(self, num_samples):
         """
