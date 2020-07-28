@@ -1,9 +1,9 @@
 {
     "local_tracks": [
         {
-            "path": "/Users/gburlet/Poddit/Ep6_greg_short.mp3",
+            "path": "/Users/gburlet/NNN/EP6-greg-edited.mp3",
             "master": true,
-            "silence_timestamps": [],
+            "silence_timestamps": [[4166.021, 4225.159]],
             "fX": [
                 {
                     "effect": "contrast",
@@ -46,8 +46,9 @@
             ]
         },
         {
-            "path": "/Users/gburlet/Poddit/Ep6_anto_short.mp3",
-            "silence_timestamps": [],
+            "path": "/Users/gburlet/NNN/Ep6-anto.mp3",
+            "offset": -0.526,
+            "silence_timestamps": [[4170.949, 4465]],
             "fX": [
                 {
                     "effect": "contrast",
@@ -91,8 +92,49 @@
         }
     ],
     "global_track": {
-        "silence_timestamps": [[0, 57]],
+        "silence_timestamps": [[0, 128.718], [1648.858, 1848.527],[4170.949, 4225.159], [4254.052, 4463.935]],
         "min_silence_duration": 1.25,
+        "overlays": [
+            {
+                "path": "/Users/gburlet/NNN/Assets/audio/intro/5004-severe-tire-damage-by-kevin-macleod.mp3",
+                "slice": [12.991, 38.748],
+                "sync_point": {
+                    "overlay": 5.5,
+                    "master": 128.718
+                },
+                "volume_automations": [
+                    {"timestamp": 3.625, "volume": 0.8},
+                    {"timestamp": 9.187, "volume": 0.25},
+                    {"timestamp": 25.754, "volume": 0.0}
+                ]
+            },
+            {
+                "path": "/Users/gburlet/NNN/Assets/audio/outro/4247-protofunk-by-kevin-macleod.mp3",
+                "slice": [0, 42],
+                "sync_point": {
+                    "overlay": 36,
+                    "master": 4253.893
+                },
+                "volume_automations": [
+                    {"timestamp": 0, "volume": 0.0},
+                    {"timestamp": 1, "volume": 0.2},
+                    {"timestamp": 36, "volume": 0.2},
+                    {"timestamp": 37, "volume": 0.8},
+                    {"timestamp": 40, "volume": 0.8},
+                    {"timestamp": 42, "volume": 0.0}
+                ]
+            }
+        ],
+        "inserts": [
+            {
+                "path": "/Users/gburlet/NNN/nnn_ad1.mp3",
+                "timestamp": 1648.858
+            },
+            {
+                "path": "/Users/gburlet/NNN/nnn_ad2.mp3",
+                "timestamp": 3049.719
+            }
+        ],
         "fX": []
     }
 }
