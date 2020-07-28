@@ -22,8 +22,10 @@ class AudioOverlayer(object):
     def overlay(self, track):
         overlay_audio_buffer = AudioBuffer(self._overlay_path)
         overlay_audio_buffer.read(normalize=False)
-        overlay_audio_buffer.slice(self._overlay_slice)
-        overlay_audio_buffer.apply_volume_automation(self._volume_automations)
+        if self._overlay_slice:
+            overlay_audio_buffer.slice(self._overlay_slice)
+        if self._volume_automations and len(self._volume_automations) > 0:
+            overlay_audio_buffer.apply_volume_automation(self._volume_automations)
         overlay_track = Track(audio=overlay_audio_buffer, master=False)
 
         tracks = [track, overlay_track]

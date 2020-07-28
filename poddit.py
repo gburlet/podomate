@@ -1,6 +1,7 @@
 import argparse
 import json
 
+from audio_inserter import AudioInserter
 from audio_overlayer import AudioOverlayer
 from fx_chain import FXChain
 from mixer import Mixer
@@ -57,29 +58,24 @@ if __name__ == "__main__":
         for silence_interval in config["global_track"]["silence_timestamps"]:
             mixed_track.apply_silence_to_interval(silence_interval)
 
-    # VAD
-    mixed_track_silence_ranges = mixed_track.silence_ranges
-
     # Audio Overlays
+    # TODO: allow overlays to start before the master track starts
     for overlay_config in config["global_track"]["overlays"]:
         mixed_track = AudioOverlayer.from_config(overlay_config).overlay(mixed_track)
 
     # Ad Inserts
-    # TODO
+    for insert_config in config["global_track"]["inserts"]:
+        AudioInserter.from_config(insert_config).insert_into(mixed_track)
 
     # TODO: fade in/out on track snipper
-    # TODO: don't remove silence on audio overlays
-    SilenceRemover(config["global_track"]["min_silence_duration"]).remove(
-        mixed_track, mixed_track_silence_ranges, padding_s=0.2
-    )
+    # TODO: if audio overlays put over awkward long silence it won't be removed because there's audio activity
+    SilenceRemover(config["global_track"]["min_silence_duration"]).remove(mixed_track, padding_s=0.2)
 
     # global fX chain
     if "fX" in config["global_track"]:
         FXChain(config["global_track"]["fX"]).apply(mixed_track)
 
     mixed_track.audio_buffer.normalize()
-
-    # Stereofy
     mixed_track.audio_buffer.stereofy()
 
     mixed_track.audio_buffer._path = args.output

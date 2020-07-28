@@ -210,5 +210,9 @@ class AudioBuffer(object):
         # apply envelope to audio buffer
         self.x *= volume_env
 
+    def insert(self, audio_buffer, timestamp):
+        insert_timestamp = self.get_sample_from_timestamp(timestamp)
+        self.x = np.insert(self.x, insert_timestamp, audio_buffer.x)
+
     def stereofy(self):
         self.x = np.array([self.x, self.x]).T

@@ -17,7 +17,7 @@ Edit, postprocess, and master podcasts and interviews automatically
 ```
 local_t1 -
          |
-local_t2 - -> Mixer -> silence global timestamps -> VAD -> Audio Overlays -> Ad Inserts -> silence removal -> fxChain:[fx2 -> fx5] -> normalize -0.1dB -> stereofy -> Output
+local_t2 - -> Mixer -> silence global timestamps -> Audio Overlays -> Ad Inserts -> VAD -> silence removal -> fxChain:[fx2 -> fx5] -> normalize -0.1dB -> stereofy -> Output
 ...      |
 local_tn -
 ```
