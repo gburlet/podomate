@@ -9,7 +9,7 @@ from audio_buffer import AudioBuffer
 from silence_remover import SilenceRemover
 from track import Track
 from track_aligner import TrackAligner
-import librosa
+from utils import read_config_time
 
 parser = argparse.ArgumentParser(description='Edit a podcast')
 parser.add_argument('config', type=str, help='Parameter JSON file')
@@ -39,7 +39,8 @@ if __name__ == "__main__":
     for track_config, track in zip(config["local_tracks"], tracks):
         if "silence_timestamps" in track_config:
             for silence_interval in track_config["silence_timestamps"]:
-                track.apply_silence_to_interval(silence_interval)
+                parsed_interval = [read_config_time(i) for i in silence_interval]
+                track.apply_silence_to_interval(parsed_interval)
 
     track_aligner.align(tracks, track_offsets).pad(tracks)
 
@@ -57,7 +58,8 @@ if __name__ == "__main__":
     # silence global timestamps
     if "silence_timestamps" in config["global_track"]:
         for silence_interval in config["global_track"]["silence_timestamps"]:
-            mixed_track.apply_silence_to_interval(silence_interval)
+            parsed_interval = [read_config_time(i) for i in silence_interval]
+            mixed_track.apply_silence_to_interval(parsed_interval)
 
     # Audio Overlays
     # TODO: allow overlays to start before the master track starts
@@ -71,6 +73,7 @@ if __name__ == "__main__":
         _, insert_duration = AudioInserter.from_config(insert_config).insert_into(mixed_track)
         if i_insert+1 < len(track_inserts):
             for next_insert_config in track_inserts[i_insert+1:]:
+                next_insert_config["timestamp"] = read_config_time(next_insert_config["timestamp"])
                 next_insert_config["timestamp"] += insert_duration
     mixed_track.audio_buffer.normalize()
 

@@ -1,5 +1,7 @@
 import numpy as np
 
+from utils import read_config_time
+
 
 class TrackAligner(object):
 
@@ -8,7 +10,7 @@ class TrackAligner(object):
             self._track_offsets = [0.]*len(tracks_config)
             for i_track, track_config in enumerate(tracks_config):
                 if "offset" in track_config:
-                    self._track_offsets[i_track] = track_config["offset"]
+                    self._track_offsets[i_track] = read_config_time(track_config["offset"])
 
     def align(self, tracks, track_offsets=None):
         if track_offsets is None:
