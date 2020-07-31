@@ -29,6 +29,15 @@ workon poddit
 cd <gitrepo>
 brew install sox
 pip install -r requirements.txt
+```
+
+#### Only required for uploads
+```
+brew cask install chromedriver
+```
+
+## Usage
+```
 poddit episode_template.json podcast.mp3
 ```
 
