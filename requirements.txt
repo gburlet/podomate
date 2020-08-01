@@ -19,6 +19,7 @@ requests==2.24.0
 resampy==0.2.2
 scikit-learn==0.23.1
 scipy==1.5.2
+selenium==3.141.0
 six==1.15.0
 SoundFile==0.10.3.post1
 sox==1.4.0
