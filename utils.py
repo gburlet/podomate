@@ -34,14 +34,15 @@ def timestamp_to_s(timestamp):
     elif not re.search("^-?(\d{2}:){2}\d{2}\.\d{3}$", timestamp):
         raise ValueError("Invalid timestamp format (%s) should be HH:MM:SS.MSS")
 
+    sign = -1 if timestamp[0] == '-' else 1
     tsplit = timestamp.split(':')
-    hours = int(tsplit[0])
-    minutes = int(tsplit[1])
+    hours = abs(int(tsplit[0]))
+    minutes = abs(int(tsplit[1]))
     ssplit = tsplit[2].split('.')
-    seconds = int(ssplit[0])
-    milliseconds = int(ssplit[1])
+    seconds = abs(int(ssplit[0]))
+    milliseconds = abs(int(ssplit[1]))
 
-    return 3600*hours + 60*minutes + seconds + float(milliseconds/1000.)
+    return sign * (3600*hours + 60*minutes + seconds + float(milliseconds/1000.))
 
 
 def s_to_timestamp(s):
@@ -58,7 +59,8 @@ def s_to_timestamp(s):
     if not isinstance(s, float) and not isinstance(s, int):
         raise TypeError("Invalid seconds (%s) is not a float" % str(s))
 
-    remainder = s
+    sign = '-' if s < 0 else ''
+    remainder = abs(s)
     hours = int(remainder/3600.)
     remainder -= 3600*hours
     minutes = int(remainder/60.)
@@ -67,4 +69,4 @@ def s_to_timestamp(s):
     remainder -= seconds
     milliseconds = int(1000*remainder)
 
-    return "%02d:%02d:%02d.%03d" % (hours, minutes, seconds, milliseconds)
+    return "%s%02d:%02d:%02d.%03d" % (sign, hours, minutes, seconds, milliseconds)

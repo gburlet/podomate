@@ -87,6 +87,5 @@ if __name__ == "__main__":
 
     mixed_track.audio_buffer.normalize()
     mixed_track.audio_buffer.stereofy()
-
     mixed_track.audio_buffer._path = args.output
     mixed_track.audio_buffer.write()
