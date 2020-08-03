@@ -77,15 +77,18 @@ if __name__ == "__main__":
     pbar.update(1)
 
     # Audio Overlays
-    # TODO: allow overlays to start before the master track starts
+    global_offset = 0.
     for overlay_config in config["global_track"]["overlays"]:
-        mixed_track = AudioOverlayer.from_config(overlay_config).overlay(mixed_track)
+        overlay_config["sync_point"]["master"] = read_config_time(overlay_config["sync_point"]["master"]) + global_offset
+        mixed_track, track_offset = AudioOverlayer.from_config(overlay_config).overlay(mixed_track)
         mixed_track.audio_buffer.normalize()
+        global_offset += track_offset
     pbar.update(1)
 
     # Ad Inserts
     track_inserts = config["global_track"]["inserts"]
     for i_insert, insert_config in enumerate(track_inserts):
+        insert_config["timestamp"] = read_config_time(insert_config["timestamp"]) + global_offset
         _, insert_duration = AudioInserter.from_config(insert_config).insert_into(mixed_track)
         if i_insert+1 < len(track_inserts):
             for next_insert_config in track_inserts[i_insert+1:]:

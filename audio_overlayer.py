@@ -33,6 +33,7 @@ class AudioOverlayer(object):
         overlay_track = Track(audio=overlay_audio_buffer, master=False)
 
         tracks = [track, overlay_track]
-        track_offsets = [0., self._sync_point_master-self._sync_point_overlay]
+        offset = self._sync_point_master-self._sync_point_overlay
+        track_offsets = [abs(offset) if offset < 0 else 0., max(offset, 0.)]
         TrackAligner().align(tracks, track_offsets).pad(tracks)
-        return Mixer().mix_tracks(tracks)
+        return Mixer().mix_tracks(tracks), track_offsets[0]
