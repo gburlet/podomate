@@ -6,6 +6,7 @@ import soundfile as sf
 from scipy.io import wavfile
 import numpy as np
 import warnings
+from utils import read_config_time
 
 
 class AudioBuffer(object):
@@ -161,25 +162,61 @@ class AudioBuffer(object):
         """
         self.x = np.pad(self.x, (0, max(0, num_samples-len(self.x))), 'constant')
 
-    def apply_silence_to_interval(self, interval):
+    def apply_silence_to_interval(self, interval, fade_in_s, fade_out_s):
         """
         Silence out an interval of the track
         Args:
             interval: (tuple), (interval_start_s, interval_end_s)
+            fade_in_s (float): fade in duration
+            fade_out_s (float): fade out duration
         """
         interval_start_sample = self.get_sample_from_timestamp(interval[0])
         interval_end_sample = self.get_sample_from_timestamp(interval[1])
         self.x[interval_start_sample:interval_end_sample] = 0.
+        self.apply_fade_in(interval[1], fade_in_s)
+        self.apply_fade_out(interval[0], fade_out_s)
 
-    def snip(self, interval):
+    def apply_fade_in(self, start_ts, length_s):
+        """
+        Applies a fade in effect at the given timestamp
+
+        Args:
+            start_ts (timestamp): where to start the fade in
+            length_s (float): length of fade in
+        """
+        start_s = read_config_time(start_ts)
+        fade_start_sample = self.get_sample_from_timestamp(start_s)
+        fade_end_sample = self.get_sample_from_timestamp(start_s+length_s)
+        envelope = np.linspace(0., 1., fade_end_sample-fade_start_sample, endpoint=True)
+        self.x[fade_start_sample:fade_end_sample] *= envelope
+
+    def apply_fade_out(self, end_ts, length_s):
+        """
+        Applies a fade in effect that ends at the given timestamp
+
+        Args:
+            end_ts (timestamp): where to end the fade out
+            length_s (float): length of fade in
+        """
+        end_s = read_config_time(end_ts)
+        fade_start_sample = self.get_sample_from_timestamp(end_s-length_s)
+        fade_end_sample = self.get_sample_from_timestamp(end_s)
+        envelope = np.linspace(1., 0., fade_end_sample-fade_start_sample, endpoint=True)
+        self.x[fade_start_sample:fade_end_sample] *= envelope
+
+    def snip(self, interval, fade_in_s, fade_out_s):
         """
         Snip out (exclude) a segment of audio
         Args:
             interval: (tuple), (interval_start_s, interval_end_s)
+            fade_in_s (float): fade in duration
+            fade_out_s (float): fade out duration
         """
         interval_start_sample = self.get_sample_from_timestamp(interval[0])
         interval_end_sample = self.get_sample_from_timestamp(interval[1])
         self.x = np.delete(self.x, range(interval_start_sample, interval_end_sample))
+        self.apply_fade_in(interval[0], fade_in_s)
+        self.apply_fade_out(interval[0], fade_out_s)
 
     def slice(self, interval):
         """

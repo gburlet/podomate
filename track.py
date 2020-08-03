@@ -38,22 +38,26 @@ class Track(object):
     def apply_offset(self, offset_s):
         self.audio_buffer.apply_offset(offset_s)
 
-    def apply_silence_to_interval(self, interval):
+    def apply_silence_to_interval(self, interval, fade_in_s=0.025, fade_out_s=0.025):
         """
         Silence out an interval of the track
 
         Args:
             interval: (tuple), (interval_start_s, interval_end_s)
+            fade_in_s (float): fade in time
+            fade_out_s (float): fade out time
         """
-        self.audio_buffer.apply_silence_to_interval(interval)
+        self.audio_buffer.apply_silence_to_interval(interval, fade_in_s, fade_out_s)
 
-    def snip(self, interval):
+    def snip(self, interval, fade_in_s=0.025, fade_out_s=0.025):
         """
         Snip out a segment of audio
         Args:
             interval: (tuple), (interval_start_s, interval_end_s)
+            fade_in_s (float): fade in time
+            fade_out_s (float): fade out time
         """
-        self.audio_buffer.snip(interval)
+        self.audio_buffer.snip(interval, fade_in_s, fade_out_s)
 
     def slice(self, interval):
         """

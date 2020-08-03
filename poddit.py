@@ -94,7 +94,6 @@ if __name__ == "__main__":
     mixed_track.audio_buffer.normalize()
     pbar.update(1)
 
-    # TODO: fade in/out on track snipper
     # TODO: if audio overlays put over awkward long silence it won't be removed because there's audio activity
     SilenceRemover(config["global_track"]["min_silence_duration"]).remove(mixed_track, padding_s=0.2)
     pbar.update(1)
