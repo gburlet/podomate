@@ -10,15 +10,28 @@ from silence_remover import SilenceRemover
 from track import Track
 from track_aligner import TrackAligner
 from utils import read_config_time
-
-parser = argparse.ArgumentParser(description='Edit a podcast')
-parser.add_argument('config', type=str, help='Parameter JSON file')
-parser.add_argument('output', type=str, help='Audio output file')
+from upload import Uploader
+from getpass import getpass
 
 
-if __name__ == "__main__":
-    args = parser.parse_args()
+def upload(args):
+    print("Login")
+    username = input("Username: ")
+    password = getpass()
 
+    uploader = Uploader()  
+    uploader.upload(
+        filepath=args.filepath
+        username=username
+        password=password
+        title=args.title          # optional
+        description=args.desc    # optional
+        ) 
+
+def process_audio(args):
+    if True:
+        print("edit a podcast")
+        return
     # read config JSON file
     with open(args.config, 'r') as f_json:
         config = json.load(f_json)
@@ -90,3 +103,25 @@ if __name__ == "__main__":
 
     mixed_track.audio_buffer._path = args.output
     mixed_track.audio_buffer.write()
+
+
+parser = argparse.ArgumentParser(description='Edit a podcast')
+subparsers = parser.add_subparsers()
+
+audio_parser = subparsers.add_parser("edit")
+audio_parser.add_argument('config', type=str, help='Parameter JSON file')
+audio_parser.add_argument('output', type=str, help='Audio output file')
+audio_parser.set_defaults(func=process_audio)
+
+
+upload_parser = subparsers.add_parser("upload")
+upload_parser.add_argument('filepath', help="File to upload")
+upload_parser.add_argument('--title', nargs="?", default="Episode Title", help="Title of the episode")
+upload_parser.add_argument('--desc', nargs="?", default="Episode Description", help="Description of the episode")
+upload_parser.set_defaults(func=upload)
+
+
+if __name__ == "__main__":
+    args = parser.parse_args()
+    args.func(args)
+

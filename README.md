@@ -37,8 +37,15 @@ brew cask install chromedriver
 ```
 
 ## Usage
+### Edit a podcast
 ```
-poddit episode_template.json podcast.mp3
+poddit edit episode_template.json podcast.mp3
 ```
+
+### Upload a podcast
+```
+poddit upload podcast.mp3 --title "episode title" --desc "episode description"
+```
+
 
 `episode_template.json` contains input paths and processing parameters for the episode
