@@ -15,9 +15,10 @@ class SilenceRemover(object):
         for silent_range in reversed(silence_ranges):
             silence_duration = silent_range[1] - silent_range[0]
             if silence_duration > self.min_silence_duration:
-                # pad the snipped audio a bit
-                padded_silent_range = [
-                    min(silent_range[0]+padding_s, silent_range[1]),
-                    max(silent_range[1]-padding_s, silent_range[0])
-                ]
-                track.snip(padded_silent_range)
+                # pad the snipped audio a bit if not at endpoints of track
+                snip_interval = [silent_range[0], silent_range[1]]
+                if silent_range[0] > 0:
+                    snip_interval[0] = min(silent_range[0]+padding_s, silent_range[1])
+                if silent_range[1] < track.audio_buffer.get_duration_s():
+                    snip_interval[1] = max(silent_range[1]-padding_s, silent_range[0])
+                track.snip(snip_interval, absolute=True)

@@ -1,7 +1,6 @@
 import numpy as np
 
 from audio_buffer import AudioBuffer
-from silence_detector import SilenceDetector
 from track import Track
 
 
@@ -12,11 +11,13 @@ class Mixer(object):
 
     def mix_tracks(self, tracks):
         num_tracks = len(tracks)
-        # TODO: tracks[0] should instead be the master track, whatever index that is
-        mixed_buffer = np.zeros_like(tracks[0].audio_buffer.x)
+        master_track = next(t for t in tracks if t.master)
+        mixed_buffer = np.zeros_like(master_track.audio_buffer.x)
         for t in tracks:
             mixed_buffer += 1./num_tracks * t.audio_buffer.x
 
-        return Track(
-            audio=AudioBuffer(x=mixed_buffer, fs=tracks[0].audio_buffer.fs), master=True
+        mixed_track = Track(
+            audio=AudioBuffer(x=mixed_buffer, fs=master_track.audio_buffer.fs), master=True
         )
+        mixed_track.timeline = master_track.timeline
+        return mixed_track

@@ -1,3 +1,4 @@
+from responsive_timeline import ResponsiveTimeline
 from silence_detector import SilenceDetector
 
 
@@ -9,6 +10,7 @@ class Track(object):
     def __init__(self, audio, master=False):
         self.audio_buffer = audio
         self.master = master
+        self.timeline = ResponsiveTimeline()
 
     @property
     def silence_ranges(self):
@@ -37,6 +39,7 @@ class Track(object):
 
     def apply_offset(self, offset_s):
         self.audio_buffer.apply_offset(offset_s)
+        self.timeline.perform_edit(0., offset_s)
 
     def apply_silence_to_interval(self, interval, fade_in_s=0.025, fade_out_s=0.025):
         """
@@ -47,17 +50,37 @@ class Track(object):
             fade_in_s (float): fade in time
             fade_out_s (float): fade out time
         """
-        self.audio_buffer.apply_silence_to_interval(interval, fade_in_s, fade_out_s)
+        transformed_interval = self.timeline.transform_interval(interval)
+        self.audio_buffer.apply_silence_to_interval(transformed_interval, fade_in_s, fade_out_s)
 
-    def snip(self, interval, fade_in_s=0.025, fade_out_s=0.025):
+    def insert(self, audio_buffer, timestamp):
+        """
+        Insert an audio buffer at a given timestamp
+        Args:
+            audio_buffer (AudioBuffer): the buffer to insert
+            timestamp: timestamp to insert into track
+        """
+        self.audio_buffer.insert(audio_buffer, self.timeline.transform_timestamp(timestamp))
+        self.timeline.perform_edit(timestamp, audio_buffer.get_duration_s())
+
+    def snip(self, interval, absolute=False, fade_in_s=0.025, fade_out_s=0.025):
         """
         Snip out a segment of audio
         Args:
             interval: (tuple), (interval_start_s, interval_end_s)
+            absolute (boolean): whether timestamps are absolute or should be transformed according to previous track edits
             fade_in_s (float): fade in time
             fade_out_s (float): fade out time
         """
-        self.audio_buffer.snip(interval, fade_in_s, fade_out_s)
+
+        snip_duration_s = interval[1] - interval[0]
+        if absolute:
+            self.audio_buffer.snip(interval, fade_in_s, fade_out_s)
+            untransformed_interval = self.timeline.untransform_interval(interval)
+            self.timeline.perform_edit(untransformed_interval[0], -snip_duration_s)    # should be -ve because removing audio
+        else:
+            self.audio_buffer.snip(self.timeline.transform_interval(interval), fade_in_s, fade_out_s)
+            self.timeline.perform_edit(interval[0], -snip_duration_s)    # should be -ve because removing audio
 
     def slice(self, interval):
         """
@@ -65,7 +88,11 @@ class Track(object):
         Args:
             interval: (tuple), (interval_start_s, interval_end_s)
         """
-        self.audio_buffer.slice(interval)
+        self.audio_buffer.slice(self.timeline.transform_interval(interval))
+        self.timeline.perform_edit(0, -interval[0])   # should be -ve because removing audio
 
     def apply_volume_automation(self, automation):
+        # transform timestamps
+        for va in automation:
+            va["timestamp"] = self.timeline.transform_timestamp(va["timestamp"])
         self.audio_buffer.apply_volume_automation(automation)

@@ -18,8 +18,9 @@ parser.add_argument('output', type=str, help='Audio output file')
 
 # read, silence, fX
 local_processing_steps = 3
-global_processing_steps = 11
 # calc align, align, mix, silence, overlays, inserts, silence removal, fX, normalize, stereofy, write
+global_processing_steps = 11
+
 
 if __name__ == "__main__":
     args = parser.parse_args()
@@ -72,33 +73,22 @@ if __name__ == "__main__":
     # silence global timestamps
     if "silence_timestamps" in config["global_track"]:
         for silence_interval in config["global_track"]["silence_timestamps"]:
-            parsed_interval = [read_config_time(i) for i in silence_interval]
-            mixed_track.apply_silence_to_interval(parsed_interval)
+            mixed_track.apply_silence_to_interval(silence_interval)
+    pbar.update(1)
+
+    SilenceRemover(config["global_track"]["min_silence_duration"]).remove(mixed_track, padding_s=0.2)
     pbar.update(1)
 
     # Audio Overlays
-    global_offset = 0.
     for overlay_config in config["global_track"]["overlays"]:
-        overlay_config["sync_point"]["master"] = read_config_time(overlay_config["sync_point"]["master"]) + global_offset
-        mixed_track, track_offset = AudioOverlayer.from_config(overlay_config).overlay(mixed_track)
+        mixed_track = AudioOverlayer.from_config(overlay_config).overlay(mixed_track)
         mixed_track.audio_buffer.normalize()
-        global_offset += track_offset
     pbar.update(1)
 
     # Ad Inserts
-    track_inserts = config["global_track"]["inserts"]
-    for i_insert, insert_config in enumerate(track_inserts):
-        insert_config["timestamp"] = read_config_time(insert_config["timestamp"]) + global_offset
-        _, insert_duration = AudioInserter.from_config(insert_config).insert_into(mixed_track)
-        if i_insert+1 < len(track_inserts):
-            for next_insert_config in track_inserts[i_insert+1:]:
-                next_insert_config["timestamp"] = read_config_time(next_insert_config["timestamp"])
-                next_insert_config["timestamp"] += insert_duration
+    for insert_config in config["global_track"]["inserts"]:
+        AudioInserter.from_config(insert_config).insert_into(mixed_track)
     mixed_track.audio_buffer.normalize()
-    pbar.update(1)
-
-    # TODO: if audio overlays put over awkward long silence it won't be removed because there's audio activity
-    SilenceRemover(config["global_track"]["min_silence_duration"]).remove(mixed_track, padding_s=0.2)
     pbar.update(1)
 
     # global fX chain
