@@ -2,16 +2,16 @@ from audio_buffer import AudioBuffer
 from mixer import Mixer
 from track import Track
 from track_aligner import TrackAligner
-from utils import read_config_time
+from utils import read_config_timestamp
 
 
 class AudioOverlayer(object):
 
     def __init__(self, overlay_path, overlay_slice, sync_point, volume_automations):
         self._overlay_path = overlay_path
-        self._overlay_slice = [read_config_time(i) for i in overlay_slice] if overlay_slice else None
-        self._sync_point_overlay = read_config_time(sync_point["overlay"])
-        self._sync_point_master = read_config_time(sync_point["master"])
+        self._overlay_slice = [read_config_timestamp(i) for i in overlay_slice] if overlay_slice else None
+        self._sync_point_overlay = read_config_timestamp(sync_point["overlay"])
+        self._sync_point_master = read_config_timestamp(sync_point["master"])
         self._volume_automations = volume_automations
 
     @staticmethod

@@ -10,7 +10,7 @@ from audio_buffer import AudioBuffer
 from silence_remover import SilenceRemover
 from track import Track
 from track_aligner import TrackAligner
-from utils import read_config_time
+from utils import read_config_timestamp, read_config_interval
 
 parser = argparse.ArgumentParser(description='Edit a podcast')
 parser.add_argument('config', type=str, help='Parameter JSON file')
@@ -50,7 +50,7 @@ if __name__ == "__main__":
     for track_config, track in zip(config["local_tracks"], tracks):
         if "silence_timestamps" in track_config:
             for silence_interval in track_config["silence_timestamps"]:
-                parsed_interval = [read_config_time(i) for i in silence_interval]
+                parsed_interval = [read_config_timestamp(i) for i in silence_interval]
                 track.apply_silence_to_interval(parsed_interval)
         pbar.update(1)
 
@@ -69,11 +69,12 @@ if __name__ == "__main__":
     mixed_track.audio_buffer.normalize()
     pbar.update(1)
 
-    # TODO: maybe change to user setting active (live) timestamps instead of dead time?
-    # silence global timestamps
+    # keep live timestamps and silence else; append explicit silence intervals
+    silence_intervals = mixed_track.get_silence_ranges_from_activity_ranges(config["global_track"]["live_timestamps"])
     if "silence_timestamps" in config["global_track"]:
-        for silence_interval in config["global_track"]["silence_timestamps"]:
-            mixed_track.apply_silence_to_interval(silence_interval)
+        silence_intervals.extend(config["global_track"]["silence_timestamps"])
+    for silence_interval in silence_intervals:
+        mixed_track.apply_silence_to_interval(silence_interval)
     pbar.update(1)
 
     SilenceRemover(config["global_track"]["min_silence_duration"]).remove(mixed_track, padding_s=0.2)

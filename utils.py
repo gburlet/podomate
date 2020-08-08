@@ -1,7 +1,7 @@
 import re
 
 
-def read_config_time(timestamp):
+def read_config_timestamp(timestamp):
     """
     Reads in config time and returns seconds
 
@@ -16,6 +16,21 @@ def read_config_time(timestamp):
     elif isinstance(timestamp, float) or isinstance(timestamp, int):
         return timestamp
     raise TypeError("Invalid timestamp (%s)" % str(timestamp))
+
+
+def read_config_interval(interval):
+    """
+    Reads in config pair of timestamps and returns pair of seconds
+
+    Args:
+        interval (timestamp, timestamp): pair of timestamps
+
+    Returns:
+        (timestamp_s, timestamp_s)
+    """
+    if len(interval) != 2:
+        raise ValueError("Invalid interval: %s" % str(interval))
+    return [read_config_timestamp(interval[0]), read_config_timestamp(interval[1])]
 
 
 def timestamp_to_s(timestamp):

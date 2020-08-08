@@ -1,5 +1,6 @@
 from responsive_timeline import ResponsiveTimeline
 from silence_detector import SilenceDetector
+from utils import read_config_interval
 
 
 class Track(object):
@@ -29,6 +30,7 @@ class Track(object):
             activity_ranges = []
             time_cursor = 0.
             for silence in silence_ranges:
+                silence = read_config_interval(silence)
                 if time_cursor < silence[0]:
                     activity_ranges.append((time_cursor, silence[0]))
                 time_cursor = silence[1]
@@ -36,6 +38,9 @@ class Track(object):
             if time_cursor < self.audio_buffer.get_duration_s():
                 activity_ranges.append((time_cursor, self.audio_buffer.get_duration_s()))
             return activity_ranges
+
+    def get_silence_ranges_from_activity_ranges(self, activity_ranges):
+        return self.get_activity_ranges_from_silence_ranges(activity_ranges)
 
     def apply_offset(self, offset_s):
         self.audio_buffer.apply_offset(offset_s)

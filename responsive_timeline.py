@@ -1,4 +1,4 @@
-from utils import read_config_time, s_to_timestamp
+from utils import read_config_timestamp, s_to_timestamp
 
 
 class ResponsiveTimeline(object):
@@ -20,7 +20,7 @@ class ResponsiveTimeline(object):
         Returns:
 
         """
-        self._edits.append([read_config_time(timestamp), duration_s])
+        self._edits.append([read_config_timestamp(timestamp), duration_s])
 
     def transform_timestamp(self, timestamp):
         """
@@ -31,7 +31,7 @@ class ResponsiveTimeline(object):
             transformed_timestamp (float): timestamp that is responsive to previous edits on track in order to place
                 at the correct location
         """
-        timestamp_s = read_config_time(timestamp)
+        timestamp_s = read_config_timestamp(timestamp)
         offset_s = 0.
         for edit in self._edits:
             if edit[1] < 0 and edit[0] < timestamp_s < edit[0] - edit[1]:
@@ -51,7 +51,7 @@ class ResponsiveTimeline(object):
         Returns:
             untransformed_timestamp (float): timestamp in original file (before any track edits)
         """
-        timestamp_s = read_config_time(timestamp)
+        timestamp_s = read_config_timestamp(timestamp)
         transformed_timestamp_s = self.transform_timestamp(timestamp_s)
         offset_s = transformed_timestamp_s - timestamp_s
         return timestamp_s - offset_s
