@@ -96,6 +96,16 @@ class Track(object):
         self.audio_buffer.slice(self.timeline.transform_interval(interval))
         self.timeline.perform_edit(0, -interval[0])   # should be -ve because removing audio
 
+    def apply_gain(self, interval, dB):
+        """
+        Apply gain to a segment of the audio buffer
+        Args:
+            interval: (tuple), (interval_start_s, interval_end_s)
+            dB (float): decibel gain
+        """
+        transformed_interval = self.timeline.transform_interval(interval)
+        self.audio_buffer.apply_gain(transformed_interval, dB)
+
     def apply_volume_automation(self, automation):
         # transform timestamps
         for va in automation:

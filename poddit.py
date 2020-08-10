@@ -4,6 +4,7 @@ from tqdm import tqdm
 
 from audio_inserter import AudioInserter
 from audio_overlayer import AudioOverlayer
+from audio_preprocessors.gate_filter import GateFilter
 from fx_chain import FXChain
 from mixer import Mixer
 from audio_buffer import AudioBuffer
@@ -16,8 +17,8 @@ parser = argparse.ArgumentParser(description='Edit a podcast')
 parser.add_argument('config', type=str, help='Parameter JSON file')
 parser.add_argument('output', type=str, help='Audio output file')
 
-# read, silence, fX
-local_processing_steps = 3
+# read, gate, silence, fX
+local_processing_steps = 4
 # calc align, align, mix, silence, overlays, inserts, silence removal, fX, normalize, stereofy, write
 global_processing_steps = 11
 
@@ -34,12 +35,19 @@ if __name__ == "__main__":
 
     tracks = []
     for local_track in config["local_tracks"]:
+        # read
         audio_buffer = AudioBuffer(local_track["path"])
         audio_buffer.read(normalize=True)
         is_master = local_track.get("master", False)
         track = Track(audio=audio_buffer, master=is_master)
-        tracks.append(track)
         pbar.update(1)
+
+        # gate filter
+        if "gate_filter" in local_track:
+            GateFilter(local_track["gate_filter"]).process(track)
+        pbar.update(1)
+
+        tracks.append(track)
 
     # auto calculate track alignment (offsets) for non master tracks
     track_aligner = TrackAligner(config["local_tracks"])
@@ -70,7 +78,9 @@ if __name__ == "__main__":
     pbar.update(1)
 
     # keep live timestamps and silence else; append explicit silence intervals
-    silence_intervals = mixed_track.get_silence_ranges_from_activity_ranges(config["global_track"]["live_timestamps"])
+    silence_intervals = []
+    if "live_timestamps" in config["global_track"]:
+        silence_intervals.extend(mixed_track.get_silence_ranges_from_activity_ranges(config["global_track"]["live_timestamps"]))
     if "silence_timestamps" in config["global_track"]:
         silence_intervals.extend(config["global_track"]["silence_timestamps"])
     for silence_interval in silence_intervals:

@@ -228,6 +228,17 @@ class AudioBuffer(object):
         interval_end_sample = self.get_sample_from_timestamp(interval[1])
         self.x = self.x[interval_start_sample:interval_end_sample]
 
+    def apply_gain(self, interval, dB):
+        """
+        Apply gain to a segment of the audio buffer
+        Args:
+            interval: (tuple), (interval_start_s, interval_end_s)
+            dB (float): decibel gain
+        """
+        interval_start_sample = self.get_sample_from_timestamp(interval[0])
+        interval_end_sample = self.get_sample_from_timestamp(interval[1])
+        self.x[interval_start_sample:interval_end_sample] *= np.power(10, dB/20.)
+
     def apply_volume_automation(self, automation):
         if len(automation) == 0:
             return
