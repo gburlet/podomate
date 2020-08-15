@@ -48,6 +48,29 @@ body {
     margin-right: 2em;
 }
 
+.speaker {
+    margin-bottom: 2em;
+}
+
+#new-speaker {
+    border: 2px dashed #ccc;
+    border-radius: 16px;
+    height: 150px;
+    cursor: pointer;
+    display: flex;
+    margin-bottom: 2em;
+}
+
+#new-speaker:hover {
+    border-color: #111;
+}
+
+#new-speaker > span {
+    margin: auto;
+    font-family: futura, sans-serif;
+    font-size: 20px;
+}
+
 .badge-pop {
     cursor: help;
     font-size: 13px;

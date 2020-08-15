@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
+    <title>Poddit</title>
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/fontawesome.min.css" rel="stylesheet">
+    <link href="../css/mixer.css" rel="stylesheet">
+    <link href="../css/mdb-file-upload.min.css" rel="stylesheet">
+</head>
+<body>
+<div id="hero">
+    <h1 id="hero-header">Mixer</h1>
+    <h4 id="header-info">Add audio files for each speaker</h4>
+</div>
+
+<section>
+    <div class="container">
+        {% with speaker_id=1 %}
+        {% include "speaker_track.html" %}
+        {% endwith %}
+
+        <div id="new-speaker" style="display:none;">
+            <span><i class="fas fa-user-plus"></i> Add another speaker</span>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-12 text-right">
+                <button id="btn-mix" class="btn btn-success btn-lg btn-block">Mix Speakers</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script type="text/javascript" src="../js/jquery.min.js"></script>
+<script type="text/javascript" src="../js/bootstrap.bundle.min.js"></script>
+<script type="text/javascript" src="../js/mdb.min.js"></script>
+<script type="text/javascript" src="../js/datatables.min.js"></script>
+<script type="text/javascript" src="../js/mdb-file-upload.min.js"></script>
+<script type="text/javascript" src="/eel.js"></script>
+<script type="text/javascript">
+    function handleAudioInput() {
+        let speakerID = parseInt($(this).attr('id').split('-')[0].slice(7));
+        var file = $(this)[0].files[0];
+        eel.set_speaker_track(file.path, speakerID-1);
+        var numSpeakers = $("input[type='file']").length;
+        if (speakerID == numSpeakers) {
+            $("#new-speaker").show();
+        }
+    }
+
+    $(document).ready(function() {
+        $("input[type='file']").change(handleAudioInput);
+        $('[data-toggle="popover"]').popover({"html": true});
+        $('.file-upload').file_upload();
+
+        $("#new-speaker").click(function() {
+            const numSpeakers = $("input[type='file']").length;
+            const newSpeakerID = numSpeakers + 1;
+            var newSpeakerHTML = `{% with speaker_id=-666 %}{% include "speaker_track.html" %}{% endwith %}`.replace(/(-666)/g, newSpeakerID);
+            $(newSpeakerHTML).insertBefore("#new-speaker");
+            $("#speaker"+newSpeakerID+"-audio").file_upload();
+            $("#speaker"+newSpeakerID+"-audio").change(handleAudioInput);
+            $("#speaker"+newSpeakerID+"-audio-badge").popover({"html": true});
+            $("#new-speaker").hide();
+        });
+
+        $("#btn-mix").click(function() {
+            // get track options
+            const numSpeakers = $("input[type='file']").length;
+            var tracks_configs = [];
+            for (var i = 1; i < numSpeakers+1; i++) {
+                var track_config = {};
+                if ($("#speaker"+i+"-noisegate").is(':checked')) {
+                    track_config["gate_filter"] = -20.0;
+                }
+                tracks_configs.push(track_config);
+            }
+            eel.mix_speaker_tracks(tracks_configs);
+        });
+    });
+</script>
+
+</body>
+</html>
