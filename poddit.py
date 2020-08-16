@@ -4,7 +4,7 @@ import eel
 import eel.browsers
 import os
 import numpy as np
-from tempfile import NamedTemporaryFile
+import tempfile
 
 from audio_buffer import AudioBuffer
 from audio_preprocessors.gate_filter import GateFilter
@@ -95,9 +95,6 @@ def mix_speaker_tracks(user_tracks_options):
         track_options.update(user_track_options)
         tracks_options.append(track_options)
 
-    print(tracks_options)
-
-    """
     # gate filter
     for track, track_options in zip(tracks, tracks_options):
         if "gate_filter" in track_options:
@@ -125,10 +122,10 @@ def mix_speaker_tracks(user_tracks_options):
     # mix global track
     mixed_track = Mixer().mix_tracks(tracks)
     mixed_track.audio_buffer.normalize()
-    with open(NamedTemporaryFile(suffix='.flac'), 'w') as f:
-        mixed_track.audio_buffer._path = f.name
+    with tempfile.NamedTemporaryFile(suffix='.flac', delete=False) as tf:
+        mixed_track.audio_buffer._path = tf.name
         mixed_track.audio_buffer.write()
-    """
+        print(tf.name)
 
 
 eel.start('templates/main.html', mode="electron", jinja_templates="templates")

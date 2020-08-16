@@ -14,6 +14,10 @@ body {
     background-color: #fff;
 }
 
+#alert {
+    margin-top: 1em;
+}
+
 #hero {
     background-image: url(../img/main.jpg);
     position: relative;
@@ -147,4 +151,19 @@ input:checked + .slider:before {
 .switch-container {
     vertical-align: middle;
     line-height: 34px;
+}
+
+#overlay {
+    background: black;
+    opacity: .8;
+    color: #666666;
+    position: fixed;
+    height: 100%;
+    width: 100%;
+    z-index: 5000;
+    top: 0;
+    left: 0;
+    float: left;
+    text-align: center;
+    padding-top: 25%;
 }
