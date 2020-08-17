@@ -64,6 +64,7 @@
     }
 
     async function mixTracks() {
+        $("#overlay").fadeIn();
         // get track options
         const numSpeakers = $("input[type='file']").length;
         var tracks_configs = [];
@@ -74,9 +75,9 @@
             }
             tracks_configs.push(track_config);
         }
-        await eel.mix_speaker_tracks(tracks_configs);
+        let mixed_track_path = await eel.mix_speaker_tracks(tracks_configs)();
         $("#overlay").fadeOut();
-        location.href = "/templates/master.html";
+        location.href = "/templates/master.html?tf="+mixed_track_path;
     }
 
     $(document).ready(function() {
@@ -110,7 +111,6 @@
                 return;
             }
 
-            $("#overlay").fadeIn();
             mixTracks();
         });
     });

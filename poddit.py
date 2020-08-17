@@ -1,5 +1,6 @@
 import copy
 
+import uuid
 import eel
 import eel.browsers
 import os
@@ -122,10 +123,10 @@ def mix_speaker_tracks(user_tracks_options):
     # mix global track
     mixed_track = Mixer().mix_tracks(tracks)
     mixed_track.audio_buffer.normalize()
-    with tempfile.NamedTemporaryFile(suffix='.flac', delete=False) as tf:
-        mixed_track.audio_buffer._path = tf.name
-        mixed_track.audio_buffer.write()
-        print(tf.name)
+    filename = "%s.flac" % str(uuid.uuid4())
+    mixed_track.audio_buffer._path = 'gui/media/%s' % filename
+    mixed_track.audio_buffer.write()
+    return filename
 
 
 eel.start('templates/main.html', mode="electron", jinja_templates="templates")

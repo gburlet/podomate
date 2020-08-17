@@ -2,9 +2,64 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
+    <title>Poddit</title>
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/fontawesome.min.css" rel="stylesheet">
+    <link href="../css/master.css" rel="stylesheet">
 </head>
 <body>
-Masterer
+
+<div id="overlay" style="display: none;">
+    <div class="spinner-border text-success" role="status">
+        <span class="sr-only">Loading...</span>
+    </div>
+</div>
+
+<div id="hero">
+    <h1 id="hero-header">Edit & Master</h1>
+    <h4 id="header-info">Trim, Insert Backtracks & Ads, Master</h4>
+</div>
+
+<section>
+    <div class="container">
+        <div id="alert" class="alert alert-danger" role="alert" style="display: none;"></div>
+
+        <div class="row" style="margin-bottom: 2em;">
+            <div class="col-lg-12 text-right">
+                <div id="waveform"></div>
+            </div>
+        </div>
+
+        <div class="row" style="margin-bottom: 2em;">
+            <div class="col-lg-12 text-right">
+                <button id="btn-mix" class="btn btn-success btn-lg btn-block">
+                    Finish
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+<script type="text/javascript" src="../js/jquery.min.js"></script>
+<script type="text/javascript" src="../js/bootstrap.bundle.min.js"></script>
+<script type="text/javascript" src="../js/wavesurfer.min.js"></script>
+<script type="text/javascript" src="/eel.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+    var wavesurfer = WaveSurfer.create({
+        container: '#waveform',
+        scrollParent: true
+    });
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const track_filename = urlParams.get('tf');
+
+    wavesurfer.load("../media/"+track_filename);
+});
+</script>
 </body>
 </html>
