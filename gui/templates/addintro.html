@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
+    <title>Poddit</title>
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/fontawesome.min.css" rel="stylesheet">
+    <link href="../css/mdb-file-upload.min.css" rel="stylesheet">
+    <link href="../css/page_template.css" rel="stylesheet">
+    <link href="../css/interactive_waveform.css" rel="stylesheet">
+</head>
+<body>
+
+<div id="overlay" style="display: none;">
+    <div class="spinner-border text-success" role="status">
+        <span class="sr-only">Loading...</span>
+    </div>
+</div>
+
+<div id="hero">
+    <h1 id="hero-header">Add Intro</h1>
+    <h4 id="header-info">Hype up the beginning of your podcast.</h4>
+</div>
+
+<section>
+    <div class="container">
+
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/templates/mixer.html">Mixer</a></li>
+                <li class="breadcrumb-item"><a href="/templates/edit.html">Edit</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Add Intro</li>
+            </ol>
+        </nav>
+
+        <div id="alert" class="alert alert-danger" role="alert" style="display: none;"></div>
+
+        <div id="intro-audio-upload" class="row">
+            <div class="col-lg-12">
+                <div class="audio-upload">
+                    <h3 class="subheading text-muted">
+                        Intro Audio
+                        <a id="audio-badge" tabindex="-1" class="badge-pop badge badge-success align-middle" data-trigger="hover" data-container="body" data-toggle="popover" data-placement="bottom" data-content="<b>File Types</b>: .mp3, .wav<br/><b>Bit Depth</b>: 16, 32">
+                            <i class="fas fa-info-circle"></i> Supported Audio
+                        </a>
+                    </h3>
+                    <div id="file-upload-wrapper" class="file-upload-wrapper">
+                        <input class="file-upload" type="file" id="intro-audio" name="intro-audio" accept="audio/*" data-height="150" required>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="audio-interact" style="display:none;">
+            <h2>What part do you want to use?</h2>
+            <p>Drag to select a segment of music to use. Double click the selected segment and stop playback where you want the talking to start. We'll start fading out the intro music and make a seamless transition.</p>
+
+            {% include "interactive_waveform.html" %}
+
+            <div class="row" style="margin-bottom: 2em;">
+                <div class="col-lg-12 text-right">
+                    <button id="btn-intro" class="btn btn-success btn-lg btn-block">
+                        Add Intro
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+<script type="text/javascript" src="../js/jquery.min.js"></script>
+<script type="text/javascript" src="../js/bootstrap.bundle.min.js"></script>
+<script type="text/javascript" src="../js/mdb.min.js"></script>
+<script type="text/javascript" src="../js/datatables.min.js"></script>
+<script type="text/javascript" src="../js/mdb-file-upload.min.js"></script>
+<script type="text/javascript" src="../js/wavesurfer.min.js"></script>
+<script type="text/javascript" src="../js/wavesurfer.timeline.min.js"></script>
+<script type="text/javascript" src="../js/wavesurfer.regions.min.js"></script>
+<script type="text/javascript" src="../js/interactive_waveform.js"></script>
+<script type="text/javascript" src="/eel.js"></script>
+<script type="text/javascript">
+var introAudioFilepath = null;
+async function handleAudioInput() {
+    $("#overlay").fadeIn();
+    var file = $(this)[0].files[0];
+    let introAudioFilepath = await eel.upload_audio(file.path)();
+    setupInteractiveWaveform(introAudioFilepath);
+    $("#intro-audio-upload").hide();
+    $("#audio-interact").show();
+    $("#overlay").fadeOut();
+}
+
+async function handleAddIntro() {
+    $("#overlay").fadeIn();
+    let slice = [wavesurfer.regions.list[0].start, wavesurfer.regions.list[0].end];
+    let overlaySyncPoint = wavesurfer.getCurrentTime();
+    await eel.add_intro_backtrack(introAudioFilepath, slice, overlaySyncPoint);
+    location.href = "/templates/edit.html";
+    $("#overlay").fadeOut();
+}
+
+$(document).ready(function() {
+    $("input[type='file']").change(handleAudioInput);
+    $('[data-toggle="popover"]').popover({"html": true});
+    $('.file-upload').file_upload();
+
+    $("#btn-intro").click(function() {
+
+    });
+});
+</script>
+</body>
+</html>

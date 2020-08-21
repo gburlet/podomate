@@ -1,0 +1,74 @@
+@font-face {
+  font-family: 'DeadRevolution';
+  src: url(../fonts/deadrevolution.otf);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    margin-block-start: 0;
+    margin-block-end: 0;
+}
+
+body {
+    background-color: #fff;
+}
+
+section {
+    position: relative;
+    margin-top: -2em;
+    z-index: 2;
+}
+
+#alert {
+    margin-top: 1em;
+}
+
+#hero {
+    background-image: url(../img/main.jpg);
+    position: relative;
+    height: 300px;
+    z-index: 1;
+    background-position: 50% 70%;
+    background-repeat: repeat-x;
+    background-size: cover;
+}
+
+#hero-header {
+    font-family: 'DeadRevolution', sans-serif;
+    font-size: 80px;
+    font-weight: 400;
+    color: #fff;
+    padding-left: 7%;
+}
+
+#header-info {
+    font-family: futura, sans-serif;
+    font-size: 30px;
+    color: #fff;
+    padding-left: 7%;
+    margin-top: -0.5%;
+    font-weight: 50;
+}
+
+.subheading {
+    font-family: futura, sans-serif;
+    font-size: 25px;
+    font-weight: 50;
+    margin-right: 2em;
+}
+
+#overlay {
+    background: black;
+    opacity: .8;
+    color: #666666;
+    position: fixed;
+    height: 100%;
+    width: 100%;
+    z-index: 5000;
+    top: 0;
+    left: 0;
+    float: left;
+    text-align: center;
+    padding-top: 25%;
+}

@@ -1,0 +1,53 @@
+h2 {
+    margin-top: 1em;
+}
+
+.new-backtrack {
+    position: relative;
+    border: 2px dashed #ccc;
+    border-radius: 16px;
+    height: 150px;
+    cursor: pointer;
+    display: flex;
+    margin-bottom: 2em;
+}
+
+.new-backtrack:hover {
+    border-color: #111;
+}
+
+.new-backtrack > span {
+    margin: auto;
+    font-family: futura, sans-serif;
+    font-size: 20px;
+}
+
+.btn-delete {
+    color: red;
+    position: absolute;
+    top: -12%;
+    right: -4%;
+    font-size: 100%;
+    border: 0px;
+    padding: 0px;
+}
+
+.new-insert {
+    position: relative;
+    border: 2px dashed #ccc;
+    border-radius: 16px;
+    height: 150px;
+    cursor: pointer;
+    display: flex;
+    margin-bottom: 2em;
+}
+
+.new-insert:hover {
+    border-color: #111;
+}
+
+.new-insert > span {
+    margin: auto;
+    font-family: futura, sans-serif;
+    font-size: 20px;
+}

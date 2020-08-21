@@ -1,11 +1,10 @@
 import copy
-
+import shutil
 import uuid
 import eel
 import eel.browsers
 import os
 import numpy as np
-import tempfile
 
 from audio_buffer import AudioBuffer
 from audio_preprocessors.gate_filter import GateFilter
@@ -75,8 +74,6 @@ def set_speaker_track(audio_path, i_speaker):
     else:
         tracks[i_speaker] = track
 
-    print(audio_path, i_speaker, tracks)
-
 
 @eel.expose
 def del_speaker_track(i_speaker):
@@ -86,6 +83,7 @@ def del_speaker_track(i_speaker):
 
 @eel.expose
 def mix_speaker_tracks(user_tracks_options):
+    global mixed_track
     # set master track to be longest track
     tracks[np.argmax([t.audio_buffer.get_duration_s() for t in tracks])].master = True
 
@@ -126,7 +124,33 @@ def mix_speaker_tracks(user_tracks_options):
     filename = "%s.flac" % str(uuid.uuid4())
     mixed_track.audio_buffer._path = 'gui/media/%s' % filename
     mixed_track.audio_buffer.write()
+
     return filename
 
 
-eel.start('templates/main.html', mode="electron", jinja_templates="templates")
+@eel.expose
+def get_mixed_track_filename():
+    if mixed_track is not None:
+        filename = os.path.split(mixed_track.audio_buffer._path)[-1]
+        return filename
+
+
+@eel.expose
+def upload_audio(filepath):
+    filename = os.path.split(filepath)[-1]
+    shutil.copy(filepath, 'gui/media/%s' % filename)
+    return filename
+
+
+@eel.expose
+def add_intro_backtrack(introAudioFilepath, slice, overlaySyncPoint):
+    pass
+
+def cleanup(page, sockets):
+    pass
+
+
+eel.start(
+    'templates/main.html', mode="electron", jinja_templates="templates",
+    close_callback=cleanup
+)

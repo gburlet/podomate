@@ -7,7 +7,9 @@
     <title>Poddit</title>
     <link href="../css/bootstrap.min.css" rel="stylesheet">
     <link href="../css/fontawesome.min.css" rel="stylesheet">
+    <link href="../css/page_template.css" rel="stylesheet">
     <link href="../css/mixer.css" rel="stylesheet">
+    <link href="../css/interactive_waveform.css" rel="stylesheet">
     <link href="../css/mdb-file-upload.min.css" rel="stylesheet">
 </head>
 <body>
@@ -31,7 +33,7 @@
         {% endwith %}
 
         <div id="new-speaker" style="display: none;">
-            <span><i class="fas fa-user-plus"></i></span>
+            <span><i class="fas fa-2x fa-user-plus"></i></span>
         </div>
 
         <div class="row" style="margin-bottom: 2em;">
@@ -77,7 +79,7 @@
         }
         let mixed_track_path = await eel.mix_speaker_tracks(tracks_configs)();
         $("#overlay").fadeOut();
-        location.href = "/templates/master.html?tf="+mixed_track_path;
+        location.href = "/templates/edit.html";
     }
 
     $(document).ready(function() {

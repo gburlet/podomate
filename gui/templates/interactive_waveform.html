@@ -1,0 +1,26 @@
+<div class="row">
+    <div class="col-lg-12">
+        <div id="waveform-controls-top" class="btn-group" role="group" aria-label="Basic example">
+            <button id="playPause" type="button" class="btn btn-light fas fa-play"></button>
+            <button id="seesk-start" type="button" class="btn btn-light fas fa-step-backward"></button>
+            <button id="seek-end" type="button" class="btn btn-light fas fa-step-forward"></button>
+            <button id="clear-regions" type="button" class="btn btn-light fas fa-redo-alt"></button>
+            <button id="del-region" type="button" class="btn btn-light fas fa-backspace" style="display: none;"></button>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12 text-right">
+        <div id="waveform"></div>
+        <div id="wave-timeline"></div>
+    </div>
+</div>
+
+<div id="waveform-controls-bottom" class="row text-right">
+    <div class="col-lg-12">
+        <i class="fas fa-search-minus"></i>
+        <input id="zoom-slider" data-action="zoom" type="range" min="1" max="80" value="0" style="width: 25%;" />
+        <i class="fas fa-search-plus"></i>
+    </div>
+</div>
