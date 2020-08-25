@@ -7,6 +7,7 @@ import os
 import numpy as np
 
 from audio_buffer import AudioBuffer
+from audio_overlayer import AudioOverlayer
 from audio_preprocessors.gate_filter import GateFilter
 from fx_chain import FXChain
 from mixer import Mixer
@@ -62,6 +63,20 @@ default_local_track_options = {
     ]
 }
 
+global_track_overlays = {
+    "intro": None,
+    "outro": None,
+    "others": []
+}
+global_track_options = {
+    "live_timestamps": [],
+    "silence_timestamps": [],
+    "min_silence_duration": 1.25,
+    "overlays": [],
+    "inserts": [],
+    "fX": []
+}
+
 
 @eel.expose
 def set_speaker_track(audio_path, i_speaker):
@@ -84,6 +99,7 @@ def del_speaker_track(i_speaker):
 @eel.expose
 def mix_speaker_tracks(user_tracks_options):
     global mixed_track
+
     # set master track to be longest track
     tracks[np.argmax([t.audio_buffer.get_duration_s() for t in tracks])].master = True
 
@@ -121,6 +137,8 @@ def mix_speaker_tracks(user_tracks_options):
     # mix global track
     mixed_track = Mixer().mix_tracks(tracks)
     mixed_track.audio_buffer.normalize()
+    _ = mixed_track.silence_ranges  # cache VAD for future operations
+
     filename = "%s.flac" % str(uuid.uuid4())
     mixed_track.audio_buffer._path = 'gui/media/%s' % filename
     mixed_track.audio_buffer.write()
@@ -143,8 +161,56 @@ def upload_audio(filepath):
 
 
 @eel.expose
-def add_intro_backtrack(introAudioFilepath, slice, overlaySyncPoint):
-    pass
+def add_intro_backtrack(filename, slice, overlay_sync_point):
+    global mixed_track, global_track_overlays
+
+    if mixed_track.activity_range_cache is None or len(mixed_track.activity_range_cache) == 0:
+        raise ValueError("We ran into an issue applying the intro backtrack. Is your mixed track of speakers silent?")
+
+    first_voice_timestamp = mixed_track.activity_range_cache[0][0]
+    duration_until_sync_point_s = overlay_sync_point - slice[0]
+    backtrack_duration_s = slice[1] - slice[0]
+    if not 0 < duration_until_sync_point_s < backtrack_duration_s:
+        raise ValueError("We ran into an issue applying the intro backtrack. The talking start point should be within the segment of selected music.")
+
+    overlay_path = os.path.join("gui/media/%s" % filename)
+    overlay_config = AudioOverlayer.automated_intro(
+        overlay_path, slice, overlay_sync_point, first_voice_timestamp
+    ).to_config()
+    global_track_overlays["intro"] = overlay_config
+
+
+@eel.expose
+def get_intro_backtrack():
+    global global_track_overlays
+    return global_track_overlays["intro"]
+
+
+@eel.expose
+def add_outro_backtrack(filename, slice, overlay_sync_point):
+    global mixed_track, global_track_overlays
+
+    if mixed_track.activity_range_cache is None or len(mixed_track.activity_range_cache) == 0:
+        raise ValueError("We ran into an issue applying the outro backtrack. Is your mixed track of speakers silent?")
+
+    last_voice_timestamp = mixed_track.activity_range_cache[-1][1]
+    duration_until_sync_point_s = overlay_sync_point - slice[0]
+    backtrack_duration_s = slice[1] - slice[0]
+    if not 0 < duration_until_sync_point_s < backtrack_duration_s:
+        raise ValueError("We ran into an issue applying the outro backtrack. The talking end point should be within the segment of selected music.")
+
+    overlay_path = os.path.join("gui/media/%s" % filename)
+    overlay_config = AudioOverlayer.automated_outro(
+        overlay_path, slice, overlay_sync_point, last_voice_timestamp
+    ).to_config()
+    global_track_overlays["outro"] = overlay_config
+
+
+@eel.expose
+def get_outro_backtrack():
+    global global_track_overlays
+    return global_track_overlays["outro"]
+
 
 def cleanup(page, sockets):
     pass

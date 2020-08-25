@@ -94,22 +94,47 @@ async function handleAudioInput() {
     $("#overlay").fadeOut();
 }
 
+async function setupUI() {
+    let introConfig = await eel.get_intro_backtrack()();
+    if (introConfig == null) {
+        // setup audio selection UI
+        $("input[type='file']").change(handleAudioInput);
+        $('[data-toggle="popover"]').popover({"html": true});
+        $('.file-upload').file_upload();
+    } else {
+        setupInteractiveWaveform(introAudioFilepath);
+        $("#intro-audio-upload").hide();
+        $("#audio-interact").show();
+
+        wavesurfer.addRegion({
+            start: introConfig["slice"][0],
+            end: introConfig["slice"][1],
+            drag: true,
+            resize: true
+        });
+        wavesurfer.seekAndCenter(introConfig["sync_point"]["overlay"]/wavesurfer.getDuration());
+    }
+}
+
 async function handleAddIntro() {
     $("#overlay").fadeIn();
-    let slice = [wavesurfer.regions.list[0].start, wavesurfer.regions.list[0].end];
+    var region = null;
+    $.each(wavesurfer.regions.list, function(rid, firstRegion) {
+        region = firstRegion;
+        return false;
+    });
+    let slice = [region.start, region.end];
     let overlaySyncPoint = wavesurfer.getCurrentTime();
     await eel.add_intro_backtrack(introAudioFilepath, slice, overlaySyncPoint);
-    location.href = "/templates/edit.html";
     $("#overlay").fadeOut();
+    location.href = "/templates/edit.html";
 }
 
 $(document).ready(function() {
-    $("input[type='file']").change(handleAudioInput);
-    $('[data-toggle="popover"]').popover({"html": true});
-    $('.file-upload').file_upload();
+    setupUI();
 
     $("#btn-intro").click(function() {
-
+        handleAddIntro();
     });
 });
 </script>
