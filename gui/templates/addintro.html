@@ -29,9 +29,8 @@
 
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="/templates/mixer.html">Mixer</a></li>
-                <li class="breadcrumb-item"><a href="/templates/edit.html">Edit</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Add Intro</li>
+                <li class="breadcrumb-item" aria-current="page"><a href="/templates/edit_backtracks.html">Backtracks</a></li>
+                <li class="breadcrumb-item" aria-current="page">Intro</li>
             </ol>
         </nav>
 
@@ -55,7 +54,11 @@
 
         <div id="audio-interact" style="display:none;">
             <h2>What part do you want to use?</h2>
-            <p>Drag to select a segment of music to use. Double click the selected segment and stop playback where you want the talking to start. We'll start fading out the intro music and make a seamless transition.</p>
+            <ol>
+                <li>Drag to select a segment of music to use.</li>
+                <li>Double click the selected segment and stop playback where you want the talking to start.</li>
+            </ol>
+            <p>We'll start fading out the intro music and make a seamless transition.</p>
 
             {% include "interactive_waveform.html" %}
 
@@ -84,6 +87,8 @@
 <script type="text/javascript" src="/eel.js"></script>
 <script type="text/javascript">
 var introAudioFilepath = null;
+var numRegions = 0;
+var wavesurfer = null;
 async function handleAudioInput() {
     $("#overlay").fadeIn();
     var file = $(this)[0].files[0];
@@ -113,7 +118,23 @@ async function setupUI() {
             resize: true
         });
         wavesurfer.seekAndCenter(introConfig["sync_point"]["overlay"]/wavesurfer.getDuration());
+
+        wavesurfer.on('region-created', handleAddRegion);
+        wavesurfer.on('region-removed', handleRemoveRegion);
     }
+}
+
+function handleAddRegion(region) {
+    numRegions++;
+    if (numRegions > 1) {
+        setError("<b>Oh Snap!</b> You can only select one segment of music for the backtrack");
+        handleRemoveRegion(region);
+    }
+}
+
+function handleRemoveRegion(region) {
+    region.remove();
+    numRegions--;
 }
 
 async function handleAddIntro() {
@@ -127,7 +148,12 @@ async function handleAddIntro() {
     let overlaySyncPoint = wavesurfer.getCurrentTime();
     await eel.add_intro_backtrack(introAudioFilepath, slice, overlaySyncPoint);
     $("#overlay").fadeOut();
-    location.href = "/templates/edit.html";
+    location.href = "/templates/edit_backtracks.html";
+}
+
+function setError(msg) {
+    $("#alert").html(msg);
+    $("#alert").show();
 }
 
 $(document).ready(function() {

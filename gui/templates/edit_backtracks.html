@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
+    <title>Poddit</title>
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/fontawesome.min.css" rel="stylesheet">
+    <link href="../css/page_template.css" rel="stylesheet">
+    <link href="../css/editor.css" rel="stylesheet">
+</head>
+<body>
+
+<div id="overlay" style="display: none;">
+    <div class="spinner-border text-success" role="status">
+        <span class="sr-only">Loading...</span>
+    </div>
+</div>
+
+<div id="hero">
+    <h1 id="hero-header">Edit</h1>
+    <h4 id="header-info">Add music backtracks</h4>
+</div>
+
+<section>
+    <div class="container">
+
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/templates/mixer.html">Mixer</a></li>
+                <li class="breadcrumb-item" aria-current="page"><a href="/templates/edit_onair.html">On-air</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Backtracks</li>
+            </ol>
+        </nav>
+
+        <div id="alert" class="alert alert-danger" role="alert" style="display: none;"></div>
+
+        <h2>Add Backtracks</h2>
+        <p>Optional. Add music behind parts of your podcast.</p>
+        <div class="row">
+            <div class="col-lg-6 text-center">
+                <div id="backtrack-intro" class="new-backtrack">
+                    <button id="delete-intro-backtrack" class="btn-delete" style="display: none;">
+                        <i class="fas fa-2x fa-minus-circle"></i>
+                    </button>
+                    <span><i class="fas fa-2x fa-compact-disc"></i><br/>Add Intro</span>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <div id="backtrack-outro" class="new-backtrack">
+                    <button id="delete-outro-backtrack" class="btn-delete" style="display: none;">
+                        <i class="fas fa-2x fa-minus-circle"></i>
+                    </button>
+                    <span><i class="fas fa-2x fa-compact-disc"></i><br/>Add Outro</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="row" style="margin-bottom: 2em;">
+            <div class="col-lg-6">
+                <button id="btn-edit" class="btn btn-success btn-lg btn-block">
+                    Add
+                </button>
+            </div>
+            <div class="col-lg-6">
+                <button id="btn-skip" class="btn btn-light btn-lg btn-block">
+                    Skip <i class="fa fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+<script type="text/javascript" src="../js/jquery.min.js"></script>
+<script type="text/javascript" src="../js/bootstrap.bundle.min.js"></script>
+<script type="text/javascript" src="/eel.js"></script>
+<script type="text/javascript">
+    $(document).ready(function() {
+        $("#backtrack-intro").click(function() {
+            location.href = "/templates/addintro.html";
+        });
+
+        $("#backtrack-outro").click(function() {
+            location.href = "/templates/addoutro.html";
+        });
+
+        $("#btn-edit").click(function() {
+            location.href = "/templates/edit_inserts.html";
+        });
+        $("#btn-skip").click(function() {
+            location.href = "/templates/edit_inserts.html";
+        });
+    });
+</script>
+</body>
+</html>

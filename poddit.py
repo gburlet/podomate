@@ -154,6 +154,18 @@ def get_mixed_track_filename():
 
 
 @eel.expose
+def get_global_track_options():
+    global global_track_options
+    return global_track_options
+
+
+@eel.expose
+def set_live_timestamps(live_timestamps):
+    global global_track_options
+    global_track_options["live_timestamps"] = live_timestamps
+
+
+@eel.expose
 def upload_audio(filepath):
     filename = os.path.split(filepath)[-1]
     shutil.copy(filepath, 'gui/media/%s' % filename)
@@ -167,7 +179,25 @@ def add_intro_backtrack(filename, slice, overlay_sync_point):
     if mixed_track.activity_range_cache is None or len(mixed_track.activity_range_cache) == 0:
         raise ValueError("We ran into an issue applying the intro backtrack. Is your mixed track of speakers silent?")
 
-    first_voice_timestamp = mixed_track.activity_range_cache[0][0]
+    # find first voice timestamp
+    first_voice_timestamp = None
+    for lt in global_track_options["live_timestamps"]:
+        for va in mixed_track.activity_range_cache:
+            if va[0] <= lt[0] <= va[1]:
+                first_voice_timestamp = lt[0]
+                break
+            elif lt[0] <= va[0] <= lt[1]:
+                first_voice_timestamp = va[0]
+                break
+            elif va[0] > lt[1]:
+                # search optimization
+                break
+        if first_voice_timestamp is not None:
+            break
+
+    if first_voice_timestamp is None:
+        raise ValueError("We ran into an issue applying the intro backtrack. Are your selected live segments silent?")
+
     duration_until_sync_point_s = overlay_sync_point - slice[0]
     backtrack_duration_s = slice[1] - slice[0]
     if not 0 < duration_until_sync_point_s < backtrack_duration_s:
@@ -192,6 +222,22 @@ def add_outro_backtrack(filename, slice, overlay_sync_point):
 
     if mixed_track.activity_range_cache is None or len(mixed_track.activity_range_cache) == 0:
         raise ValueError("We ran into an issue applying the outro backtrack. Is your mixed track of speakers silent?")
+
+    # find last voice timestamp
+    last_voice_timestamp = None
+    for lt in global_track_options["live_timestamps"]:
+        for va in mixed_track.activity_range_cache:
+            if va[0] <= lt[0] <= va[1] or lt[0] <= va[0] <= lt[1]:
+                last_voice_timestamp = va[1] if va[1] < lt[1] else lt[1]
+                break
+            elif va[0] > lt[1]:
+                # search optimization
+                break
+        if last_voice_timestamp is not None:
+            break
+
+    if last_voice_timestamp is None:
+        raise ValueError("We ran into an issue applying the intro backtrack. Are your selected live segments silent?")
 
     last_voice_timestamp = mixed_track.activity_range_cache[-1][1]
     duration_until_sync_point_s = overlay_sync_point - slice[0]

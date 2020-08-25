@@ -21,7 +21,7 @@
 
 <div id="hero">
     <h1 id="hero-header">Edit</h1>
-    <h4 id="header-info">Trim, Insert Backtracks & Ads, Master</h4>
+    <h4 id="header-info">Select on-air segments</h4>
 </div>
 
 <section>
@@ -30,7 +30,7 @@
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="/templates/mixer.html">Mixer</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Edit</li>
+                <li class="breadcrumb-item active" aria-current="page">On-air</li>
             </ol>
         </nav>
 
@@ -41,44 +41,10 @@
 
         {% include "interactive_waveform.html" %}
 
-        <h2>Add Backtracks</h2>
-        <p>Add music behind parts of your podcast.</p>
-        <div class="row">
-            <div class="col-lg-6 text-center">
-                <div id="backtrack-intro" class="new-backtrack">
-                    <button id="delete-intro-backtrack" class="btn-delete" style="display: none;">
-                        <i class="fas fa-2x fa-minus-circle"></i>
-                    </button>
-                    <span><i class="fas fa-2x fa-compact-disc"></i><br/>Add Intro</span>
-                </div>
-            </div>
-            <div class="col-lg-6 text-center">
-                <div id="backtrack-outro" class="new-backtrack">
-                    <button id="delete-outro-backtrack" class="btn-delete" style="display: none;">
-                        <i class="fas fa-2x fa-minus-circle"></i>
-                    </button>
-                    <span><i class="fas fa-2x fa-compact-disc"></i><br/>Add Outro</span>
-                </div>
-            </div>
-        </div>
-
-        <h2>Add Audio Snippets</h2>
-        <p>Insert ads or other prerecorded snippets at specific points in your podcast.</p>
-        <div class="row">
-            <div class="col-lg-12 text-center">
-                <div class="new-insert">
-                    <button class="btn-delete" style="display: none;">
-                        <i class="fas fa-2x fa-minus-circle"></i>
-                    </button>
-                    <span><i class="far fa-2x fa-file-audio"></i><br/>Add Snippet</span>
-                </div>
-            </div>
-        </div>
-
         <div class="row" style="margin-bottom: 2em;">
             <div class="col-lg-12 text-right">
                 <button id="btn-edit" class="btn btn-success btn-lg btn-block">
-                    Create Podcast
+                    Trim
                 </button>
             </div>
         </div>
@@ -100,22 +66,32 @@
         setupInteractiveWaveform(audioFilename);
     }
 
+    async function setLiveRegions(liveTimestamps) {
+        $("#overlay").fadeIn();
+        await eel.set_live_timestamps(liveTimestamps)();
+        $("#overlay").fadeOut();
+        location.href = "/templates/edit_backtracks.html";
+    }
+
+    function setError(msg) {
+        $("#alert").html(msg);
+        $("#alert").show();
+    }
+
     $(document).ready(function() {
         getAudioFilename();
 
         $("#btn-edit").click(function() {
-            var params = {"live_timestamps": [], "overlays": [], "inserts": []};
+            $("#alert").hide();
+            var liveTimestamps = [];
             $.each(wavesurfer.regions.list, function(rid, region) {
-                params["live_timestamps"].push([region.start, region.end]);
+                liveTimestamps.push([region.start, region.end]);
             });
-        });
-
-        $("#backtrack-intro").click(function() {
-            location.href = "/templates/addintro.html";
-        });
-
-        $("#backtrack-outro").click(function() {
-            location.href = "/templates/addoutro.html";
+            if (liveTimestamps.length == 0) {
+                setError("<b>Oh Snap!</b> You need to select segments of your audio where you were on air before moving on.");
+            } else {
+                setLiveRegions(liveTimestamps);
+            }
         });
     });
 </script>
