@@ -25,7 +25,16 @@
 </div>
 
 <section>
+    <ul id="progressbar">
+        <li id="mixer" class="active"><i class="fa fa-sliders-h"></i> <strong>Mixer</strong></li>
+        <li id="trim"><i class="fa fa-cut"></i> <strong>Trim</strong></li>
+        <li id="music"><i class="fa fa-music"></i> <strong>Music</strong></li>
+        <li id="snippets"><i class="fa fa-file-audio"></i> <strong>Snippets</strong></li>
+        <li id="finish"><i class="fa fa-check"></i> <strong>Finish</strong></li>
+    </ul>
+
     <div class="container">
+
         <div id="alert" class="alert alert-danger" role="alert" style="display: none;"></div>
 
         {% with speaker_id=1 %}
@@ -39,7 +48,7 @@
         <div class="row" style="margin-bottom: 2em;">
             <div class="col-lg-12 text-right">
                 <button id="btn-mix" class="btn btn-success btn-lg btn-block">
-                    Mix Speakers
+                    Mix
                 </button>
             </div>
         </div>
@@ -83,6 +92,7 @@
     }
 
     $(document).ready(function() {
+        $("#progressbar li.active").prevAll("li").addClass("active");
         $("input[type='file']").change(handleAudioInput);
         $('[data-toggle="popover"]').popover({"html": true});
         $('.file-upload').file_upload();

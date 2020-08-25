@@ -76,3 +76,62 @@ section {
     text-align: center;
     padding-top: 25%;
 }
+
+#progressbar {
+    margin-bottom: 30px;
+    overflow: hidden;
+    color: lightgrey
+}
+
+#progressbar .active {
+    color: #000000;
+}
+
+#progressbar a {
+    color: #000000;
+}
+#progressbar a:hover {
+    color: lightgray;
+    text-decoration: none;
+}
+
+#progressbar li {
+    list-style-type: none;
+    font-size: 12px;
+    width: 20%;
+    float: left;
+    position: relative;
+    text-align: center;
+}
+
+#progressbar li i.fa {
+    width: 50px;
+    height: 50px;
+    line-height: 45px;
+    display: block;
+    font-size: 18px;
+    color: #ffffff;
+    background: lightgray;
+    border-radius: 50%;
+    margin: 0 auto 10px auto;
+    padding: 2px
+}
+
+#progressbar li:after {
+    content: '';
+    width: 100%;
+    height: 2px;
+    background: lightgray;
+    position: absolute;
+    left: 0;
+    top: 25px;
+    z-index: -1
+}
+
+#progressbar li.active i.fa {
+    background: #69E086;
+}
+
+#progressbar li.active:after {
+    background: #69E086!important;
+}
