@@ -25,14 +25,16 @@
 </div>
 
 <section>
-    <div class="container">
 
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item" aria-current="page"><a href="/templates/edit_backtracks.html">Backtracks</a></li>
-                <li class="breadcrumb-item" aria-current="page">Intro</li>
-            </ol>
-        </nav>
+    <ul id="progressbar">
+        <li id="mixer"><a href="/templates/mixer.html"><i class="fa fa-sliders-h"></i> <strong>Mixer</strong></a></li>
+        <li id="trim"><a href="/templates/edit_onair.html"><i class="fa fa-cut"></i> <strong>Trim</strong></a></li>
+        <li id="music" class="active"><a href="/templates/edit_backtracks.html"><i class="fa fa-music"></i> <strong>Music</strong></a></li>
+        <li id="snippets"><i class="fa fa-file-audio"></i> <strong>Snippets</strong></li>
+        <li id="finish"><i class="fa fa-check"></i> <strong>Finish</strong></li>
+    </ul>
+
+    <div class="container">
 
         <div id="alert" class="alert alert-danger" role="alert" style="display: none;"></div>
 
@@ -61,19 +63,22 @@
             <p>We'll start fading out the intro music and make a seamless transition.</p>
 
             {% include "interactive_waveform.html" %}
+        </div>
 
-            <div class="row" style="margin-bottom: 2em;">
-                <div class="col-lg-12 text-right">
-                    <button id="btn-intro" class="btn btn-success btn-lg btn-block">
-                        Add Intro
-                    </button>
-                </div>
+        <div class="row" style="margin-top: 2em; margin-bottom: 2em;">
+            <div class="col-md-9">
+                <button id="btn-intro" class="btn btn-success btn-lg btn-block">
+                    Add
+                </button>
+            </div>
+            <div class="col-md-3">
+                <button id="btn-skip" class="btn btn-light btn-lg btn-block">
+                    Cancel <i class="fa fa-chevron-right"></i>
+                </button>
             </div>
         </div>
     </div>
 </section>
-
-
 
 <script type="text/javascript" src="../js/jquery.min.js"></script>
 <script type="text/javascript" src="../js/bootstrap.bundle.min.js"></script>
@@ -100,24 +105,25 @@ async function handleAudioInput() {
 }
 
 async function setupUI() {
-    let introConfig = await eel.get_intro_backtrack()();
-    if (introConfig == null) {
+    let overlayConfig = await eel.get_global_track_overlays()();
+    if (overlayConfig["intro"] == null) {
         // setup audio selection UI
         $("input[type='file']").change(handleAudioInput);
         $('[data-toggle="popover"]').popover({"html": true});
         $('.file-upload').file_upload();
     } else {
+        introAudioFilepath = overlayConfig["intro"]["path"];
         setupInteractiveWaveform(introAudioFilepath);
         $("#intro-audio-upload").hide();
         $("#audio-interact").show();
 
         wavesurfer.addRegion({
-            start: introConfig["slice"][0],
-            end: introConfig["slice"][1],
+            start: overlayConfig["intro"]["slice"][0],
+            end: overlayConfig["intro"]["slice"][1],
             drag: true,
             resize: true
         });
-        wavesurfer.seekAndCenter(introConfig["sync_point"]["overlay"]/wavesurfer.getDuration());
+        wavesurfer.seekAndCenter(overlayConfig["intro"]["sync_point"]["overlay"]/wavesurfer.getDuration());
 
         wavesurfer.on('region-created', handleAddRegion);
         wavesurfer.on('region-removed', handleRemoveRegion);
@@ -138,7 +144,17 @@ function handleRemoveRegion(region) {
 }
 
 async function handleAddIntro() {
-    $("#overlay").fadeIn();
+    $("#alert").hide();
+
+    if ($("#intro-audio")[0].files.length == 0) {
+        setError("<b>Oh Snap!</b> You need to select an audio file first.");
+        return;
+    }
+    if (Object.keys(wavesurfer.regions.list).length == 0) {
+        setError("<b>Oh Snap!</b> You need to select a segment of the music file to use.");
+        return;
+    }
+
     var region = null;
     $.each(wavesurfer.regions.list, function(rid, firstRegion) {
         region = firstRegion;
@@ -146,6 +162,12 @@ async function handleAddIntro() {
     });
     let slice = [region.start, region.end];
     let overlaySyncPoint = wavesurfer.getCurrentTime();
+    if (overlaySyncPoint < region.start || overlaySyncPoint > region.end) {
+        setError("<b>Oh Snap!</b> Please stop playback within the segment of selected music.");
+        return;
+    }
+
+    $("#overlay").fadeIn();
     await eel.add_intro_backtrack(introAudioFilepath, slice, overlaySyncPoint);
     $("#overlay").fadeOut();
     location.href = "/templates/edit_backtracks.html";
@@ -157,10 +179,14 @@ function setError(msg) {
 }
 
 $(document).ready(function() {
+    $("#progressbar li.active").prevAll("li").addClass("active");
     setupUI();
 
     $("#btn-intro").click(function() {
         handleAddIntro();
+    });
+    $("#btn-skip").click(function() {
+        location.href = "/templates/edit_backtracks.html";
     });
 });
 </script>

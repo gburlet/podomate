@@ -22,11 +22,31 @@ h2 {
     font-size: 20px;
 }
 
+.backtrack {
+    position: relative;
+    border: 2px solid #419656;
+    border-radius: 16px;
+    height: 150px;
+    cursor: pointer;
+    display: flex;
+    margin-bottom: 2em;
+}
+
+.backtrack:hover {
+    border-color: #69E086;
+}
+
+.backtrack > span {
+    margin: auto;
+    font-family: futura, sans-serif;
+    font-size: 20px;
+}
+
 .btn-delete {
     color: red;
     position: absolute;
     top: -12%;
-    right: -4%;
+    right: -3%;
     font-size: 100%;
     border: 0px;
     padding: 0px;

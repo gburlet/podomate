@@ -42,29 +42,35 @@
         <div class="row">
             <div class="col-lg-6 text-center">
                 <div id="backtrack-intro" class="new-backtrack">
-                    <button id="delete-intro-backtrack" class="btn-delete" style="display: none;">
+                    <button id="delete-backtrack-intro" class="btn-delete" style="display: none;">
                         <i class="fas fa-2x fa-minus-circle"></i>
                     </button>
-                    <span><i class="fas fa-2x fa-music"></i><br/>Add Intro</span>
+                    <span>
+                        <i class="fas fa-2x fa-music"></i><br/>
+                        <span id="intro-text">Add Intro</span>
+                    </span>
                 </div>
             </div>
             <div class="col-lg-6 text-center">
                 <div id="backtrack-outro" class="new-backtrack">
-                    <button id="delete-outro-backtrack" class="btn-delete" style="display: none;">
+                    <button id="delete-backtrack-outro" class="btn-delete" style="display: none;">
                         <i class="fas fa-2x fa-minus-circle"></i>
                     </button>
-                    <span><i class="fas fa-2x fa-music"></i><br/>Add Outro</span>
+                    <span>
+                        <i class="fas fa-2x fa-music"></i><br/>
+                        <span id="outro-text">Add Outro</span>
+                    </span>
                 </div>
             </div>
         </div>
 
         <div class="row" style="margin-bottom: 2em;">
-            <div class="col-lg-8">
+            <div class="col-md-9">
                 <button id="btn-edit" class="btn btn-success btn-lg btn-block">
                     Add
                 </button>
             </div>
-            <div class="col-lg-4">
+            <div class="col-md-3">
                 <button id="btn-skip" class="btn btn-light btn-lg btn-block">
                     Skip <i class="fa fa-chevron-right"></i>
                 </button>
@@ -79,24 +85,56 @@
 <script type="text/javascript" src="../js/bootstrap.bundle.min.js"></script>
 <script type="text/javascript" src="/eel.js"></script>
 <script type="text/javascript">
-    $(document).ready(function() {
-        $("#progressbar li.active").prevAll("li").addClass("active");
+async function setupUI() {
+    // get state and populate UI accordingly
+    let trackOverlays = await eel.get_global_track_overlays()();
+    if (trackOverlays["intro"] != null) {
+        $("#delete-backtrack-intro").show();
+        $("#intro-text").text("Change Intro");
+        $("#backtrack-intro").addClass("backtrack");
+        $("#backtrack-intro").removeClass("new-backtrack");
+    }
+    if (trackOverlays["outro"] != null) {
+        $("#delete-backtrack-outro").show();
+        $("#outro-text").text("Change Intro");
+        $("#backtrack-outro").addClass("backtrack");
+        $("#backtrack-outro").removeClass("new-backtrack");
+    }
+}
 
-        $("#backtrack-intro").click(function() {
-            location.href = "/templates/addintro.html";
-        });
+function removeBacktrack(id) {
+    $("#delete-backtrack-"+id).hide();
+    $("#backtrack-"+id).removeClass("backtrack");
+    $("#backtrack-"+id).addClass("new-backtrack");
+}
 
-        $("#backtrack-outro").click(function() {
-            location.href = "/templates/addoutro.html";
-        });
+$(document).ready(function() {
+    $("#progressbar li.active").prevAll("li").addClass("active");
+    setupUI();
 
-        $("#btn-edit").click(function() {
-            location.href = "/templates/edit_inserts.html";
-        });
-        $("#btn-skip").click(function() {
-            location.href = "/templates/edit_inserts.html";
-        });
+    $("#backtrack-intro").click(function() {
+        location.href = "/templates/addintro.html";
     });
+    $("#delete-backtrack-intro").click(function() {
+        eel.delete_intro_backtrack()();
+        removeBacktrack("intro");
+    });
+
+    $("#backtrack-outro").click(function() {
+        location.href = "/templates/addoutro.html";
+    });
+    $("#delete-backtrack-outro").click(function() {
+        eel.delete_outro_backtrack()();
+        removeBacktrack("outro");
+    });
+
+    $("#btn-edit").click(function() {
+        location.href = "/templates/edit_inserts.html";
+    });
+    $("#btn-skip").click(function() {
+        location.href = "/templates/edit_inserts.html";
+    });
+});
 </script>
 </body>
 </html>

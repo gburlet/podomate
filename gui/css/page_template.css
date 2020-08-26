@@ -133,5 +133,5 @@ section {
 }
 
 #progressbar li.active:after {
-    background: #69E086!important;
+    background: #69E086;
 }

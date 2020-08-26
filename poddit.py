@@ -211,9 +211,9 @@ def add_intro_backtrack(filename, slice, overlay_sync_point):
 
 
 @eel.expose
-def get_intro_backtrack():
+def remove_intro_backtrack():
     global global_track_overlays
-    return global_track_overlays["intro"]
+    del global_track_overlays["intro"]
 
 
 @eel.expose
@@ -253,9 +253,15 @@ def add_outro_backtrack(filename, slice, overlay_sync_point):
 
 
 @eel.expose
-def get_outro_backtrack():
+def remove_outro_backtrack():
     global global_track_overlays
-    return global_track_overlays["outro"]
+    del global_track_overlays["outro"]
+
+
+@eel.expose
+def get_global_track_overlays():
+    global global_track_overlays
+    return global_track_overlays
 
 
 def cleanup(page, sockets):
