@@ -97,8 +97,10 @@ var wavesurfer = null;
 async function handleAudioInput() {
     $("#overlay").fadeIn();
     var file = $(this)[0].files[0];
-    let introAudioFilepath = await eel.upload_audio(file.path)();
+    introAudioFilepath = await eel.upload_audio(file.path)();
     setupInteractiveWaveform(introAudioFilepath);
+    wavesurfer.on('region-created', handleAddRegion);
+    wavesurfer.on('region-removed', handleRemoveRegion);
     $("#intro-audio-upload").hide();
     $("#audio-interact").show();
     $("#overlay").fadeOut();
@@ -112,7 +114,7 @@ async function setupUI() {
         $('[data-toggle="popover"]').popover({"html": true});
         $('.file-upload').file_upload();
     } else {
-        introAudioFilepath = overlayConfig["intro"]["path"];
+        introAudioFilepath = overlayConfig["intro"]["path"].slice(10);
         setupInteractiveWaveform(introAudioFilepath);
         $("#intro-audio-upload").hide();
         $("#audio-interact").show();
@@ -121,32 +123,35 @@ async function setupUI() {
             start: overlayConfig["intro"]["slice"][0],
             end: overlayConfig["intro"]["slice"][1],
             drag: true,
-            resize: true
+            resize: true,
+            color: "rgba(45, 255, 25, 0.1)"
         });
-        wavesurfer.seekAndCenter(overlayConfig["intro"]["sync_point"]["overlay"]/wavesurfer.getDuration());
-
+        numRegions++;
+        wavesurfer.on('ready', function() {
+            wavesurfer.seekAndCenter(overlayConfig["intro"]["sync_point"]["overlay"]/wavesurfer.getDuration());
+        });
         wavesurfer.on('region-created', handleAddRegion);
         wavesurfer.on('region-removed', handleRemoveRegion);
     }
 }
 
 function handleAddRegion(region) {
+    $("#alert").hide();
     numRegions++;
     if (numRegions > 1) {
         setError("<b>Oh Snap!</b> You can only select one segment of music for the backtrack");
-        handleRemoveRegion(region);
+        region.remove();
     }
 }
 
 function handleRemoveRegion(region) {
-    region.remove();
-    numRegions--;
+    numRegions = Math.max(0, numRegions-1);
 }
 
 async function handleAddIntro() {
     $("#alert").hide();
 
-    if ($("#intro-audio")[0].files.length == 0) {
+    if (introAudioFilepath == null) {
         setError("<b>Oh Snap!</b> You need to select an audio file first.");
         return;
     }
@@ -168,7 +173,7 @@ async function handleAddIntro() {
     }
 
     $("#overlay").fadeIn();
-    await eel.add_intro_backtrack(introAudioFilepath, slice, overlaySyncPoint);
+    await eel.add_intro_backtrack(introAudioFilepath, slice, overlaySyncPoint)();
     $("#overlay").fadeOut();
     location.href = "/templates/edit_backtracks.html";
 }

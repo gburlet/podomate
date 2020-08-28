@@ -23,7 +23,7 @@ function createWindow () {
   mainWindow.setMenu(null);
 
   // and load the index.html of the app.
-  mainWindow.loadURL('http://localhost:8000/templates/main.html');
+  mainWindow.loadURL('http://localhost:8000/templates/edit_inserts.html');
 
   // Open the DevTools.
   mainWindow.webContents.openDevTools()

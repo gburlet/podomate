@@ -45,11 +45,16 @@ h2 {
 .btn-delete {
     color: red;
     position: absolute;
-    top: -12%;
-    right: -3%;
+    top: -10%;
+    right: -0.1%;
     font-size: 100%;
     border: 0px;
     padding: 0px;
+    background-color: Transparent;
+    background-repeat:no-repeat;
+    cursor: pointer;
+    overflow: hidden;
+    outline: none;
 }
 
 .new-insert {
