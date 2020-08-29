@@ -2,18 +2,20 @@
     <div class="col-lg-12">
         <div id="waveform-controls-top" class="btn-group" role="group" aria-label="Basic example">
             <button id="playPause" type="button" class="btn btn-light fas fa-play"></button>
-            <button id="seesk-start" type="button" class="btn btn-light fas fa-step-backward"></button>
+            <button id="seek-start" type="button" class="btn btn-light fas fa-step-backward"></button>
             <button id="seek-end" type="button" class="btn btn-light fas fa-step-forward"></button>
+            {% if regionLimit > 0 %}
             <button id="clear-regions" type="button" class="btn btn-light fas fa-redo-alt"></button>
             <button id="del-region" type="button" class="btn btn-light fas fa-backspace" style="display: none;"></button>
+            {% endif %}
         </div>
     </div>
 </div>
 
 <div class="row">
     <div class="col-lg-12 text-right">
-        <div id="waveform"></div>
-        <div id="wave-timeline"></div>
+        <div id="{{waveformID}}"></div>
+        <div id="{{waveformID}}-timeline"></div>
     </div>
 </div>
 

@@ -264,6 +264,24 @@ def get_global_track_overlays():
     return global_track_overlays
 
 
+@eel.expose
+def add_insert(filename, slice, timestamp):
+    global global_track_options
+    insert_path = os.path.join("gui/media/%s" % filename)
+    global_track_options["inserts"].append({
+        "path": insert_path,
+        "slice": slice,
+        "timestamp": timestamp
+    })
+
+
+@eel.expose
+def remove_insert(i):
+    global global_track_options
+    if 0 <= i < len(global_track_options["inserts"]):
+        del global_track_options["inserts"]
+
+
 def cleanup(page, sockets):
     pass
 

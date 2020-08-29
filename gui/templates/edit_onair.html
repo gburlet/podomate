@@ -40,7 +40,7 @@
         <h2>Where Were You Live?</h2>
         <p>Drag to select where you were live in the recording. Highlighted sections will be in your final podcast audio.</p>
 
-        {% include "interactive_waveform.html" %}
+        {% include "interactive_waveform.html" with waveformID=waveform %}
 
         <div class="row" style="margin-bottom: 2em;">
             <div class="col-lg-12 text-right">
@@ -64,7 +64,7 @@
 <script type="text/javascript">
     async function getAudioFilename() {
         let audioFilename = await eel.get_mixed_track_filename()();
-        setupInteractiveWaveform(audioFilename);
+        setupInteractiveWaveform(audioFilename, "waveform", Infinity);
     }
 
     async function setLiveRegions(liveTimestamps) {

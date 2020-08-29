@@ -62,7 +62,7 @@
             </ol>
             <p>We'll start fading out the intro music and make a seamless transition.</p>
 
-            {% include "interactive_waveform.html" %}
+            {% include "interactive_waveform.html" with waveformID="waveform" %}
         </div>
 
         <div class="row" style="margin-top: 2em; margin-bottom: 2em;">
@@ -92,15 +92,13 @@
 <script type="text/javascript" src="/eel.js"></script>
 <script type="text/javascript">
 var introAudioFilepath = null;
-var numRegions = 0;
-var wavesurfer = null;
+
 async function handleAudioInput() {
     $("#overlay").fadeIn();
     var file = $(this)[0].files[0];
     introAudioFilepath = await eel.upload_audio(file.path)();
-    setupInteractiveWaveform(introAudioFilepath);
-    wavesurfer.on('region-created', handleAddRegion);
-    wavesurfer.on('region-removed', handleRemoveRegion);
+    setupInteractiveWaveform(introAudioFilepath, "waveform", 1);
+
     $("#intro-audio-upload").hide();
     $("#audio-interact").show();
     $("#overlay").fadeOut();
@@ -115,37 +113,15 @@ async function setupUI() {
         $('.file-upload').file_upload();
     } else {
         introAudioFilepath = overlayConfig["intro"]["path"].slice(10);
-        setupInteractiveWaveform(introAudioFilepath);
-        $("#intro-audio-upload").hide();
-        $("#audio-interact").show();
-
-        wavesurfer.addRegion({
-            start: overlayConfig["intro"]["slice"][0],
-            end: overlayConfig["intro"]["slice"][1],
-            drag: true,
-            resize: true,
-            color: "rgba(45, 255, 25, 0.1)"
-        });
-        numRegions++;
+        setupInteractiveWaveform(introAudioFilepath, "waveform", 1);
         wavesurfer.on('ready', function() {
             wavesurfer.seekAndCenter(overlayConfig["intro"]["sync_point"]["overlay"]/wavesurfer.getDuration());
         });
-        wavesurfer.on('region-created', handleAddRegion);
-        wavesurfer.on('region-removed', handleRemoveRegion);
-    }
-}
+        addRegion(overlayConfig["intro"]["slice"][0], overlayConfig["intro"]["slice"][1]);
 
-function handleAddRegion(region) {
-    $("#alert").hide();
-    numRegions++;
-    if (numRegions > 1) {
-        setError("<b>Oh Snap!</b> You can only select one segment of music for the backtrack");
-        region.remove();
+        $("#intro-audio-upload").hide();
+        $("#audio-interact").show();
     }
-}
-
-function handleRemoveRegion(region) {
-    numRegions = Math.max(0, numRegions-1);
 }
 
 async function handleAddIntro() {

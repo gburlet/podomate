@@ -57,7 +57,7 @@ h2 {
     outline: none;
 }
 
-.new-insert {
+#new-insert {
     position: relative;
     border: 2px dashed #ccc;
     border-radius: 16px;
@@ -67,11 +67,11 @@ h2 {
     margin-bottom: 2em;
 }
 
-.new-insert:hover {
+#new-insert:hover {
     border-color: #111;
 }
 
-.new-insert > span {
+#new-insert > span {
     margin: auto;
     font-family: futura, sans-serif;
     font-size: 20px;
