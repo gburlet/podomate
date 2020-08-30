@@ -276,6 +276,17 @@ def add_insert(filename, slice, timestamp):
 
 
 @eel.expose
+def edit_insert(i_insert, filename, slice, timestamp):
+    global global_track_options
+    if 0 <= i_insert < len(global_track_options["inserts"]):
+        insert_path = os.path.join("gui/media/%s" % filename)
+        global_track_options["inserts"][i_insert] = {
+            "path": insert_path,
+            "slice": slice,
+            "timestamp": timestamp
+        }
+
+@eel.expose
 def remove_insert(i):
     global global_track_options
     if 0 <= i < len(global_track_options["inserts"]):

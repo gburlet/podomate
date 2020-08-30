@@ -43,8 +43,13 @@ function setupInteractiveWaveform(audioFilename, containerID, regions=0) {
             $('#playPause').removeClass('fa-play').addClass('fa-pause');
         });
 
+        $("#one-region").click(function() {
+            addRegion(0, wavesurfer.getDuration());
+        });
+
         $("#clear-regions").click(function() {
             wavesurfer.clearRegions();
+            $("#del-region").hide();
         });
 
         $("#del-region").click(function() {
@@ -150,11 +155,12 @@ function handleSelectRegion(region) {
 }
 
 function addRegion(start, end) {
-    wavesurfer.addRegion({
-        start: snippetConfig["slice"][0],
-        end: snippetConfig["slice"][1],
+    let region = wavesurfer.addRegion({
+        start: start,
+        end: end,
         drag: true,
         resize: true,
         color: "rgba(45, 255, 25, 0.1)"
     });
+    selectRegion(region);
 }

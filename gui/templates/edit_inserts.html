@@ -79,11 +79,13 @@ async function setupUI() {
         $(insertHTML).insertBefore("#new-insert");
         $("#filename-insert-"+iInsert).text(insertFilename);
         $("#del-insert-"+iInsert).show();
-        $("#del-insert-"+iInsert).click(function() {
-            removeInsert(iInsert);
+        $("#del-insert-"+iInsert).click(function(event) {
+            const insertID = parseInt(event.currentTarget.id.slice(11));
+            removeInsert(insertID);
         });
-        $("#insert-"+iInsert).click(function() {
-            location.href = "/templates/addinsert.html?iInsert="+iInsert;
+        $("#insert-"+iInsert).click(function(event) {
+            const insertID = event.target.id.slice(7);
+            location.href = "/templates/addinsert.html?iInsert="+insertID;
         });
     }
 }

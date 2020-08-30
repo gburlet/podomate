@@ -68,7 +68,7 @@
         <div id="audio-interact-snippet-insertion-point" class="row" style="display:none;">
             <div class="col-lg-12">
                 <h2>Where should we put it?</h2>
-                <p>Pause playback where you want the snippet to start playing.</p>
+                <p>Select or pause playback where you want the snippet to start playing.</p>
 
                 {% with waveformID="waveform-snippet-insertion-point", regionLimit=0 %}
                 {% include "interactive_waveform.html" %}
@@ -107,6 +107,7 @@
 <script type="text/javascript">
 var snippetAudioFilename = null;
 var mixedTrackFilename = null;
+var iInsert = NaN;
 var snippetConfig = {
     "path": null,
     "slice": null,
@@ -116,10 +117,10 @@ var snippetConfig = {
 async function setupUI() {
     mixedTrackFilename = await eel.get_mixed_track_filename()();
     const urlParams = new URLSearchParams(window.location.search);
-    const iInsert = parseInt(urlParams.get('iInsert'));
+    iInsert = parseInt(urlParams.get('iInsert'));
     let globalTrackOptions = await eel.get_global_track_options()();
     let trackInserts = globalTrackOptions["inserts"];
-    if (0 <= iInsert < trackInserts.length) {
+    if (!isNaN(iInsert) && iInsert >= 0 && iInsert < trackInserts.length) {
         // we found a saved insert, load it up for editing
         snippetConfig = trackInserts[iInsert];
         snippetAudioFilename = snippetConfig["path"].slice(10);
@@ -214,7 +215,11 @@ async function handleAddSnippet() {
 
     $("#overlay").fadeIn();
     snippetConfig["timestamp"] = wavesurfer.getCurrentTime();
-    await eel.add_insert(snippetAudioFilename, snippetConfig["slice"], snippetConfig["timestamp"])();
+    if (isNaN(iInsert)) {
+        await eel.add_insert(snippetAudioFilename, snippetConfig["slice"], snippetConfig["timestamp"])();
+    } else {
+        await eel.update_insert(iInsert, snippetAudioFilename, snippetConfig["slice"], snippetConfig["timestamp"])();
+    }
     $("#overlay").fadeOut();
     location.href = "/templates/edit_inserts.html";
 }
