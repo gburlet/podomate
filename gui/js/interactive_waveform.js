@@ -11,8 +11,8 @@ var regionLimit = 0;
  *  containerID (string): id for the wavesurfer object
  *  regionLimit (int): 0 = no region selections, x = x region selections. Make x = Infinity for no limit
  */
-function setupInteractiveWaveform(audioFilename, containerID, regionLimit=0) {
-    regionLimit = regionLimit;
+function setupInteractiveWaveform(audioFilename, containerID, regions=0) {
+    regionLimit = regions;
     if (regionLimit > 0) {
         // enable region selection
         wavesurfer = WaveSurfer.create({
@@ -76,13 +76,6 @@ function setupInteractiveWaveform(audioFilename, containerID, regionLimit=0) {
         }
     }
 
-    function deleteSelectedRegion() {
-        if (selectedRegion != null) {
-            selectedRegion.remove();
-        }
-        $("#del-region").hide();
-    }
-
     $(document).keydown(function(event) {
         if (event.which == 32) {
             event.preventDefault();
@@ -120,6 +113,18 @@ function setupInteractiveWaveform(audioFilename, containerID, regionLimit=0) {
     });
 
     wavesurfer.load("../media/" + audioFilename);
+}
+
+function selectRegion(region) {
+    selectedRegion = region;
+    $("#del-region").show();
+}
+
+function deleteSelectedRegion() {
+    if (selectedRegion != null) {
+        selectedRegion.remove();
+    }
+    $("#del-region").hide();
 }
 
 function handleAddRegion(region) {

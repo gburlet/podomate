@@ -76,3 +76,23 @@ h2 {
     font-family: futura, sans-serif;
     font-size: 20px;
 }
+
+.insert {
+    position: relative;
+    border: 2px solid #419656;
+    border-radius: 16px;
+    height: 150px;
+    cursor: pointer;
+    display: flex;
+    margin-bottom: 2em;
+}
+
+.insert:hover {
+    border-color: #69E086;
+}
+
+.insert > span {
+    margin: auto;
+    font-family: futura, sans-serif;
+    font-size: 20px;
+}

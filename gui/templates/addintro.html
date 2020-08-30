@@ -62,7 +62,9 @@
             </ol>
             <p>We'll start fading out the intro music and make a seamless transition.</p>
 
-            {% include "interactive_waveform.html" with waveformID="waveform" %}
+            {% with waveformID="waveform", regionLimit=1 %}
+            {% include "interactive_waveform.html" %}
+            {% endwith %}
         </div>
 
         <div class="row" style="margin-top: 2em; margin-bottom: 2em;">

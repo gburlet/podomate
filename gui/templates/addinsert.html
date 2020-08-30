@@ -59,7 +59,9 @@
                 <h2>What part do you want to use?</h2>
                 <p>Drag to select a segment of music to use.</p>
 
-                {% include "interactive_waveform.html" with waveformID="waveform-snippet" regionLimit=1 %}
+                {% with waveformID="waveform-snippet", regionLimit=1 %}
+                {% include "interactive_waveform.html" %}
+                {% endwith %}
             </div>
         </div>
 
@@ -68,7 +70,9 @@
                 <h2>Where should we put it?</h2>
                 <p>Pause playback where you want the snippet to start playing.</p>
 
-                {% include "interactive_waveform.html" with waveformID="waveform-snippet-insertion-point" regionLimit=0 %}
+                {% with waveformID="waveform-snippet-insertion-point", regionLimit=0 %}
+                {% include "interactive_waveform.html" %}
+                {% endwith %}
             </div>
         </div>
 
@@ -113,7 +117,8 @@ async function setupUI() {
     mixedTrackFilename = await eel.get_mixed_track_filename()();
     const urlParams = new URLSearchParams(window.location.search);
     const iInsert = parseInt(urlParams.get('iInsert'));
-    let trackInserts = await get_global_track_options()()["inserts"];
+    let globalTrackOptions = await eel.get_global_track_options()();
+    let trackInserts = globalTrackOptions["inserts"];
     if (0 <= iInsert < trackInserts.length) {
         // we found a saved insert, load it up for editing
         snippetConfig = trackInserts[iInsert];
@@ -176,7 +181,13 @@ async function handleAudioInput() {
     $("#overlay").fadeOut();
 }
 
-async function handleSelectRegion() {
+async function handleSelectSnippetRegion() {
+    $("#alert").hide();
+    if (Object.keys(wavesurfer.regions.list).length == 0) {
+        setError("<b>Oh Snap!</b> You need to select a segment of the audio file to use.");
+        return;
+    }
+
     $("#overlay").fadeIn();
     var region = null;
     $.each(wavesurfer.regions.list, function(rid, firstRegion) {
@@ -196,7 +207,7 @@ async function handleAddSnippet() {
         setError("<b>Oh Snap!</b> You need to select an audio file first.");
         return;
     }
-    if (Object.keys(wavesurfer.regions.list).length == 0) {
+    if (snippetConfig["slice"] == null) {
         setError("<b>Oh Snap!</b> You need to select a segment of the audio file to use.");
         return;
     }
@@ -218,7 +229,7 @@ $(document).ready(function() {
     setupUI();
 
     $("#btn-select-region").click(function() {
-        handleSelectRegion();
+        handleSelectSnippetRegion();
     });
     $("#btn-select-placement").click(function() {
         handleAddSnippet();

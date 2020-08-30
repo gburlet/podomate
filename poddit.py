@@ -279,7 +279,7 @@ def add_insert(filename, slice, timestamp):
 def remove_insert(i):
     global global_track_options
     if 0 <= i < len(global_track_options["inserts"]):
-        del global_track_options["inserts"]
+        del global_track_options["inserts"][i]
 
 
 def cleanup(page, sockets):

@@ -44,9 +44,6 @@
                 <div id="new-insert">
                     <span><i class="far fa-2x fa-file-audio"></i><br/>Add Snippet</span>
                 </div>
-                <button class="btn-delete" style="display: none;">
-                    <i class="fas fa-2x fa-minus-circle"></i>
-                </button>
             </div>
         </div>
 
@@ -73,18 +70,20 @@
 <script type="text/javascript">
 var numInserts = 0;
 async function setupUI() {
-    let trackInserts = await get_global_track_options()()["inserts"];
+    let globalTrackConfig = await eel.get_global_track_options()();
+    let trackInserts = globalTrackConfig["inserts"];
     numInserts = trackInserts.length;
     for (var iInsert = 0; iInsert < numInserts; iInsert++) {
         let insertFilename = trackInserts[iInsert]["path"].slice(10);
         var insertHTML = `{% with insert_id=-666 %}{% include "insert_snippet.html" %}{% endwith %}`.replace(/(-666)/g, iInsert);
         $(insertHTML).insertBefore("#new-insert");
         $("#filename-insert-"+iInsert).text(insertFilename);
+        $("#del-insert-"+iInsert).show();
         $("#del-insert-"+iInsert).click(function() {
             removeInsert(iInsert);
         });
         $("#insert-"+iInsert).click(function() {
-            location.href = "/templates/addinsert.html?iInsert="+iInsert";
+            location.href = "/templates/addinsert.html?iInsert="+iInsert;
         });
     }
 }
@@ -99,6 +98,7 @@ async function removeInsert(iInsert) {
 
 $(document).ready(function() {
     $("#progressbar li.active").prevAll("li").addClass("active");
+    setupUI();
 
     $("#new-insert").click(function() {
         location.href = "/templates/addinsert.html";
