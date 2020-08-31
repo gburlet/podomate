@@ -7,10 +7,12 @@ import os
 import numpy as np
 
 from audio_buffer import AudioBuffer
+from audio_inserter import AudioInserter
 from audio_overlayer import AudioOverlayer
 from audio_preprocessors.gate_filter import GateFilter
 from fx_chain import FXChain
 from mixer import Mixer
+from silence_remover import SilenceRemover
 from track import Track
 from track_aligner import TrackAligner
 
@@ -286,11 +288,55 @@ def edit_insert(i_insert, filename, slice, timestamp):
             "timestamp": timestamp
         }
 
+
 @eel.expose
 def remove_insert(i):
     global global_track_options
     if 0 <= i < len(global_track_options["inserts"]):
         del global_track_options["inserts"][i]
+
+
+@eel.expose
+def process():
+    global global_track_overlays, global_track_options, mixed_track
+
+    global_track_options["overlays"].clear()
+    if global_track_overlays["intro"]:
+        global_track_options["overlays"].append(global_track_overlays["intro"])
+    if global_track_overlays["outro"]:
+        global_track_options["overlays"].append(global_track_overlays["outro"])
+    global_track_options["overlays"].extend(global_track_overlays["others"])
+    
+    silence_intervals = []
+    if "live_timestamps" in global_track_options:
+        silence_intervals.extend(mixed_track.get_silence_ranges_from_activity_ranges(global_track_options["live_timestamps"]))
+    if "silence_timestamps" in global_track_options:
+        silence_intervals.extend(global_track_options["silence_timestamps"])
+    for silence_interval in silence_intervals:
+        mixed_track.apply_silence_to_interval(silence_interval)
+
+    SilenceRemover(global_track_options["min_silence_duration"]).remove(mixed_track, padding_s=0.2)
+
+    # Audio Overlays
+    for overlay_config in global_track_options["overlays"]:
+        mixed_track = AudioOverlayer.from_config(overlay_config).overlay(mixed_track)
+        mixed_track.audio_buffer.normalize()
+
+    # Ad Inserts
+    for insert_config in global_track_options["inserts"]:
+        AudioInserter.from_config(insert_config).insert_into(mixed_track)
+    mixed_track.audio_buffer.normalize()
+
+    # global fX chain
+    if "fX" in global_track_options:
+        FXChain(global_track_options["fX"]).apply(mixed_track)
+
+    mixed_track.audio_buffer.normalize()
+    mixed_track.audio_buffer.stereofy()
+    filename = "%s_mastered.flac" % os.path.split(mixed_track.audio_buffer._path)[-1]
+    output_path = "gui/media/%s" % filename
+    mixed_track.audio_buffer._path = output_path
+    mixed_track.audio_buffer.write()
 
 
 def cleanup(page, sockets):
