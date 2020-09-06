@@ -12,6 +12,29 @@ var regionLimit = 0;
  *  regionLimit (int): 0 = no region selections, x = x region selections. Make x = Infinity for no limit
  */
 function setupInteractiveWaveform(audioFilename, containerID, regions=0) {
+    if (wavesurfer == null) {
+        // one-time setups
+        $(document).keydown(function(event) {
+            if (event.which == 32) {
+                event.preventDefault();
+            }
+        });
+
+        $(document).keyup(function(event) {
+            let key = event.which;
+            switch(key) {
+                case 32:
+                    event.preventDefault();
+                    playPause();
+                    break;
+                case 8:
+                case 46:
+                    deleteSelectedRegion();
+                    break;
+            }
+        });
+    }
+
     regionLimit = regions;
     if (regionLimit > 0) {
         // enable region selection
@@ -80,26 +103,6 @@ function setupInteractiveWaveform(audioFilename, containerID, regions=0) {
             $('#playPause').removeClass('fa-pause').addClass('fa-play');
         }
     }
-
-    $(document).keydown(function(event) {
-        if (event.which == 32) {
-            event.preventDefault();
-        }
-    });
-
-    $(document).keyup(function(event) {
-        let key = event.which;
-        switch(key) {
-            case 32:
-                event.preventDefault();
-                playPause();
-                break;
-            case 8:
-            case 46:
-                deleteSelectedRegion();
-                break;
-        }
-    });
 
     $("#playPause").click(function() {
         playPause();

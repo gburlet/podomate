@@ -84,6 +84,11 @@
             if ($("#speaker"+i+"-noisegate").is(':checked')) {
                 track_config["gate_filter"] = -20.0;
             }
+            // TODO: offset format validation
+            var trackOffset = $("#speaker"+i+"-offset").val();
+            if (trackOffset) {
+                track_config["offset"] = trackOffset;
+            }
             tracks_configs.push(track_config);
         }
         let mixed_track_path = await eel.mix_speaker_tracks(tracks_configs)();

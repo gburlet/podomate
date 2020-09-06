@@ -29,8 +29,8 @@
     <ul id="progressbar">
         <li id="mixer"><a href="/templates/mixer.html"><i class="fa fa-sliders-h"></i> <strong>Mixer</strong></a></li>
         <li id="trim"><a href="/templates/edit_onair.html"><i class="fa fa-cut"></i> <strong>Trim</strong></a></li>
-        <li id="music" class="active"><a href="/templates/edit_backtracks.html"><i class="fa fa-music"></i> <strong>Music</strong></a></li>
-        <li id="snippets"><i class="fa fa-file-audio"></i> <strong>Snippets</strong></li>
+        <li id="music"><a href="/templates/edit_backtracks.html"><i class="fa fa-music"></i> <strong>Music</strong></a></li>
+        <li id="snippets" class="active"><a href="/templates/edit_inserts.html"><i class="fa fa-file-audio"></i><strong>Snippets</strong></a></li>
         <li id="finish"><i class="fa fa-check"></i> <strong>Finish</strong></li>
     </ul>
 
@@ -159,6 +159,7 @@ function showSelectRegion() {
 
 function showSelectPlacement() {
     if (mixedTrackFilename != null) {
+        $("#audio-interact-snippet").remove();
         setupInteractiveWaveform(mixedTrackFilename, "waveform-snippet-insertion-point", 0);
     }
     if (snippetConfig["timestamp"] != null) {

@@ -318,6 +318,7 @@ def process():
     SilenceRemover(global_track_options["min_silence_duration"]).remove(mixed_track, padding_s=0.2)
 
     # Audio Overlays
+    cache_mixed_track_path = mixed_track.audio_buffer._path
     for overlay_config in global_track_options["overlays"]:
         mixed_track = AudioOverlayer.from_config(overlay_config).overlay(mixed_track)
         mixed_track.audio_buffer.normalize()
@@ -333,7 +334,7 @@ def process():
 
     mixed_track.audio_buffer.normalize()
     mixed_track.audio_buffer.stereofy()
-    filename = "%s_mastered.flac" % os.path.split(mixed_track.audio_buffer._path)[-1]
+    filename = "%s_mastered.flac" % os.path.split(cache_mixed_track_path)[-1]
     output_path = "gui/media/%s" % filename
     mixed_track.audio_buffer._path = output_path
     mixed_track.audio_buffer.write()

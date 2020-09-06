@@ -25,7 +25,7 @@
                                 <div class="col">
                                     <div class="switch-container">
                                         <label class="switch">
-                                          <input type="checkbox" id="speaker{{speaker_id}}-noisegate" checked>
+                                          <input type="checkbox" id="speaker{{speaker_id}}-noisegate">
                                           <span class="slider round"></span>
                                         </label>
                                         Noise Gate
@@ -38,6 +38,14 @@
                                           <span class="slider round"></span>
                                         </label>
                                         Noise Reduction
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="col">
+                                    <div class="col">
+                                        <label for="speaker{{speaker_id}}-offset">Track Offset</label>
+                                        <input type="text" class="form-control" id="speaker{{speaker_id}}-offset" placeholder="HH:MM:SS.MSS">
                                     </div>
                                 </div>
                             </div>
