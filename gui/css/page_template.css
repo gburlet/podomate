@@ -63,8 +63,7 @@ section {
 }
 
 #overlay {
-    background: black;
-    opacity: .8;
+    background: #434743ff;
     color: #666666;
     position: fixed;
     height: 100%;
@@ -74,7 +73,17 @@ section {
     left: 0;
     float: left;
     text-align: center;
-    padding-top: 25%;
+}
+
+#loading-spinner {
+    vertical-align: middle;
+}
+
+#loading-text {
+    color: #28a745!important;
+    font-family: 'DeadRevolution', sans-serif;
+    font-size: 25px;
+    font-weight: 500;
 }
 
 #progressbar {
