@@ -26,7 +26,7 @@ class TrackAligner(object):
         for t in tracks:
             t.audio_buffer.pad(max_samples)
 
-    def auto_calc_offset(self, tracks, finetune_local_search_s=1.0):
+    def auto_calc_offset(self, tracks, finetune_local_search_s=2.0):
         """
         Algorithm is:
             loop through each track and try to find optimal offset so it merges into master track with
@@ -191,7 +191,7 @@ class TrackAligner(object):
                 # fine-tune the alignment by grid searching around the silence start period
                 finetune_start_s = master_silent_range[0] - finetune_local_search_s
                 finetune_end_s = master_silent_range[0] + finetune_local_search_s
-                finetune_candidates = np.linspace(finetune_start_s, finetune_end_s, 10)
+                finetune_candidates = np.linspace(finetune_start_s, finetune_end_s, 20)
                 for finetune_placement_s in finetune_candidates:
                     slave_offset_s = finetune_placement_s-slave_longest_activity[0]
                     track_overlap = self._calc_track_overlap(master_track, slave_track, slave_offset_s)
