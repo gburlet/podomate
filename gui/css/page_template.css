@@ -1,0 +1,146 @@
+@font-face {
+  font-family: 'DeadRevolution';
+  src: url(../fonts/deadrevolution.otf);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    margin-block-start: 0;
+    margin-block-end: 0;
+}
+
+body {
+    background-color: #fff;
+}
+
+ol {
+    padding-left: 3em;
+}
+
+section {
+    position: relative;
+    margin-top: -2em;
+    z-index: 2;
+}
+
+#alert {
+    margin-top: 1em;
+}
+
+#hero {
+    background-image: url(../img/main.jpg);
+    position: relative;
+    height: 300px;
+    z-index: 1;
+    background-position: 50% 70%;
+    background-repeat: repeat-x;
+    background-size: cover;
+}
+
+#hero-header {
+    font-family: 'DeadRevolution', sans-serif;
+    font-size: 80px;
+    font-weight: 400;
+    color: #fff;
+    padding-left: 7%;
+}
+
+#header-info {
+    font-family: futura, sans-serif;
+    font-size: 30px;
+    color: #fff;
+    padding-left: 7%;
+    margin-top: -0.5%;
+    font-weight: 50;
+}
+
+.subheading {
+    font-family: futura, sans-serif;
+    font-size: 25px;
+    font-weight: 50;
+    margin-right: 2em;
+}
+
+#overlay {
+    background: #434743ff;
+    color: #666666;
+    position: fixed;
+    height: 100%;
+    width: 100%;
+    z-index: 5000;
+    top: 0;
+    left: 0;
+    float: left;
+    text-align: center;
+}
+
+#loading-spinner {
+    vertical-align: middle;
+}
+
+#loading-text {
+    color: #28a745!important;
+    font-family: 'DeadRevolution', sans-serif;
+    font-size: 25px;
+    font-weight: 500;
+}
+
+#progressbar {
+    margin-bottom: 30px;
+    overflow: hidden;
+    color: lightgrey
+}
+
+#progressbar .active {
+    color: #000000;
+}
+
+#progressbar a {
+    color: #000000;
+}
+#progressbar a:hover {
+    color: lightgray;
+    text-decoration: none;
+}
+
+#progressbar li {
+    list-style-type: none;
+    font-size: 12px;
+    width: 20%;
+    float: left;
+    position: relative;
+    text-align: center;
+}
+
+#progressbar li i.fa {
+    width: 50px;
+    height: 50px;
+    line-height: 45px;
+    display: block;
+    font-size: 18px;
+    color: #ffffff;
+    background: lightgray;
+    border-radius: 50%;
+    margin: 0 auto 10px auto;
+    padding: 2px
+}
+
+#progressbar li:after {
+    content: '';
+    width: 100%;
+    height: 2px;
+    background: lightgray;
+    position: absolute;
+    left: 0;
+    top: 25px;
+    z-index: -1
+}
+
+#progressbar li.active i.fa {
+    background: #69E086;
+}
+
+#progressbar li.active:after {
+    background: #69E086;
+}

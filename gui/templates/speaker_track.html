@@ -1,0 +1,58 @@
+<div id="speaker{{speaker_id}}-row" class="row">
+    <div class="col-lg-12">
+        <div class="speaker">
+            <h3 class="subheading text-muted">
+                Speaker {{speaker_id}}
+                <a id="speaker{{speaker_id}}-audio-badge" tabindex="-1" class="badge-pop badge badge-success align-middle" data-trigger="hover" data-container="body" data-toggle="popover" data-placement="bottom" data-content="<b>File Types</b>: .mp3, .wav<br/><b>Bit Depth</b>: 16, 32">
+                    <i class="fas fa-info-circle"></i> Supported Audio
+                </a>
+            </h3>
+            <div id="file-upload-wrapper" class="file-upload-wrapper">
+                <input class="file-upload" type="file" id="speaker{{speaker_id}}-audio" name="speaker{{speaker_id}}-audio" accept="audio/*" data-height="150" required>
+            </div>
+            <div id="accordion-speaker{{speaker_id}}">
+                <div class="card">
+                    <div class="card-header" id="heading-speaker{{speaker_id}}">
+                        <h5 class="mb-0">
+                            <button class="btn" data-toggle="collapse" data-target="#collapse-speaker{{speaker_id}}" aria-expanded="false" aria-controls="collapse-speaker{{speaker_id}}">
+                                Options <i class="fas fa-chevron-right align-middle"></i>
+                            </button>
+                        </h5>
+                    </div>
+                    <div id="collapse-speaker{{speaker_id}}" class="collapse" aria-labelledby="heading-speaker{{speaker_id}}" data-parent="#accordion-speaker{{speaker_id}}">
+                        <div class="card-body">
+                            <div class="form-row">
+                                <div class="col">
+                                    <div class="switch-container">
+                                        <label class="switch">
+                                          <input type="checkbox" id="speaker{{speaker_id}}-noisegate">
+                                          <span class="slider round"></span>
+                                        </label>
+                                        Noise Gate
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="switch-container">
+                                        <label class="switch">
+                                          <input type="checkbox" id="speaker{{speaker_id}}-noisereduction" checked>
+                                          <span class="slider round"></span>
+                                        </label>
+                                        Noise Reduction
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="col">
+                                    <div class="col">
+                                        <label for="speaker{{speaker_id}}-offset">Track Offset</label>
+                                        <input type="text" class="form-control" id="speaker{{speaker_id}}-offset" placeholder="HH:MM:SS.MSS">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

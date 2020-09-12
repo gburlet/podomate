@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
+    <title>Poddit</title>
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/fontawesome.min.css" rel="stylesheet">
+    <link href="../css/page_template.css" rel="stylesheet">
+    <link href="../css/editor.css" rel="stylesheet">
+</head>
+<body>
+
+<div id="overlay" class="text-center" style="display: none;">
+    <div class="row">
+        <div class="col-lg-12">
+            <img id="loading-animation" src="../img/loading_animation.gif" />
+        </div>
+    </div>
+    <div class="row" style="margin-top: -7em;">
+        <div class="col-lg-12">
+            <div id="loading-spinner" class="spinner-border text-success" role="status"></div>
+            <span id="loading-text" class="align-middle">&nbsp;WORKING ...</span>
+        </div>
+    </div>
+</div>
+
+<div id="hero">
+    <h1 id="hero-header">Music</h1>
+    <h4 id="header-info">Add music backtracks</h4>
+</div>
+
+<section>
+    <ul id="progressbar">
+        <li id="mixer"><a href="/templates/mixer.html"><i class="fa fa-sliders-h"></i> <strong>Mixer</strong></a></li>
+        <li id="trim"><a href="/templates/edit_onair.html"><i class="fa fa-cut"></i> <strong>Trim</strong></a></li>
+        <li id="music" class="active"><i class="fa fa-music"></i> <strong>Music</strong></li>
+        <li id="snippets"><i class="fa fa-file-audio"></i> <strong>Snippets</strong></li>
+        <li id="finish"><i class="fa fa-check"></i> <strong>Finish</strong></li>
+    </ul>
+
+    <div class="container">
+
+        <div id="alert" class="alert alert-danger" role="alert" style="display: none;"></div>
+
+        <h2>Add Music</h2>
+        <p>Optional. Add music behind parts of your podcast.</p>
+
+        <div class="row">
+            <div class="col-lg-6 text-center">
+                <div id="backtrack-intro" class="new-backtrack">
+                    <span>
+                        <i class="fas fa-2x fa-music"></i><br/>
+                        <span id="intro-text">Add Intro</span>
+                    </span>
+                </div>
+                <button id="delete-backtrack-intro" class="btn-delete" style="display: none;">
+                    <i class="fas fa-2x fa-minus-circle"></i>
+                </button>
+            </div>
+            <div class="col-lg-6 text-center">
+                <div id="backtrack-outro" class="new-backtrack">
+                    <span>
+                        <i class="fas fa-2x fa-music"></i><br/>
+                        <span id="outro-text">Add Outro</span>
+                    </span>
+                </div>
+                <button id="delete-backtrack-outro" class="btn-delete" style="display: none;">
+                    <i class="fas fa-2x fa-minus-circle"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="row" style="margin-bottom: 2em;">
+            <div class="col-md-9">
+                <button id="btn-edit" class="btn btn-success btn-lg btn-block">
+                    Add
+                </button>
+            </div>
+            <div class="col-md-3">
+                <button id="btn-skip" class="btn btn-light btn-lg btn-block">
+                    Skip <i class="fa fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+<script type="text/javascript" src="../js/jquery.min.js"></script>
+<script type="text/javascript" src="../js/bootstrap.bundle.min.js"></script>
+<script type="text/javascript" src="/eel.js"></script>
+<script type="text/javascript">
+async function setupUI() {
+    // get state and populate UI accordingly
+    let trackOverlays = await eel.get_global_track_overlays()();
+    if (trackOverlays["intro"] != null) {
+        $("#delete-backtrack-intro").show();
+        $("#intro-text").text("Change Intro");
+        $("#backtrack-intro").addClass("backtrack");
+        $("#backtrack-intro").removeClass("new-backtrack");
+    }
+    if (trackOverlays["outro"] != null) {
+        $("#delete-backtrack-outro").show();
+        $("#outro-text").text("Change Outro");
+        $("#backtrack-outro").addClass("backtrack");
+        $("#backtrack-outro").removeClass("new-backtrack");
+    }
+}
+
+function toTitleCase(str) {
+    return str.replace(/(?:^|\s)\w/g, function(match) {
+        return match.toUpperCase();
+    });
+}
+
+function removeBacktrack(id) {
+    $("#delete-backtrack-"+id).hide();
+    $("#backtrack-"+id).removeClass("backtrack");
+    $("#backtrack-"+id).addClass("new-backtrack");
+    $("#"+id+"-text").text("Add " + toTitleCase(id));
+}
+
+$(document).ready(function() {
+    $("#progressbar li.active").prevAll("li").addClass("active");
+    setupUI();
+
+    $("#backtrack-intro").click(function() {
+        location.href = "/templates/addintro.html";
+    });
+    $("#delete-backtrack-intro").click(function() {
+        eel.remove_intro_backtrack()();
+        removeBacktrack("intro");
+    });
+
+    $("#backtrack-outro").click(function() {
+        location.href = "/templates/addoutro.html";
+    });
+    $("#delete-backtrack-outro").click(function() {
+        eel.remove_outro_backtrack()();
+        removeBacktrack("outro");
+    });
+
+    $("#btn-edit").click(function() {
+        location.href = "/templates/edit_inserts.html";
+    });
+    $("#btn-skip").click(function() {
+        location.href = "/templates/edit_inserts.html";
+    });
+});
+</script>
+</body>
+</html>

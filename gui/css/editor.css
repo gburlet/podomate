@@ -1,0 +1,98 @@
+h2 {
+    margin-top: 1em;
+}
+
+.new-backtrack {
+    position: relative;
+    border: 2px dashed #ccc;
+    border-radius: 16px;
+    height: 150px;
+    cursor: pointer;
+    display: flex;
+    margin-bottom: 2em;
+}
+
+.new-backtrack:hover {
+    border-color: #111;
+}
+
+.new-backtrack > span {
+    margin: auto;
+    font-family: futura, sans-serif;
+    font-size: 20px;
+}
+
+.backtrack {
+    position: relative;
+    border: 2px solid #419656;
+    border-radius: 16px;
+    height: 150px;
+    cursor: pointer;
+    display: flex;
+    margin-bottom: 2em;
+}
+
+.backtrack:hover {
+    border-color: #69E086;
+}
+
+.backtrack > span {
+    margin: auto;
+    font-family: futura, sans-serif;
+    font-size: 20px;
+}
+
+.btn-delete {
+    color: red;
+    position: absolute;
+    top: -10%;
+    right: -0.1%;
+    font-size: 100%;
+    border: 0px;
+    padding: 0px;
+    background-color: Transparent;
+    background-repeat:no-repeat;
+    cursor: pointer;
+    overflow: hidden;
+    outline: none;
+}
+
+#new-insert {
+    position: relative;
+    border: 2px dashed #ccc;
+    border-radius: 16px;
+    height: 150px;
+    cursor: pointer;
+    display: flex;
+    margin-bottom: 2em;
+}
+
+#new-insert:hover {
+    border-color: #111;
+}
+
+#new-insert > span {
+    margin: auto;
+    font-family: futura, sans-serif;
+    font-size: 20px;
+}
+
+.insert {
+    position: relative;
+    border: 2px solid #419656;
+    border-radius: 16px;
+    height: 150px;
+    cursor: pointer;
+    display: flex;
+    margin-bottom: 2em;
+}
+
+.insert:hover {
+    border-color: #69E086;
+}
+
+.insert > span {
+    margin: auto;
+    font-family: futura, sans-serif;
+    font-size: 20px;
+}

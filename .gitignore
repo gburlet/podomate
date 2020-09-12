@@ -130,3 +130,5 @@ dmypy.json
 
 .DS_STORE
 .idea
+node_modules
+gui/media

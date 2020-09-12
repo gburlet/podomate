@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
+    <title>Poddit</title>
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/fontawesome.min.css" rel="stylesheet">
+    <link href="../css/page_template.css" rel="stylesheet">
+    <link href="../css/editor.css" rel="stylesheet">
+</head>
+<body>
+
+<div id="overlay" class="text-center" style="display: none;">
+    <div class="row">
+        <div class="col-lg-12">
+            <img id="loading-animation" src="../img/loading_animation.gif" />
+        </div>
+    </div>
+    <div class="row" style="margin-top: -7em;">
+        <div class="col-lg-12">
+            <div id="loading-spinner" class="spinner-border text-success" role="status"></div>
+            <span id="loading-text" class="align-middle">&nbsp;WORKING ...</span>
+        </div>
+    </div>
+</div>
+
+<div id="hero">
+    <h1 id="hero-header">Finish</h1>
+    <h4 id="header-info">Create your podcast episode</h4>
+</div>
+
+<section>
+    <ul id="progressbar">
+        <li id="mixer"><a href="/templates/mixer.html"><i class="fa fa-sliders-h"></i> <strong>Mixer</strong></a></li>
+        <li id="trim"><a href="/templates/edit_onair.html"><i class="fa fa-cut"></i> <strong>Trim</strong></a></li>
+        <li id="music"><a href="/templates/edit_backtracks.html"><i class="fa fa-music"></i> <strong>Music</strong></a></li>
+        <li id="snippets"><a href="/templates/edit_inserts.html"><i class="fa fa-file-audio"></i> <strong>Snippets</strong></a></li>
+        <li id="finish" class="active"><i class="fa fa-check"></i> <strong>Finish</strong></li>
+    </ul>
+
+    <div class="container">
+
+        <div id="alert" class="alert alert-danger" role="alert" style="display: none;"></div>
+
+        <div id="ready" style="padding-bottom: 1.5em;">
+            <div class="row">
+                <div class="col-md-6">
+                    <h2>Ready For Takeoff</h2>
+                    <p>You can modify previous steps by clicking the buttons above. Click the button below when you're ready to go.</p>
+                    <p>This might take up to 5 minutes depending on the length of your podcast and the speed of your computer. Grab a coffee. Go pet your cat.</p>
+                </div>
+                <div class="col-md-6 text-center">
+                    <img src="../img/gazeatstars.png" width="80%;" />
+                </div>
+            </div>
+        </div>
+
+        <div id="row-process" class="row" style="margin-bottom: 2em;">
+            <div class="col-lg-12">
+                <button id="btn-process" class="btn btn-success btn-lg btn-block">
+                    Process
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+<script type="text/javascript" src="../js/jquery.min.js"></script>
+<script type="text/javascript" src="../js/bootstrap.bundle.min.js"></script>
+<script type="text/javascript" src="/eel.js"></script>
+<script type="text/javascript">
+async function startProcessing() {
+    $("#row-process").hide();
+    $("#progressbar").hide();
+    $("#ready").hide();
+    $("#overlay").show();
+    await eel.process()();
+    $("#overlay").hide();
+    location.href = "/templates/result.html";
+}
+
+$(document).ready(function() {
+    $("#progressbar li.active").prevAll("li").addClass("active");
+
+    $("#btn-process").click(function() {
+        startProcessing();
+    });
+});
+</script>
+</body>
+</html>
