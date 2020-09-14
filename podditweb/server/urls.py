@@ -5,7 +5,7 @@ from . import views
 
 # REST API URLs
 router = routers.DefaultRouter()
-router.register(r'activate', views.)
+#router.register(r'activate', views.)
 
 urlpatterns = [
     path('', views.index, name='index'),

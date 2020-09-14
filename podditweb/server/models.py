@@ -1,7 +1,60 @@
 from django.contrib.auth.models import User
+from django.contrib.sites.models import Site
+from django.db.models.signals import post_save, pre_save
 from django.db import models
+
+import uuid
+
+from django.dispatch import receiver
 
 
 class PodditUser(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     # custom fields for user
+
+@receiver(post_save, sender=User)
+def handle_user_save(sender, instance, created, **kwargs):
+    if created:
+        PodditUser.objects.create(user=instance)
+        MailingListSubscriber.objects.create(email=instance.email, active=True)
+
+
+class MailingListSubscriber(models.Model):
+    """
+    An entry means the user has once subscribed to the mailing list.
+    The active field indicates if they are currently subscribed.
+    Therefore, if active == false then they have opted out of their subscription at some point
+    """
+    email = models.EmailField(max_length=256)
+    active = models.BooleanField(default=False)
+    subscribe_date = models.DateTimeField(auto_now_add=True)
+
+
+class Product(models.Model):
+    sku = models.CharField(max_length=32)
+    name = models.CharField(max_length=128)
+    description = models.CharField(max_length=512)
+    price = models.DecimalField(max_digits=6, decimal_places=2)
+    price_locale = models.CharField(max_length=12, default="USD")
+    active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return '(%s) %s' % (self.name, self.sku)
+
+
+class License(models.Model):
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
+    product = models.ForeignKey(Product, on_delete=models.PROTECT)
+    key = models.CharField(max_length=36, null=True, blank=True, help_text="Leave blank to generate.")
+
+    def generate_license_key(self):
+        site_url = Site.objects.get_current().domain
+        ns_base = uuid.uuid5(uuid.NAMESPACE_DNS, site_url)
+        ns_email_sku = uuid.uuid5(ns_base, "email_sku")
+        key = str(uuid.uuid5(ns_email_sku, "%s_%s" % (self.user.email, self.product.sku))).upper()
+        return key
+
+
+@receiver(pre_save, sender=License)
+def license_populate(sender, instance, *args, **kwargs):
+    instance.key = instance.generate_license_key()
