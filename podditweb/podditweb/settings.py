@@ -22,13 +22,14 @@ if private_ip:
     ALLOWED_HOSTS.append(private_ip)
 
 INSTALLED_APPS = [
+    'server.apps.ServerConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'server'
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
