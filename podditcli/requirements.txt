@@ -33,7 +33,6 @@ SoundFile==0.10.3.post1
 sox==1.4.0
 threadpoolctl==2.1.0
 tqdm==4.48.2
-urllib3==1.25.10
 whichcraft==0.6.1
 zope.event==4.4
 zope.interface==5.1.0
