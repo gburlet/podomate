@@ -1,5 +1,5 @@
 from django.contrib import admin
-from server.models import PodditUser, License, Product
+from server.models import PodditUser, License, Product, Activation
 
 
 @admin.register(PodditUser)
@@ -15,6 +15,19 @@ class ProductAdmin(admin.ModelAdmin):
 
 @admin.register(License)
 class LicenseAdmin(admin.ModelAdmin):
-    list_display = ('user', 'product', 'key')
+    list_display = ('user', 'product', 'key', 'issued_date')
     search_fields = ('user__username', 'product__sku',)
     raw_id_fields = ('user',)
+
+
+@admin.register(Activation)
+class ActivationAdmin(admin.ModelAdmin):
+    list_display = ('license_key', 'product_sku', 'mac', 'activation_date')
+    search_fields = ('license__key', 'license__product__sku',)
+    raw_id_fields = ('license',)
+
+    def license_key(self, obj):
+        return obj.license.key
+
+    def product_sku(self, obj):
+        return obj.license.product.sku

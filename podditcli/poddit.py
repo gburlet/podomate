@@ -1,3 +1,4 @@
+import base64
 import copy
 import shutil
 import uuid
@@ -5,6 +6,12 @@ import eel
 import eel.browsers
 import os
 import numpy as np
+import requests
+from cryptography.exceptions import InvalidSignature
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import serialization, hashes
+from cryptography.hazmat.primitives.asymmetric import padding
+from getmac import get_mac_address
 
 from audio_buffer import AudioBuffer
 from audio_inserter import AudioInserter
@@ -19,6 +26,7 @@ from track_aligner import TrackAligner
 eel.browsers.set_path('electron', 'node_modules/electron/dist/Electron.app/Contents/MacOS/Electron')
 eel.init('gui')
 
+API_ROOT = "http://localhost:8000/api"
 tracks = []
 mixed_track = None
 
@@ -78,6 +86,49 @@ global_track_options = {
     "inserts": [],
     "fX": []
 }
+
+
+@eel.expose
+def activate(email, license_key):
+    mac_address = get_mac_address()
+
+    # contact licensing server
+    api_endpoint = "%s/activate" % API_ROOT
+    response = requests.post(
+        url=api_endpoint,
+        data={
+            'email': email, 'license_key': license_key, 'mac_address': mac_address
+        }
+    )
+    response_data = response.json()
+    if response.status_code == 200:
+        # server activation OK, analyze response
+        signature = response_data.get("signature").encode('utf-8')
+        decoded_signature = base64.decodebytes(signature)
+        activations_remaining = response_data.get("activations_remaining")
+
+        with open("poddit_public.pem", "rb") as key_file:
+            public_key = serialization.load_pem_public_key(
+                key_file.read(),
+                backend=default_backend()
+            )
+
+        message = "%s_%s_%s" % (email, license_key, mac_address)
+        try:
+            public_key.verify(
+                decoded_signature, bytes(message, encoding='utf-8'),
+                padding.PSS(
+                    mgf=padding.MGF1(hashes.SHA256()),
+                    salt_length=padding.PSS.MAX_LENGTH
+                ),
+                hashes.SHA256()
+            )
+        except InvalidSignature:
+            return False, 0, "There was an error activating the license key"
+
+        return True, activations_remaining, "You're all set up. Enjoy!"
+    elif response.status_code == 403:
+        return False, 0, response_data.get("general")
 
 
 @eel.expose
