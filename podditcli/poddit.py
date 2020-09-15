@@ -26,7 +26,7 @@ from track_aligner import TrackAligner
 eel.browsers.set_path('electron', 'node_modules/electron/dist/Electron.app/Contents/MacOS/Electron')
 eel.init('gui')
 
-API_ROOT = "http://localhost:8000/api"
+API_ROOT = "http://localhost:8001/api"
 tracks = []
 mixed_track = None
 
@@ -124,11 +124,22 @@ def activate(email, license_key):
                 hashes.SHA256()
             )
         except InvalidSignature:
-            return False, 0, "There was an error activating the license key"
+            return {
+                "activated": False,
+                "activations_remaining": 0,
+                "msg": "There was an error activating the license key"
+            }
 
-        return True, activations_remaining, "You're all set up. Enjoy!"
+        return {
+            "activated": True,
+            "activations_remaining": activations_remaining
+        }
     elif response.status_code == 403:
-        return False, 0, response_data.get("general")
+        return {
+            "activated": False,
+            "activations_remaining": 0,
+            "msg": response_data.get("general")
+        }
 
 
 @eel.expose
