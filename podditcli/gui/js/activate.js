@@ -35,24 +35,32 @@ $("#btn-activate").click(function() {
         $("#btn-activate").attr("disabled", true);
         setTimeout(() => {
             performActivation(email, licenseKey);
-            $("#activation-spinner").hide();
-            $("#btn-activate").attr("disabled", false);
         }, 2000);
     }
 });
 
 async function performActivation(email, licenseKey) {
     let response = await eel.activate(email, licenseKey)();
-    const activated = response[0];
-    const activations_remaining = response[1];
-    const msg = response[2];
+    const activated = response["activated"];
+    const activations_remaining = response["activations_remaining"];
+    const msg = response["msg"];
 
     if (activated) {
         $("#activation-start").hide();
         $("#activation-success").show();
         $("#activation-footer").hide();
+        $("#btn-start-activation").hide();
     } else {
         $("#activation-key").addClass("is-invalid");
+    }
+    $("#activation-spinner").hide();
+    $("#btn-activate").attr("disabled", false);
+}
+
+async function checkActivation() {
+    let isActivated = await eel.check_license()();
+    if (isActivated) {
+        $("#btn-start-activation").hide();
     }
 }
 

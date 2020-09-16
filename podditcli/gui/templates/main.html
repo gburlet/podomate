@@ -59,7 +59,7 @@
                         <div class="row text-center">
                             <div class="col-lg-12">
                                 <img src="../img/thumbsup.gif" width="75%">
-                                <p>You're all set up!</p>
+                                <p><b>You're all set up!</b></p>
                             </div>
                         </div>
                     </div>
@@ -80,6 +80,10 @@
     <script type="text/javascript" src="/eel.js"></script>
     <script type="text/javascript" src="../js/activate.js"></script>
     <script type="text/javascript">
+    $(document).ready(function() {
+        checkActivation();
+    });
+
     $("#btn-start").click(function() {
         location.href = "/templates/mixer.html";
     });

@@ -26,7 +26,10 @@ from track_aligner import TrackAligner
 eel.browsers.set_path('electron', 'node_modules/electron/dist/Electron.app/Contents/MacOS/Electron')
 eel.init('gui')
 
+# TODO: update urls/paths when rolling out
 API_ROOT = "http://localhost:8001/api"
+license_path = "gui/media/license.lic"
+publickey_path = "poddit_public.pem"
 tracks = []
 mixed_track = None
 
@@ -103,17 +106,17 @@ def activate(email, license_key):
     response_data = response.json()
     if response.status_code == 200:
         # server activation OK, analyze response
-        signature = response_data.get("signature").encode('utf-8')
-        decoded_signature = base64.decodebytes(signature)
+        signature = response_data.get("signature")
+        decoded_signature = base64.decodebytes(signature.encode('utf-8'))
         activations_remaining = response_data.get("activations_remaining")
 
-        with open("poddit_public.pem", "rb") as key_file:
+        with open(publickey_path, "rb") as key_file:
             public_key = serialization.load_pem_public_key(
                 key_file.read(),
                 backend=default_backend()
             )
 
-        message = "%s_%s_%s" % (email, license_key, mac_address)
+        message = mac_address
         try:
             public_key.verify(
                 decoded_signature, bytes(message, encoding='utf-8'),
@@ -130,9 +133,16 @@ def activate(email, license_key):
                 "msg": "There was an error activating the license key"
             }
 
+        # save signed response on HDD for bootup checks
+        with open(license_path, 'w') as f:
+            f.write(email+'\n')
+            f.write(license_key+'\n')
+            f.write(signature)
+
         return {
             "activated": True,
-            "activations_remaining": activations_remaining
+            "activations_remaining": activations_remaining,
+            "msg": "activated"
         }
     elif response.status_code == 403:
         return {
@@ -141,6 +151,39 @@ def activate(email, license_key):
             "msg": response_data.get("general")
         }
 
+
+@eel.expose
+def check_license():
+    # reads the license file on disk and checks signature authenticity
+    if os.path.isfile(license_path) and os.path.isfile(publickey_path):
+        with open(license_path, 'r') as f:
+            license_data = f.readlines()
+            email = license_data[0]
+            license_key = license_data[1]
+            signature = license_data[2]
+
+            with open(publickey_path, "rb") as key_file:
+                public_key = serialization.load_pem_public_key(
+                    key_file.read(),
+                    backend=default_backend()
+                )
+
+                try:
+                    message = get_mac_address()
+                    decoded_signature = base64.decodebytes(signature.encode('utf-8'))
+                    public_key.verify(
+                        decoded_signature, bytes(message, encoding='utf-8'),
+                        padding.PSS(
+                            mgf=padding.MGF1(hashes.SHA256()),
+                            salt_length=padding.PSS.MAX_LENGTH
+                        ),
+                        hashes.SHA256()
+                    )
+                except InvalidSignature:
+                    return False
+
+                return True
+    return False
 
 @eel.expose
 def set_speaker_track(audio_path, i_speaker):

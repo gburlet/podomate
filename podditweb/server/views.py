@@ -74,7 +74,7 @@ class Activate(APIView):
                 key_file.read(), password=None, backend=default_backend()
             )
 
-        message = "%s_%s_%s" % (license.user.email, license.key, activation.mac)
+        message = activation.mac
         signature = private_key.sign(
             bytes(message, encoding='utf-8'),
             padding.PSS(
