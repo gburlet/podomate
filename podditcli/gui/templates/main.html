@@ -34,16 +34,22 @@
                     <div id="activation-start">
                         <div class="row">
                             <div class="col-lg-12">
-                                <form id="form-activation">
+                                <form id="form-activation" novalidate>
                                     <div class="form-group">
                                         <label for="activation-email">Email address</label>
                                         <input type="email" class="form-control" id="activation-email" aria-describedby="emailHelp" placeholder="your@email.com" required>
                                         <small id="emailHelp" class="form-text text-muted">Input the email you entered on poddit.io</small>
+                                        <div class="invalid-feedback">
+                                            Please enter your email address.
+                                        </div>
                                     </div>
                                     <div class="form-group">
                                         <label for="activation-key">License Key</label>
                                         <input type="text" class="form-control" id="activation-key" placeholder="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX" required>
-                                        <small id="activation-keyHelp" class="form-text text-muted">Input the license key you received after payment.</small>
+                                        <small id="activation-keyHelp" class="form-text text-muted">Input the license key you received after payment</small>
+                                        <div class="invalid-feedback">
+                                            Invalid license key. Please contact our support team for a helping hand.
+                                        </div>
                                     </div>
                                 </form>
                             </div>
@@ -52,15 +58,18 @@
                     <div id="activation-success" style="display: none;">
                         <div class="row text-center">
                             <div class="col-lg-12">
-                                <h2>Activation Success</h2>
-                                <p>You're all set up! Yeehaw space cowboy.</p>
+                                <img src="../img/thumbsup.gif" width="75%">
+                                <p>You're all set up!</p>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer">
+                <div id="activation-footer" class="modal-footer">
                     <button id="btn-get-key" type="button" class="btn btn-secondary">Get License</button>
-                    <button id="btn-activate" type="button" class="btn btn-success">Activate</button>
+                    <button id="btn-activate" type="button" class="btn btn-success">
+                        <span id="activation-spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none;"></span>
+                        Activate
+                    </button>
                 </div>
             </div>
         </div>

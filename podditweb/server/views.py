@@ -40,8 +40,6 @@ class Activate(APIView):
             if request.data.get(rf) is None or request.data.get(rf) == "":
                 err_data[rf] = "Required field"
 
-        print(request.data)
-
         # if we're missing (meta)data or it is invalid. Escape immediately.
         if len(err_data):
             return Response(err_data, status.HTTP_400_BAD_REQUEST)
