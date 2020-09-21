@@ -33,3 +33,20 @@ poddit episode_template.json podcast.mp3
 ```
 
 `episode_template.json` contains input paths and processing parameters for the episode
+
+## Bundle Executables
+
+Instructions to bundle a Mac OS .app & Windows .exe
+
+### Mac OS
+
+Download Electron.js app and fiddle with internals
+```
+wget https://github.com/electron/electron/releases/download/v10.1.2/electron-v10.1.2-darwin-x64.zip
+unzip -e electron-v10.1.2-darwin-x64.zip
+cp electron-v10.1.2-darwin-x64/Electron.app <poddit>/podditcli
+cd <poddit>/podditcli
+mv Electron.app/Contents/Frameworks/Electron\ Framework.framework/Versions/A Electron.app/Contents/Frameworks/Electron\ Framework.framework
+rm -rf Electron.app/Contents/Frameworks/Electron\ Framework.framework/Versions
+pyinstaller poddit.spec
+```

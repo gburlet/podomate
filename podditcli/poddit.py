@@ -1,6 +1,7 @@
 import base64
 import copy
 import shutil
+import sys
 import uuid
 import eel
 import eel.browsers
@@ -23,16 +24,19 @@ from silence_remover import SilenceRemover
 from track import Track
 from track_aligner import TrackAligner
 
-eel.browsers.set_path('electron', 'node_modules/electron/dist/Electron.app/Contents/MacOS/Electron')
-eel.init('gui')
 
-# TODO: update urls/paths when rolling out
+
+################################
+#            GLOBALS           #
+################################
+bundle_dir = getattr(sys, '_MEIPASS', os.path.abspath(os.path.dirname(__file__)))
+exe_path = os.path.dirname(sys.executable) if getattr(sys, 'frozen', False) else bundle_dir
+electron_path = os.path.join(bundle_dir, "Electron.app/Contents/MacOS/Electron")
 API_ROOT = "http://localhost:8001/api"
-license_path = "gui/media/license.lic"
-publickey_path = "poddit_public.pem"
+license_path = os.path.join(exe_path, "license.lic")
+publickey_path = os.path.join(bundle_dir, "poddit_public.pem")
 tracks = []
 mixed_track = None
-
 default_local_track_options = {
     "fX": [
         {
@@ -75,7 +79,6 @@ default_local_track_options = {
         }
     ]
 }
-
 global_track_overlays = {
     "intro": None,
     "outro": None,
@@ -91,6 +94,15 @@ global_track_options = {
 }
 
 
+################################
+#            Startup           #
+################################
+eel.browsers.set_path('electron', electron_path)
+eel.init('gui')
+
+################################
+#            GLOBALS           #
+################################
 @eel.expose
 def activate(email, license_key):
     mac_address = get_mac_address()
@@ -247,7 +259,8 @@ def mix_speaker_tracks(user_tracks_options):
     _ = mixed_track.silence_ranges  # cache VAD for future operations
 
     filename = "%s.flac" % str(uuid.uuid4())
-    mixed_track.audio_buffer._path = 'gui/media/%s' % filename
+    mixed_track_path = os.path.abspath(os.path.join(bundle_dir, 'gui/media/%s' % filename))
+    mixed_track.audio_buffer._path = mixed_track_path
     mixed_track.audio_buffer.write()
 
     return filename
@@ -275,7 +288,8 @@ def set_live_timestamps(live_timestamps):
 @eel.expose
 def upload_audio(filepath):
     filename = os.path.split(filepath)[-1]
-    shutil.copy(filepath, 'gui/media/%s' % filename)
+    audio_sink_path = os.path.abspath(os.path.join(bundle_dir, 'gui/media/%s' % filename))
+    shutil.copy(filepath, audio_sink_path)
     return filename
 
 
@@ -411,7 +425,7 @@ def process():
     if global_track_overlays["outro"]:
         global_track_options["overlays"].append(global_track_overlays["outro"])
     global_track_options["overlays"].extend(global_track_overlays["others"])
-    
+
     silence_intervals = []
     if "live_timestamps" in global_track_options:
         silence_intervals.extend(mixed_track.get_silence_ranges_from_activity_ranges(global_track_options["live_timestamps"]))
@@ -440,16 +454,15 @@ def process():
     mixed_track.audio_buffer.normalize()
     mixed_track.audio_buffer.stereofy()
     filename = "%s_mastered.flac" % os.path.split(cache_mixed_track_path)[-1]
-    output_path = "gui/media/%s" % filename
-    mixed_track.audio_buffer._path = output_path
+    mixed_track_path = os.path.abspath(os.path.join(bundle_dir, 'gui/media/%s' % filename))
+    mixed_track.audio_buffer._path = mixed_track_path
     mixed_track.audio_buffer.write()
 
-
+"""
 def cleanup(page, sockets):
     pass
-
+"""
 
 eel.start(
-    'templates/main.html', mode="electron", jinja_templates="templates",
-    close_callback=cleanup
+    'templates/main.html', mode="electron", jinja_templates="templates"
 )

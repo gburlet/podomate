@@ -4,10 +4,10 @@
   "description": "Edit, mix, and master your podcast",
   "main": "main.js",
   "scripts": {
-    "start": "node_modules/electron/dist/Electron.app/Contents/MacOS/Electron ."
+    "start": "Electron.app/Contents/MacOS/Electron ."
   },
   "author": "gburlet",
   "devDependencies": {
-    "electron": "^7.2.4"
+    "electron": "^10.1.2"
   }
 }
