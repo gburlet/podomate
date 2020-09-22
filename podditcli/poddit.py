@@ -197,6 +197,7 @@ def check_license():
                 return True
     return False
 
+
 @eel.expose
 def set_speaker_track(audio_path, i_speaker):
     # read
@@ -458,10 +459,6 @@ def process():
     mixed_track.audio_buffer._path = mixed_track_path
     mixed_track.audio_buffer.write()
 
-"""
-def cleanup(page, sockets):
-    pass
-"""
 
 eel.start(
     'templates/main.html', mode="electron", jinja_templates="templates"
