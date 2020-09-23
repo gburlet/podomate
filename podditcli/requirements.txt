@@ -32,7 +32,7 @@ scikit-learn==0.23.1
 scipy==1.5.2
 six==1.15.0
 SoundFile==0.10.3.post1
-sox==1.4.0
+https://github.com/gburlet/pysox/archive/pyinstaller-pathing.zip
 threadpoolctl==2.1.0
 tqdm==4.48.2
 urllib3==1.25.10
