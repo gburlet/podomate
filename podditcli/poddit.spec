@@ -89,7 +89,7 @@ if os_id == "darwin":
           console=True, icon='poddit.icns')
 
     app = BUNDLE(exe,
-                 name='poddit.app',
+                 name='Poddit.app',
                  icon='poddit.icns',
                  bundle_identifier='com.poddit.io',
                  version=version)
