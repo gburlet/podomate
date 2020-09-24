@@ -7,14 +7,14 @@ dmg: app
 	create-dmg \
 		--volname "Poddit Installer" \
 		--volicon "poddit.icns" \
-		--background "gui/img/main.jpg" \
+		--background "poddit_dmg_background.png" \
 		--window-pos 200 120 \
-		--window-size 800 400 \
+		--window-size 600 400 \
 		--icon-size 100 \
-		--icon "Poddit.app" 200 190 \
+		--icon "Poddit.app" 150 130 \
 		--hide-extension "Poddit.app" \
-		--app-drop-link 600 185 \
-		dist/poddit_v$(VERSION).dmg dist/poddit.app
+		--app-drop-link 450 125 \
+		dist/Poddit_v$(VERSION).dmg dist/Poddit.app
 
 clean:
 	rm -rf build dist
