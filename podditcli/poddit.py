@@ -454,7 +454,7 @@ def process():
 
     mixed_track.audio_buffer.normalize()
     mixed_track.audio_buffer.stereofy()
-    filename = "%s_mastered.flac" % os.path.split(cache_mixed_track_path)[-1]
+    filename = "%s_mastered.flac" % os.path.splitext(os.path.split(cache_mixed_track_path)[-1])[0]
     mixed_track_path = os.path.abspath(os.path.join(bundle_dir, 'gui/media/%s' % filename))
     mixed_track.audio_buffer._path = mixed_track_path
     mixed_track.audio_buffer.write()
