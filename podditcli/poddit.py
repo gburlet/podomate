@@ -23,7 +23,7 @@ from mixer import Mixer
 from silence_remover import SilenceRemover
 from track import Track
 from track_aligner import TrackAligner
-
+from utils import parse_version_string
 
 
 ################################
@@ -35,6 +35,10 @@ electron_path = os.path.join(bundle_dir, "Electron.app/Contents/MacOS/Electron")
 API_ROOT = "http://localhost:8001/api"
 license_path = os.path.join(exe_path, "license.lic")
 publickey_path = os.path.join(bundle_dir, "poddit_public.pem")
+product_sku = "poddit-desktop"
+version = "0.1.21"
+latest_version = None
+latest_mac_version_link = None
 tracks = []
 mixed_track = None
 default_local_track_options = {
@@ -103,6 +107,44 @@ eel.init('gui')
 ################################
 #            GLOBALS           #
 ################################
+@eel.expose
+def check_update():
+    global latest_version, latest_mac_version_link
+    api_endpoint = "%s/update" % API_ROOT
+    response = requests.get(url=api_endpoint, params={"sku": product_sku})
+    response_data = response.json()
+    if response.status_code == 200:
+        latest_version = response_data.get("version")
+        latest_mac_version_link = response_data.get("mac_link")
+        return _can_update()
+    return False
+
+
+@eel.expose
+def update():
+    global latest_version, latest_mac_version_link
+    if _can_update():
+        response = requests.get(latest_mac_version_link, stream=True)
+        total_size_in_bytes = int(response.headers.get('content-length', 0))
+        block_size = 1024 # 1 kibibyte
+        app_path = os.path.join(exe_path, 'Poddit.app')
+        with open(app_path, 'wb') as file:
+            bytes_downloaded = 0
+            for data in response.iter_content(block_size):
+                bytes_downloaded += len(data)
+                download_progress = float(bytes_downloaded) / total_size_in_bytes
+                eel.update_progress_tick(int(download_progress))
+                file.write(data)
+
+
+def _can_update():
+    global latest_version, latest_mac_version_link
+    if latest_version is None or latest_mac_version_link is None:
+        return False
+    cmajor, cminor, cpatch = parse_version_string(version)
+    lmajor, lminor, lpatch = parse_version_string(latest_version)
+    return lmajor > cmajor or (lmajor == cmajor and lminor > cminor) or (lmajor == cmajor and lminor == cminor and lpatch > cpatch)
+
 @eel.expose
 def activate(email, license_key):
     mac_address = get_mac_address()

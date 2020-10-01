@@ -9,11 +9,34 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from server.models import License, Activation
+from server.models import License, Activation, AppVersion
+from server.serializers import LatestAppVersionSerializer
 
 
 def index(request):
     return HttpResponse("Hello, poddit.")
+
+
+class Update(APIView):
+    """
+    Endpoint for client to check for app updates
+
+    GET
+    params:
+        sku (string): product sku
+    returns:
+        sku (string): product sku
+        version (string): latest version
+        mac_link (string): link to download newest mac app
+        windows_link (string): link to download newest windows app
+
+    Test GET:
+        curl http://localhost:8001/api/update?sku=poddit-desktop
+    """
+
+    def get(self, request):
+        latest_app_version = AppVersion.objects.all().order_by("-release_date")[0]
+        return Response(LatestAppVersionSerializer(latest_app_version, context={"request": request}).data)
 
 
 class Activate(APIView):
@@ -29,7 +52,7 @@ class Activate(APIView):
         signed_response
 
     Test POST:
-        curl -X POST http://localhost:8000/api/activate -F email='gregory.burlet@gmail.com' -F license_key='3D319CDD-5B1D-573C-B92C-F3BF231EBD68' -F mac_address='8c:85:90:3e:5e:d9'
+        curl -X POST http://localhost:8001/api/activate -F email='gregory.burlet@gmail.com' -F license_key='3D319CDD-5B1D-573C-B92C-F3BF231EBD68' -F mac_address='8c:85:90:3e:5e:d9'
     """
 
     def post(self, request):

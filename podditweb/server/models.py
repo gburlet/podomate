@@ -7,6 +7,8 @@ import uuid
 
 from django.dispatch import receiver
 
+from podditweb import settings
+
 
 class PodditUser(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -40,6 +42,12 @@ class Product(models.Model):
 
     def __str__(self):
         return '(%s) %s' % (self.name, self.sku)
+
+
+class AppVersion(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.PROTECT)
+    version = models.CharField(max_length=11)
+    release_date = models.DateTimeField(auto_now_add=True)
 
 
 class License(models.Model):

@@ -11,6 +11,11 @@ DEPLOY_ENV = os.environ.get("DEPLOY_ENV", "local")  # {local, dev, prod}
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', '')
 
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder'
+)
+
 DEBUG = DEPLOY_ENV == "local"
 
 ALLOWED_HOSTS = [

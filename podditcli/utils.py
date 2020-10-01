@@ -85,3 +85,21 @@ def s_to_timestamp(s):
     milliseconds = int(1000*remainder)
 
     return "%s%02d:%02d:%02d.%03d" % (sign, hours, minutes, seconds, milliseconds)
+
+
+def parse_version_string(version):
+    """
+    Args:
+        version (string)
+
+    Returns:
+        major: int
+        minor: int
+        patch: int
+    """
+    parsed_version = version.split('.')
+    major = int(parsed_version[0])
+    minor = int(parsed_version[1])
+    patch = int(parsed_version[2])
+
+    return major, minor, patch

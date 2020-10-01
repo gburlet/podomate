@@ -131,3 +131,4 @@ dmypy.json
 .idea
 node_modules
 gui/media
+podditweb/server/static/server/versions/**

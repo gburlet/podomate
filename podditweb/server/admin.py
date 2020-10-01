@@ -1,5 +1,5 @@
 from django.contrib import admin
-from server.models import PodditUser, License, Product, Activation
+from server.models import PodditUser, License, Product, Activation, AppVersion
 
 
 @admin.register(PodditUser)
@@ -31,3 +31,8 @@ class ActivationAdmin(admin.ModelAdmin):
 
     def product_sku(self, obj):
         return obj.license.product.sku
+
+
+@admin.register(AppVersion)
+class AppVersionAdmin(admin.ModelAdmin):
+    list_display = ('product', 'version', 'release_date')

@@ -13,7 +13,7 @@
 <body>
     <div id="hero">
         <div id="version-info">
-            v0.1.21 <i class="fas fa-sync-alt"></i>
+            v0.1.21 <i class="fas fa-wrench"></i>
         </div>
         <h1 id="hero-header">PODDIT</h1>
         <h3 id="hero-subheader">Edit, mix, and master your podcast</h3>
@@ -75,13 +75,31 @@
         </div>
     </div>
 
+    <div id="update-notification-toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <i class="fas fa-wrench"></i>
+            <strong class="mr-auto">Update</strong>
+            <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="toast-body">
+            An update is available!
+            <button id="btn-update" class="btn btn-progress">Update</button>
+        </div>
+    </div>
+
     <script type="text/javascript" src="../js/jquery.min.js"></script>
     <script type="text/javascript" src="../js/bootstrap.bundle.min.js"></script>
     <script type="text/javascript" src="/eel.js"></script>
     <script type="text/javascript" src="../js/activate.js"></script>
+    <script type="text/javascript" src="../js/update.js"></script>
     <script type="text/javascript">
+    $('.toast').toast();
+
     $(document).ready(function() {
         checkActivation();
+        checkUpdate();
     });
 
     $("#btn-start").click(function() {
