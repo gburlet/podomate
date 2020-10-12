@@ -1,34 +1,31 @@
 eel.expose(update_progress_tick);
 function update_progress_tick(progress) {
-    // update download bar here
-    console.log(progress);
+    $("#update-progress-bar").width(progress);
+    $("#update-progress-bar").attr("aria-valuenow", progress);
 }
 
 async function performUpdate() {
-    let response = await eel.update(email, licenseKey)();
-    const activated = response["activated"];
-    const activations_remaining = response["activations_remaining"];
-    const msg = response["msg"];
-
-    if (activated) {
-        $("#activation-start").hide();
-        $("#activation-success").show();
-        $("#activation-footer").hide();
-        $("#btn-start-activation").hide();
-    } else {
-        $("#activation-key").addClass("is-invalid");
-    }
-    $("#activation-spinner").hide();
-    $("#btn-activate").attr("disabled", false);
+    $("#btn-start-update").hide();
+    $("#update-progress").show();
+    await eel.update()();
 }
 
 async function checkUpdate() {
+    let version = await eel.get_version()();
+    $("#version-string").text(version);
     let updateAvailable = await eel.check_update()();
     if (updateAvailable) {
-        $("#update-notification-toast").show();
+        $("#update-notification-toast").toast('show');
+    } else {
+        $("#update-prompt").text("Your application is up to date. Hoorah!");
+        $("#btn-start-update").hide();
     }
 }
 
-$("#btn-update").click(function() {
+$("#btn-start-update").click(function() {
     performUpdate();
+});
+
+$('#updateModal').on('show.bs.modal', function (e) {
+    $("#update-notification-toast").toast('hide');
 });

@@ -8,6 +8,8 @@ import eel.browsers
 import os
 import numpy as np
 import requests
+from tempfile import TemporaryFile
+from zipfile import ZipFile
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization, hashes
@@ -36,7 +38,8 @@ API_ROOT = "http://localhost:8001/api"
 license_path = os.path.join(exe_path, "license.lic")
 publickey_path = os.path.join(bundle_dir, "poddit_public.pem")
 product_sku = "poddit-desktop"
-version = "0.1.21"
+with open(os.path.join(bundle_dir, "version.txt"), "r") as vfile:
+    version = vfile.readline().strip().lower()
 latest_version = None
 latest_mac_version_link = None
 tracks = []
@@ -108,6 +111,11 @@ eel.init('gui')
 #            GLOBALS           #
 ################################
 @eel.expose
+def get_version():
+    return version
+
+
+@eel.expose
 def check_update():
     global latest_version, latest_mac_version_link
     api_endpoint = "%s/update" % API_ROOT
@@ -126,16 +134,22 @@ def update():
     if _can_update():
         response = requests.get(latest_mac_version_link, stream=True)
         total_size_in_bytes = int(response.headers.get('content-length', 0))
-        block_size = 1024 # 1 kibibyte
-        app_path = os.path.join(exe_path, 'Poddit.app')
-        with open(app_path, 'wb') as file:
+        block_size = 1024  # 1 kibibyte
+        with TemporaryFile(mode='wb', suffix='.app.zip') as app_update_file:
             bytes_downloaded = 0
             for data in response.iter_content(block_size):
                 bytes_downloaded += len(data)
                 download_progress = float(bytes_downloaded) / total_size_in_bytes
                 eel.update_progress_tick(int(download_progress))
-                file.write(data)
+                app_update_file.write(data)
 
+            # we're done downloading, unpack and move
+            with ZipFile(app_update_file.name, 'r') as app_zip_file:
+                app_zip_file.extractall(exe_path)
+
+            app_path = os.path.join(exe_path, "Poddit.app")
+            os.execl(app_path)
+            sys.exit(0)
 
 def _can_update():
     global latest_version, latest_mac_version_link
@@ -144,6 +158,7 @@ def _can_update():
     cmajor, cminor, cpatch = parse_version_string(version)
     lmajor, lminor, lpatch = parse_version_string(latest_version)
     return lmajor > cmajor or (lmajor == cmajor and lminor > cminor) or (lmajor == cmajor and lminor == cminor and lpatch > cpatch)
+
 
 @eel.expose
 def activate(email, license_key):

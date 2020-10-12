@@ -75,8 +75,15 @@ body {
     position: absolute;
     top: 5px;
     right: 5px;
+    height: 20px;
     color: #fff;
     font-size: 10px;
+}
+
+#update-notification-toast {
+    position: absolute;
+    top: 25px;
+    right: 5px;
 }
 
 *:focus {

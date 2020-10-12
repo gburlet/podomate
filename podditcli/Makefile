@@ -1,9 +1,10 @@
-VERSION=0.1.21
+VERSION=$(shell cat version.txt)
 
 app:
 	pyinstaller poddit.spec
 
 dmg: app
+	VERSION=$(file < version.txt)
 	create-dmg \
 		--volname "Poddit Installer" \
 		--volicon "poddit.icns" \

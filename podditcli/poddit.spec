@@ -2,7 +2,8 @@
 import platform
 
 block_cipher = None
-version = '0.0.21'
+with open("version.txt", "r") as vfile:
+    version = vfile.readline().strip().lower()
 os_id = platform.system().lower()
 
 if os_id == "darwin":

@@ -13,12 +13,24 @@
 <body>
     <div id="hero">
         <div id="version-info">
-            v0.1.21 <i class="fas fa-wrench"></i>
+            <span id="version-string"></span> <i class="fas fa-wrench" data-toggle="modal" data-target="#updateModal"></i>
         </div>
         <h1 id="hero-header">PODDIT</h1>
         <h3 id="hero-subheader">Edit, mix, and master your podcast</h3>
         <button id="btn-start" class="splash-btn-cta">CREATE EPISODE</button>
         <button id="btn-start-activation" class="splash-btn-cta" data-toggle="modal" data-target="#activationModal">ACTIVATE</button>
+
+        <div id="update-notification-toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-autohide="false">
+            <div class="toast-header">
+                <i class="fas fa-wrench"></i>&nbsp;<strong class="mr-auto">Update</strong>
+                <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="toast-body">
+                An update is available! <a href="#" data-toggle="modal" data-target="#updateModal">Update Now</a>
+            </div>
+        </div>
     </div>
 
     <div class="modal fade" id="activationModal" tabindex="-1" role="dialog" aria-labelledby="activationModalTitle" aria-hidden="true">
@@ -75,17 +87,27 @@
         </div>
     </div>
 
-    <div id="update-notification-toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="toast-header">
-            <i class="fas fa-wrench"></i>
-            <strong class="mr-auto">Update</strong>
-            <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
-        <div class="toast-body">
-            An update is available!
-            <button id="btn-update" class="btn btn-progress">Update</button>
+    <div class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="updateModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="updateModalLongTitle">Updater</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <p id="update-prompt">This will download the newest version of Poddit and restart the app.</p>
+                            <div id="update-progress" class="progress" style="display: none;">
+                                <div id="update-progress-bar" class="progress-bar progress-bar-striped progress-bar-animated bg-success" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <button id="btn-start-update" type="button" class="btn btn-success">Update</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -95,8 +117,6 @@
     <script type="text/javascript" src="../js/activate.js"></script>
     <script type="text/javascript" src="../js/update.js"></script>
     <script type="text/javascript">
-    $('.toast').toast();
-
     $(document).ready(function() {
         checkActivation();
         checkUpdate();
