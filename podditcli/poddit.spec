@@ -31,6 +31,7 @@ if os_id == "darwin":
                     ('main.js', 'Electron.app/Contents/Resources/app'),
                     ('package.json', 'Electron.app/Contents/Resources/app'),
                     ('poddit_public.pem', '.'),
+                    ('version.txt', '.'),
                     ('/Users/gburlet/virtualenvs/podditcli/lib/python3.8/site-packages/librosa', 'librosa'),
                     ('/usr/local/bin/sox', '.'),
                     ('/usr/local/lib/libsox.a', '.'),

@@ -8,7 +8,8 @@ import eel.browsers
 import os
 import numpy as np
 import requests
-from tempfile import TemporaryFile
+import subprocess
+from tempfile import NamedTemporaryFile
 from zipfile import ZipFile
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.backends import default_backend
@@ -135,21 +136,28 @@ def update():
         response = requests.get(latest_mac_version_link, stream=True)
         total_size_in_bytes = int(response.headers.get('content-length', 0))
         block_size = 1024  # 1 kibibyte
-        with TemporaryFile(mode='wb', suffix='.app.zip') as app_update_file:
+        app_zip_path = None
+        with NamedTemporaryFile(mode='wb', suffix='.app.zip', delete=False) as app_update_file:
             bytes_downloaded = 0
             for data in response.iter_content(block_size):
                 bytes_downloaded += len(data)
                 download_progress = float(bytes_downloaded) / total_size_in_bytes
-                eel.update_progress_tick(int(download_progress))
+                eel.update_progress_tick(int(download_progress*100))
                 app_update_file.write(data)
+            app_zip_path = app_update_file.name
 
-            # we're done downloading, unpack and move
+        # we're done downloading, unpack and move
+        mac_app_path = exe_path
+        if getattr(sys, 'frozen', False):
+            mac_app_path = os.path.abspath(os.path.join(exe_path, "../../../"))
+        if os.path.isfile(app_zip_path):
             with ZipFile(app_update_file.name, 'r') as app_zip_file:
-                app_zip_file.extractall(exe_path)
+                app_zip_file.extractall(mac_app_path)
+            os.remove(app_zip_path)
+        app_path = os.path.join(mac_app_path, "Poddit.app/Contents/MacOS/poddit")
+        subprocess.Popen([app_path])
+        eel.close_window_for_restart()
 
-            app_path = os.path.join(exe_path, "Poddit.app")
-            os.execl(app_path)
-            sys.exit(0)
 
 def _can_update():
     global latest_version, latest_mac_version_link

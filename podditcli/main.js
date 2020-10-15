@@ -15,7 +15,8 @@ function createWindow () {
     resizable: true,
     title: "Poddit",
     webPreferences: {
-      nodeIntegration: false
+      nodeIntegration: true,
+      enableRemoteModule: true
     }
   });
 
