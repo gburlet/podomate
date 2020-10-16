@@ -1,0 +1,7 @@
+{% macro nav_link(id, icon, active="", linked="") %}
+    <li id="{{id}}" {% if active %}class="active"{% endif %}>
+        {% if linked %}<a href="/templates/{{id}}.html">{% endif %}
+        <i class="fa fa-{{icon}}"></i> <strong>{{id|title}}</strong>
+        {% if linked %}</a>{% endif %}
+    </li>
+{% endmacro %}

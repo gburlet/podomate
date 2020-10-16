@@ -1,74 +1,45 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
-    <title>Poddit</title>
-    <link href="../css/bootstrap.min.css" rel="stylesheet">
-    <link href="../css/fontawesome.min.css" rel="stylesheet">
-    <link href="../css/page_template.css" rel="stylesheet">
-    <link href="../css/mixer.css" rel="stylesheet">
-    <link href="../css/interactive_waveform.css" rel="stylesheet">
-    <link href="../css/mdb-file-upload.min.css" rel="stylesheet">
-</head>
-<body>
-<div id="overlay" class="text-center" style="display: none;">
-    <div class="row">
-        <div class="col-lg-12">
-            <img id="loading-animation" src="../img/loading_animation.gif" />
+{% extends "base_edit.html" %}
+{% from "macros.html" import nav_link %}
+
+{% block header %}
+<link href="../css/mixer.css" rel="stylesheet">
+<link href="../css/interactive_waveform.css" rel="stylesheet">
+<link href="../css/mdb-file-upload.min.css" rel="stylesheet">
+{% endblock %}
+
+{% block title %}Mixer{% endblock%}
+{% block subtitle %}Add audio files for each speaker{% endblock %}
+
+{% block navbar %}
+    {{ nav_link('mixer', 'sliders-h', 'true') }}
+    {{ nav_link('trim', 'cut') }}
+    {{ nav_link('music', 'music') }}
+    {{ nav_link('snippets', 'file-audio') }}
+    {{ nav_link('finish', 'check') }}
+{% endblock %}
+
+{% block content %}
+    {% with speaker_id=1 %}
+    {% include "speaker_track.html" %}
+    {% endwith %}
+
+    <div id="new-speaker" style="display: none;">
+        <span><i class="fas fa-2x fa-user-plus"></i></span>
+    </div>
+
+    <div class="row" style="margin-bottom: 2em;">
+        <div class="col-lg-12 text-right">
+            <button id="btn-mix" class="btn btn-success btn-lg btn-block">
+                Mix
+            </button>
         </div>
     </div>
-    <div class="row" style="margin-top: -7em;">
-        <div class="col-lg-12">
-            <div id="loading-spinner" class="spinner-border text-success" role="status"></div>
-            <span id="loading-text" class="align-middle">&nbsp;WORKING ...</span>
-        </div>
-    </div>
-</div>
+{% endblock %}
 
-<div id="hero">
-    <h1 id="hero-header">Mixer</h1>
-    <h4 id="header-info">Add audio files for each speaker</h4>
-</div>
-
-<section>
-    <ul id="progressbar">
-        <li id="mixer" class="active"><i class="fa fa-sliders-h"></i> <strong>Mixer</strong></li>
-        <li id="trim"><i class="fa fa-cut"></i> <strong>Trim</strong></li>
-        <li id="music"><i class="fa fa-music"></i> <strong>Music</strong></li>
-        <li id="snippets"><i class="fa fa-file-audio"></i> <strong>Snippets</strong></li>
-        <li id="finish"><i class="fa fa-check"></i> <strong>Finish</strong></li>
-    </ul>
-
-    <div class="container">
-
-        <div id="alert" class="alert alert-danger" role="alert" style="display: none;"></div>
-
-        {% with speaker_id=1 %}
-        {% include "speaker_track.html" %}
-        {% endwith %}
-
-        <div id="new-speaker" style="display: none;">
-            <span><i class="fas fa-2x fa-user-plus"></i></span>
-        </div>
-
-        <div class="row" style="margin-bottom: 2em;">
-            <div class="col-lg-12 text-right">
-                <button id="btn-mix" class="btn btn-success btn-lg btn-block">
-                    Mix
-                </button>
-            </div>
-        </div>
-    </div>
-</section>
-
-<script type="text/javascript" src="../js/jquery.min.js"></script>
-<script type="text/javascript" src="../js/bootstrap.bundle.min.js"></script>
+{% block scripts %}
 <script type="text/javascript" src="../js/mdb.min.js"></script>
 <script type="text/javascript" src="../js/datatables.min.js"></script>
 <script type="text/javascript" src="../js/mdb-file-upload.min.js"></script>
-<script type="text/javascript" src="/eel.js"></script>
 <script type="text/javascript">
     async function handleAudioInput() {
         $("#overlay").fadeIn();
@@ -140,6 +111,4 @@
         });
     });
 </script>
-
-</body>
-</html>
+{% endblock %}

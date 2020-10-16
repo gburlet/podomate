@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
+    <title>Poddit</title>
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/fontawesome.min.css" rel="stylesheet">
+    <link href="../css/page_template.css" rel="stylesheet">
+
+    {% block header %}{% endblock %}
+</head>
+<body>
+    {% include "loading_overlay.html" %}
+
+    <div id="hero">
+        <h1 id="hero-header">{% block title %}{% endblock %}</h1>
+        <h4 id="header-info">{% block subtitle %}{% endblock %}</h4>
+    </div>
+
+    <section>
+        <ul id="progressbar">
+            {% block navbar %}{% endblock %}
+        </ul>
+
+        <div class="container">
+            <div id="alert" class="alert alert-danger" role="alert" style="display: none;"></div>
+
+            {% block content %}{% endblock %}
+        </div>
+    </section>
+
+    <script type="text/javascript">
+    // for nodeIntegration namespace clash
+    window.nodeRequire = require;
+    delete window.require;
+    delete window.exports;
+    delete window.module;
+    </script>
+    <script type="text/javascript" src="../js/jquery.min.js"></script>
+    <script type="text/javascript" src="../js/bootstrap.bundle.min.js"></script>
+    <script type="text/javascript" src="/eel.js"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>
