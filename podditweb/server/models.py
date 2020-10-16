@@ -48,6 +48,7 @@ class AppVersion(models.Model):
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
     version = models.CharField(max_length=11)
     release_date = models.DateTimeField(auto_now_add=True)
+    sunset_date = models.DateTimeField(null=True, blank=True)
 
 
 class License(models.Model):

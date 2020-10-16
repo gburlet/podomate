@@ -35,4 +35,4 @@ class ActivationAdmin(admin.ModelAdmin):
 
 @admin.register(AppVersion)
 class AppVersionAdmin(admin.ModelAdmin):
-    list_display = ('product', 'version', 'release_date')
+    list_display = ('product', 'version', 'release_date', 'sunset_date')

@@ -30,6 +30,16 @@ async function checkUpdate() {
     }
 }
 
+async function checkSunset() {
+    let isVersionActive = await eel.check_version_active()();
+    if (!isVersionActive) {
+        $("#btn-start").hide();
+        $("#btn-start-activation").hide();
+        $("#alert").text("This version is too out of date. Please update before using!");
+        $("#alert").show();
+    }
+}
+
 $("#btn-start-update").click(function() {
     performUpdate();
 });

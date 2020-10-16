@@ -9,6 +9,9 @@
         <div id="version-info">
             <span id="version-string"></span> <i id="btn-version-update" class="fas fa-wrench" data-toggle="modal" data-target="#updateModal"></i>
         </div>
+
+        <div id="alert" class="alert alert-danger" role="alert" style="display: none;"></div>
+
         <h1 id="hero-header">PODDIT</h1>
         <h3 id="hero-subheader">Edit, mix, and master your podcast</h3>
         <button id="btn-start" class="splash-btn-cta">CREATE EPISODE</button>
@@ -38,6 +41,7 @@
     $(document).ready(function() {
         checkActivation();
         checkUpdate();
+        checkSunset();
     });
 
     $("#btn-start").click(function() {

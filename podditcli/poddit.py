@@ -117,6 +117,13 @@ def get_version():
 
 
 @eel.expose
+def check_version_active():
+    api_endpoint = "%s/version" % API_ROOT
+    response = requests.get(url=api_endpoint, params={"sku": product_sku, "version": version})
+    return response.status_code == 200
+
+
+@eel.expose
 def check_update():
     global latest_version, latest_mac_version_link
     api_endpoint = "%s/update" % API_ROOT

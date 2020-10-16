@@ -17,6 +17,42 @@ def index(request):
     return HttpResponse("Hello, poddit.")
 
 
+class ClientVersion(APIView):
+    """
+    Endpoint for client to check whether version is sunsetted (refuse access to app)
+
+    GET
+    params:
+        sku (string): product sku
+        version (string): client version
+    returns:
+        200 if active, 400 if sunsetted
+
+    Test GET:
+        curl "http://localhost:8001/api/version?sku=poddit-desktop&version=0.1.21"
+    """
+
+    def get(self, request):
+        err_data = {}
+        required_fields = {"sku", "version"}
+        for rf in required_fields:
+            if request.query_params.get(rf) is None or request.data.get(rf) == "":
+                err_data[rf] = "Required field"
+
+        # if we're missing (meta)data or it is invalid. Escape immediately.
+        if len(err_data):
+            return Response(err_data, status.HTTP_400_BAD_REQUEST)
+
+        try:
+            app_version = AppVersion.objects.get(product__sku=request.query_params.get("sku"), version=request.query_params.get("version"))
+            from django.utils import timezone
+            if app_version.sunset_date is not None and app_version.sunset_date < timezone.now():
+                return Response({"error": "Update required"}, status.HTTP_400_BAD_REQUEST)
+            return Response(status=status.HTTP_200_OK)
+        except AppVersion.DoesNotExist:
+            return Response({"error": "App version is not valid"}, status.HTTP_400_BAD_REQUEST)
+
+
 class Update(APIView):
     """
     Endpoint for client to check for app updates
@@ -31,11 +67,21 @@ class Update(APIView):
         windows_link (string): link to download newest windows app
 
     Test GET:
-        curl http://localhost:8001/api/update?sku=poddit-desktop
+        curl "http://localhost:8001/api/update?sku=poddit-desktop"
     """
 
     def get(self, request):
-        latest_app_version = AppVersion.objects.all().order_by("-release_date")[0]
+        err_data = {}
+        required_fields = {"sku"}
+        for rf in required_fields:
+            if request.query_params.get(rf) is None or request.data.get(rf) == "":
+                err_data[rf] = "Required field"
+
+        # if we're missing (meta)data or it is invalid. Escape immediately.
+        if len(err_data):
+            return Response(err_data, status.HTTP_400_BAD_REQUEST)
+
+        latest_app_version = AppVersion.objects.filter(product__sku=request.query_params.get("sku")).order_by("-release_date")[0]
         return Response(LatestAppVersionSerializer(latest_app_version, context={"request": request}).data)
 
 
