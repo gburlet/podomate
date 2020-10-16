@@ -1,97 +1,67 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
-    <title>Poddit</title>
-    <link href="../css/bootstrap.min.css" rel="stylesheet">
-    <link href="../css/fontawesome.min.css" rel="stylesheet">
+{% extends "base_edit.html" %}
+{% from "macros.html" import nav_link %}
+
+{% block header %}
     <link href="../css/mdb-file-upload.min.css" rel="stylesheet">
-    <link href="../css/page_template.css" rel="stylesheet">
     <link href="../css/interactive_waveform.css" rel="stylesheet">
-</head>
-<body>
+{% endblock %}
 
-<div id="overlay" class="text-center" style="display: none;">
-    <div class="row">
-        <div class="col-lg-12">
-            <img id="loading-animation" src="../img/loading_animation.gif" />
-        </div>
-    </div>
-    <div class="row" style="margin-top: -7em;">
-        <div class="col-lg-12">
-            <div id="loading-spinner" class="spinner-border text-success" role="status"></div>
-            <span id="loading-text" class="align-middle">&nbsp;WORKING ...</span>
+{% block title %}Add Intro{% endblock%}
+{% block subtitle %}Hype up the beginning of your podcast.{% endblock %}
+
+{% block navbar %}
+    {{ nav_link('mixer', 'sliders-h', '', 'true') }}
+    {{ nav_link('trim', 'cut', '', 'true') }}
+    {{ nav_link('music', 'music', 'true', 'true') }}
+    {{ nav_link('snippets', 'file-audio') }}
+    {{ nav_link('finish', 'check') }}
+{% endblock %}
+
+{% block content %}
+<div id="intro-audio-upload" class="row">
+    <div class="col-lg-12">
+        <div class="audio-upload">
+            <h3 class="subheading text-muted">
+                Intro Audio
+                <a id="audio-badge" tabindex="-1" class="badge-pop badge badge-success align-middle" data-trigger="hover" data-container="body" data-toggle="popover" data-placement="bottom" data-content="<b>File Types</b>: .mp3, .wav<br/><b>Bit Depth</b>: 16, 32">
+                    <i class="fas fa-info-circle"></i> Supported Audio
+                </a>
+            </h3>
+            <div id="file-upload-wrapper" class="file-upload-wrapper">
+                <input class="file-upload" type="file" id="intro-audio" name="intro-audio" accept="audio/*" data-height="150" required>
+            </div>
         </div>
     </div>
 </div>
 
-<div id="hero">
-    <h1 id="hero-header">Add Intro</h1>
-    <h4 id="header-info">Hype up the beginning of your podcast.</h4>
+<div id="audio-interact" style="display:none;">
+    <h2>What part do you want to use?</h2>
+    <ol>
+        <li>Drag to select a segment of music to use.</li>
+        <li>Double click the selected segment and stop playback where you want the talking to start.</li>
+    </ol>
+    <p>We'll start fading out the intro music and make a seamless transition.</p>
+
+    {% with waveformID="waveform", regionLimit=1 %}
+    {% include "interactive_waveform.html" %}
+    {% endwith %}
 </div>
 
-<section>
-
-    <ul id="progressbar">
-        <li id="mixer"><a href="/templates/mixer.html"><i class="fa fa-sliders-h"></i> <strong>Mixer</strong></a></li>
-        <li id="trim"><a href="/templates/edit_onair.html"><i class="fa fa-cut"></i> <strong>Trim</strong></a></li>
-        <li id="music" class="active"><a href="/templates/edit_backtracks.html"><i class="fa fa-music"></i> <strong>Music</strong></a></li>
-        <li id="snippets"><i class="fa fa-file-audio"></i> <strong>Snippets</strong></li>
-        <li id="finish"><i class="fa fa-check"></i> <strong>Finish</strong></li>
-    </ul>
-
-    <div class="container">
-
-        <div id="alert" class="alert alert-danger" role="alert" style="display: none;"></div>
-
-        <div id="intro-audio-upload" class="row">
-            <div class="col-lg-12">
-                <div class="audio-upload">
-                    <h3 class="subheading text-muted">
-                        Intro Audio
-                        <a id="audio-badge" tabindex="-1" class="badge-pop badge badge-success align-middle" data-trigger="hover" data-container="body" data-toggle="popover" data-placement="bottom" data-content="<b>File Types</b>: .mp3, .wav<br/><b>Bit Depth</b>: 16, 32">
-                            <i class="fas fa-info-circle"></i> Supported Audio
-                        </a>
-                    </h3>
-                    <div id="file-upload-wrapper" class="file-upload-wrapper">
-                        <input class="file-upload" type="file" id="intro-audio" name="intro-audio" accept="audio/*" data-height="150" required>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="audio-interact" style="display:none;">
-            <h2>What part do you want to use?</h2>
-            <ol>
-                <li>Drag to select a segment of music to use.</li>
-                <li>Double click the selected segment and stop playback where you want the talking to start.</li>
-            </ol>
-            <p>We'll start fading out the intro music and make a seamless transition.</p>
-
-            {% with waveformID="waveform", regionLimit=1 %}
-            {% include "interactive_waveform.html" %}
-            {% endwith %}
-        </div>
-
-        <div class="row" style="margin-top: 2em; margin-bottom: 2em;">
-            <div class="col-md-9">
-                <button id="btn-intro" class="btn btn-success btn-lg btn-block">
-                    Add
-                </button>
-            </div>
-            <div class="col-md-3">
-                <button id="btn-skip" class="btn btn-light btn-lg btn-block">
-                    Cancel <i class="fa fa-chevron-right"></i>
-                </button>
-            </div>
-        </div>
+<div class="row" style="margin-top: 2em; margin-bottom: 2em;">
+    <div class="col-md-9">
+        <button id="btn-intro" class="btn btn-success btn-lg btn-block">
+            Add
+        </button>
     </div>
-</section>
+    <div class="col-md-3">
+        <button id="btn-skip" class="btn btn-light btn-lg btn-block">
+            Cancel <i class="fa fa-chevron-right"></i>
+        </button>
+    </div>
+</div>
+{% endblock %}
 
-<script type="text/javascript" src="../js/jquery.min.js"></script>
-<script type="text/javascript" src="../js/bootstrap.bundle.min.js"></script>
+{% block scripts %}
 <script type="text/javascript" src="../js/mdb.min.js"></script>
 <script type="text/javascript" src="../js/datatables.min.js"></script>
 <script type="text/javascript" src="../js/mdb-file-upload.min.js"></script>
@@ -99,7 +69,6 @@
 <script type="text/javascript" src="../js/wavesurfer.timeline.min.js"></script>
 <script type="text/javascript" src="../js/wavesurfer.regions.min.js"></script>
 <script type="text/javascript" src="../js/interactive_waveform.js"></script>
-<script type="text/javascript" src="/eel.js"></script>
 <script type="text/javascript">
 var introAudioFilepath = null;
 
@@ -161,7 +130,7 @@ async function handleAddIntro() {
     $("#overlay").fadeIn();
     await eel.add_intro_backtrack(introAudioFilepath, slice, overlaySyncPoint)();
     $("#overlay").fadeOut();
-    location.href = "/templates/edit_backtracks.html";
+    location.href = "/templates/music.html";
 }
 
 function setError(msg) {
@@ -177,9 +146,8 @@ $(document).ready(function() {
         handleAddIntro();
     });
     $("#btn-skip").click(function() {
-        location.href = "/templates/edit_backtracks.html";
+        location.href = "/templates/music.html";
     });
 });
 </script>
-</body>
-</html>
+{% endblock %}
