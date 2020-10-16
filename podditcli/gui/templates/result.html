@@ -1,0 +1,30 @@
+{% extends "base_splash.html" %}
+
+{% block header %}
+<link href="../css/main.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+    <div id="hero">
+        <h1 id="hero-header">It's Ready</h1>
+        <h3 id="hero-subheader">Click to save your finished podcast episode</h3>
+        <div class="row">
+            <div class="col-md-6"></div>
+        </div>
+        <a id="btn-download" class="splash-btn-cta" download="poddit_episode.flac" href="#" >SAVE <i class="fas fa-download"></i></a>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+<script type="text/javascript">
+    async function setDownloadPath() {
+        let masteredTrackFilename = await eel.get_mixed_track_filename()();
+        let masteredTrackLink = "../media/" + masteredTrackFilename;
+        $("#btn-download").attr("href", masteredTrackLink);
+    }
+
+    $(document).ready(function() {
+        setDownloadPath();
+    });
+</script>
+{% endblock %}

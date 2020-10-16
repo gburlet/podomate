@@ -1,0 +1,122 @@
+{% extends "base_edit.html" %}
+{% from "macros.html" import nav_link %}
+
+{% block header %}
+<link href="../css/editor.css" rel="stylesheet">
+{% endblock %}
+
+{% block title %}Music{% endblock%}
+{% block subtitle %}Add music backtracks{% endblock %}
+
+{% block navbar %}
+    {{ nav_link('mixer', 'sliders-h', '', 'true') }}
+    {{ nav_link('trim', 'cut', '', 'true') }}
+    {{ nav_link('music', 'music', 'true') }}
+    {{ nav_link('snippets', 'file-audio') }}
+    {{ nav_link('finish', 'check') }}
+{% endblock %}
+
+{% block content %}
+    <h2>Add Music</h2>
+    <p>Optional. Add music behind parts of your podcast.</p>
+
+    <div class="row">
+        <div class="col-lg-6 text-center">
+            <div id="backtrack-intro" class="new-backtrack">
+                <span>
+                    <i class="fas fa-2x fa-music"></i><br/>
+                    <span id="intro-text">Add Intro</span>
+                </span>
+            </div>
+            <button id="delete-backtrack-intro" class="btn-delete" style="display: none;">
+                <i class="fas fa-2x fa-minus-circle"></i>
+            </button>
+        </div>
+        <div class="col-lg-6 text-center">
+            <div id="backtrack-outro" class="new-backtrack">
+                <span>
+                    <i class="fas fa-2x fa-music"></i><br/>
+                    <span id="outro-text">Add Outro</span>
+                </span>
+            </div>
+            <button id="delete-backtrack-outro" class="btn-delete" style="display: none;">
+                <i class="fas fa-2x fa-minus-circle"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="row" style="margin-bottom: 2em;">
+        <div class="col-md-9">
+            <button id="btn-edit" class="btn btn-success btn-lg btn-block">
+                Add
+            </button>
+        </div>
+        <div class="col-md-3">
+            <button id="btn-skip" class="btn btn-light btn-lg btn-block">
+                Skip <i class="fa fa-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+<script type="text/javascript">
+async function setupUI() {
+    // get state and populate UI accordingly
+    let trackOverlays = await eel.get_global_track_overlays()();
+    if (trackOverlays["intro"] != null) {
+        $("#delete-backtrack-intro").show();
+        $("#intro-text").text("Change Intro");
+        $("#backtrack-intro").addClass("backtrack");
+        $("#backtrack-intro").removeClass("new-backtrack");
+    }
+    if (trackOverlays["outro"] != null) {
+        $("#delete-backtrack-outro").show();
+        $("#outro-text").text("Change Outro");
+        $("#backtrack-outro").addClass("backtrack");
+        $("#backtrack-outro").removeClass("new-backtrack");
+    }
+}
+
+function toTitleCase(str) {
+    return str.replace(/(?:^|\s)\w/g, function(match) {
+        return match.toUpperCase();
+    });
+}
+
+function removeBacktrack(id) {
+    $("#delete-backtrack-"+id).hide();
+    $("#backtrack-"+id).removeClass("backtrack");
+    $("#backtrack-"+id).addClass("new-backtrack");
+    $("#"+id+"-text").text("Add " + toTitleCase(id));
+}
+
+$(document).ready(function() {
+    $("#progressbar li.active").prevAll("li").addClass("active");
+    setupUI();
+
+    $("#backtrack-intro").click(function() {
+        location.href = "/templates/addintro.html";
+    });
+    $("#delete-backtrack-intro").click(function() {
+        eel.remove_intro_backtrack()();
+        removeBacktrack("intro");
+    });
+
+    $("#backtrack-outro").click(function() {
+        location.href = "/templates/addoutro.html";
+    });
+    $("#delete-backtrack-outro").click(function() {
+        eel.remove_outro_backtrack()();
+        removeBacktrack("outro");
+    });
+
+    $("#btn-edit").click(function() {
+        location.href = "/templates/snippets.html";
+    });
+    $("#btn-skip").click(function() {
+        location.href = "/templates/snippets.html";
+    });
+});
+</script>
+{% endblock %}
