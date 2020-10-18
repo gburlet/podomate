@@ -21,6 +21,10 @@ def guide(request):
     return HttpResponse("Guide to using poddit")
 
 
+def feedback(request):
+    return HttpResponse("Feedback")
+
+
 class ClientVersion(APIView):
     """
     Endpoint for client to check whether version is sunsetted (refuse access to app)

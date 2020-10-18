@@ -1,6 +1,9 @@
 // Modules to control application life and create native browser window
 const {app, BrowserWindow, Menu} = require('electron')
 const shell = require('electron').shell
+const isMac = process.platform === 'darwin'
+
+const serverUrl = "http://localhost:8001"
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -27,16 +30,49 @@ function createWindow () {
             label: app.name,
             submenu: [
                 { role: 'about' },
-                {type: 'separator'},
-                {
-                    role: 'quit'
-                }
+                { type: 'separator' },
+                { role: 'services' },
+                { role: 'hide' },
+                { role: 'hideothers' },
+                { role: 'unhide' },
+                { type: 'separator' },
+                { role: 'quit' }
+            ]
+        },
+        {
+            label: 'Edit',
+            submenu: [
+                { role: 'undo' },
+                { role: 'redo' },
+                { type: 'separator' },
+                { role: 'cut' },
+                { role: 'copy' },
+                { role: 'paste' },
+                ...(isMac ? [
+                    { role: 'pasteAndMatchStyle' },
+                    { role: 'delete' },
+                    { role: 'selectAll' },
+                    { type: 'separator' },
+                    {
+                        label: 'Speech',
+                        submenu: [
+                            { role: 'startspeaking' },
+                            { role: 'stopspeaking' }
+                        ]
+                    }
+                    ] : [
+                    { role: 'delete' },
+                    { type: 'separator' },
+                    { role: 'selectAll' }
+                ])
             ]
         },
         {
             label: 'View',
             submenu: [
                 { role: 'reload' },
+                { role: 'forcereload' },
+                { type: 'separator' },
                 { role: 'zoomin' },
                 { role: 'zoomout' },
                 { type: 'separator' },
@@ -44,13 +80,36 @@ function createWindow () {
             ]
         },
         {
+            label: 'Window',
+            submenu: [
+                { role: 'minimize' },
+                { role: 'zoom' },
+                ...(isMac ? [
+                    { type: 'separator' },
+                    { role: 'front' },
+                    { type: 'separator' },
+                    { role: 'window' }
+                ] : [
+                    { role: 'close' }
+                ])
+            ]
+        },
+        {
             label: 'Help',
-            submenu: [{
-                label: 'View Guide',
-                click() {
-                    shell.openExternal('http://localhost:8001/guide');
+            submenu: [
+                {
+                    label: 'View Guide',
+                    click() {
+                        shell.openExternal(serverUrl + '/guide');
+                    }
+                },
+                {
+                    label: 'Send Feedback',
+                    click() {
+                        shell.openExternal(serverUrl + '/feedback');
+                    }
                 }
-            }]
+            ]
         }
     ]);
     Menu.setApplicationMenu(menu);
