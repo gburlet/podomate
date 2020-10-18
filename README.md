@@ -5,14 +5,9 @@ Edit, postprocess, and master podcasts and interviews automatically
 
 #### Electron.js Browser
 
-We use Electron.js as the chromium browser for the GUI frontend for Python-Eel. Download Electron.js app and fiddle with some internals.
+We use Electron.js as the chromium browser for the GUI frontend for Python-Eel. Download Electron.js app and fiddle with some internals using the included bash script:
 ```
-wget https://github.com/electron/electron/releases/download/v10.1.2/electron-v10.1.2-darwin-x64.zip
-unzip -e electron-v10.1.2-darwin-x64.zip
-cp electron-v10.1.2-darwin-x64/Electron.app <gitrepo>/podditcli
-cd <gitrepo>/podditcli
-mv Electron.app/Contents/Frameworks/Electron\ Framework.framework/Versions/A Electron.app/Contents/Frameworks/Electron\ Framework.framework
-rm -rf Electron.app/Contents/Frameworks/Electron\ Framework.framework/Versions
+./setup_electron.sh
 ```
 
 #### Development Environment
