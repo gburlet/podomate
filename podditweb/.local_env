@@ -1,8 +1,0 @@
-#!/bin/bash
-export DEPLOY_ENV=local
-export DJANGO_SECRET_KEY='1^)*a70irh^6a$n*(cirt3!w7d2n*hdrg6i_ap$pb8sb9hszdg'
-export RDS_DB_NAME=poddit
-export RDS_USERNAME=gburlet
-export RDS_PASSWORD=gburlet
-export RDS_HOSTNAME=localhost
-export RDS_PORT=5432

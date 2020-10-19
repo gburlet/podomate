@@ -1,4 +1,4 @@
-# poddit
+# podomate
 Edit, postprocess, and master podcasts and interviews automatically
 
 ## Setup Client
@@ -12,7 +12,7 @@ We use Electron.js as the chromium browser for the GUI frontend for Python-Eel. 
 
 #### Development Environment
 
-**Install Python3**: Poddit uses Python3. We recommend installing Python3 using [pyenv](https://github.com/pyenv/pyenv).
+**Install Python3**: Podomate uses Python3. We recommend installing Python3 using [pyenv](https://github.com/pyenv/pyenv).
 Here's a couple good tutorial blog posts on pyenv: [[1](https://medium.com/faun/pyenv-multi-version-python-development-on-mac-578736fb91aa)] [[2](https://alysivji.github.io/setting-up-pyenv-virtualenvwrapper.html)].
 
 If bundling executable using pyinstaller, make sure to install python as a framework: `PYTHON_CONFIGURE_OPTS="--enable-framework" pyenv install 3.6.0`
@@ -22,34 +22,34 @@ Here's a good tutorial blog post on pyenv & pyenv-virtualenvwrapper: [[1]](https
 
 **Setup Client Environment**
 ```
-mkvirtualenv podditcli
-workon podditcli
-cd <gitrepo>/podditcli
+mkvirtualenv podomatecli
+workon podomatecli
+cd <gitrepo>/podomatecli
 brew install libsndfile libvorbis libogg libpng opusfile lame mad flac ffmpeg sox tbb
 pip install -r requirements.txt
-python poddit.py
+python podomate.py
 ```
 
-**Poddit Command Line**
+**Podomate Command Line**
 
 `python main.py episode_config.json path/to/output.flac`
 
-Note: `podditcli/episode_template.json` in the git repo is an example template JSON file where you can plug in your own parameters to create an episode.
+Note: `podomatecli/episode_template.json` in the git repo is an example template JSON file where you can plug in your own parameters to create an episode.
 
-**Poddit GUI**
+**Podomate GUI**
 
-`python poddit.py`
+`python podomate.py`
 
 ## Setup Server
 
 ```
-mkvirtualenv podditweb
-workon podditweb
-cd <gitrepo>/podditweb
+mkvirtualenv podomateweb
+workon podomateweb
+cd <gitrepo>/podomateweb
 brew install postgresql
 brew services start postgresql
 createuser -P -s -e -d <your username>
-createdb poddit
+createdb podomate
 pip install -r requirements.txt
 python manage.py migrate
 python manage.py createsuperuser
@@ -70,7 +70,7 @@ pip install pyinstaller
 make app
 ```
 
-Will create a .app in `/podditcli/dist/poddit.app` that you can double click to open and distribute to different macs.
+Will create a .app in `/podomatecli/dist/podomate.app` that you can double click to open and distribute to different macs.
 
 To bundle the .app into a .dmg file using [create-dmg](https://github.com/create-dmg/create-dmg):
 ```

@@ -1,0 +1,23 @@
+<div class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="updateModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="updateModalLongTitle">Updater</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <p id="update-prompt">This will download the newest version of Podomate and restart the app.</p>
+                        <div id="update-progress" class="progress" style="display: none;">
+                            <div id="update-progress-bar" class="progress-bar progress-bar-striped progress-bar-animated bg-success" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <button id="btn-start-update" type="button" class="btn btn-success">Update</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

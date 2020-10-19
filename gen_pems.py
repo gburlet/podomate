@@ -21,7 +21,7 @@ private_pem = private_key.private_bytes(
     encryption_algorithm=serialization.NoEncryption()
 )
 
-with open('podditweb/server/poddit_private.pem', 'wb') as f:
+with open('podomateweb/server/podomate_private.pem', 'wb') as f:
     f.write(private_pem)
 
 # write public key as .pem file
@@ -30,5 +30,5 @@ public_pem = public_key.public_bytes(
     format=serialization.PublicFormat.SubjectPublicKeyInfo
 )
 
-with open('podditcli/poddit_public.pem', 'wb') as f:
+with open('podomatecli/podomate_public.pem', 'wb') as f:
     f.write(public_pem)

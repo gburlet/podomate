@@ -1,0 +1,51 @@
+{% extends "base_splash.html" %}
+
+{% block header %}
+<link href="../css/main.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+    <div id="hero">
+        <div id="version-info">
+            <span id="version-string"></span> <i id="btn-version-update" class="fas fa-wrench" data-toggle="modal" data-target="#updateModal"></i>
+        </div>
+
+        <div id="alert" class="alert alert-danger" role="alert" style="display: none;"></div>
+
+        <h1 id="hero-header">PODOMATE</h1>
+        <h3 id="hero-subheader">Edit, mix, and master your podcast</h3>
+        <button id="btn-start" class="splash-btn-cta">CREATE EPISODE</button>
+        <button id="btn-start-activation" class="splash-btn-cta" data-toggle="modal" data-target="#activationModal">ACTIVATE</button>
+
+        <div id="update-notification-toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-autohide="false">
+            <div class="toast-header">
+                <i class="fas fa-wrench"></i>&nbsp;<strong class="mr-auto">Update</strong>
+                <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="toast-body">
+                An update is available! <a href="#" data-toggle="modal" data-target="#updateModal">Update Now</a>
+            </div>
+        </div>
+    </div>
+
+    {% include "activation_modal.html" %}
+    {% include "update_modal.html" %}
+{% endblock %}
+
+{% block scripts %}
+    <script type="text/javascript" src="../js/activate.js"></script>
+    <script type="text/javascript" src="../js/update.js"></script>
+    <script type="text/javascript">
+    $(document).ready(function() {
+        checkActivation();
+        checkUpdate();
+        checkSunset();
+    });
+
+    $("#btn-start").click(function() {
+        location.href = "/templates/mixer.html";
+    });
+    </script>
+{% endblock %}
