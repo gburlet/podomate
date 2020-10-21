@@ -5,6 +5,7 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization, hashes
 from cryptography.hazmat.primitives.asymmetric import padding
 from django.http import HttpResponse
+from django.shortcuts import render
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -14,11 +15,23 @@ from server.serializers import LatestAppVersionSerializer
 
 
 def index(request):
-    return HttpResponse("Hello, podomate.")
+    return render(request, 'server/index.html')
+
+
+def download(request):
+    return HttpResponse("Download podomate")
 
 
 def guide(request):
     return HttpResponse("Guide to using podomate")
+
+
+def about(request):
+    return HttpResponse("About Us")
+
+
+def contact(request):
+    return HttpResponse("Contact Us")
 
 
 def feedback(request):
