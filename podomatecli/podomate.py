@@ -1,5 +1,6 @@
 import base64
 import copy
+import json
 import shutil
 import sys
 import uuid
@@ -26,8 +27,7 @@ from mixer import Mixer
 from silence_remover import SilenceRemover
 from track import Track
 from track_aligner import TrackAligner
-from utils import parse_version_string
-
+from utils import parse_version_string, s_to_timestamp
 
 ################################
 #            GLOBALS           #
@@ -99,6 +99,10 @@ global_track_options = {
     "overlays": [],
     "inserts": [],
     "fX": []
+}
+settings_file = {
+    "local_tracks": [],
+    "global_track": {}
 }
 
 
@@ -290,7 +294,7 @@ def del_speaker_track(i_speaker):
 
 @eel.expose
 def mix_speaker_tracks(user_tracks_options):
-    global mixed_track
+    global mixed_track, settings_file
 
     # set master track to be longest track
     tracks[np.argmax([t.audio_buffer.get_duration_s() for t in tracks])].master = True
@@ -316,6 +320,22 @@ def mix_speaker_tracks(user_tracks_options):
         if "silence_timestamps" in track_options:
             for silence_interval in track_options["silence_timestamps"]:
                 track.apply_silence_to_interval(silence_interval)
+
+    # write local track metadata to settings file
+    settings_file["local_tracks"].clear()
+    for track, track_options, track_offset in zip(tracks, tracks_options, track_offsets):
+        track_settings = {
+            "path": track.audio_buffer._path,
+            "master": track.master,
+            "offset": s_to_timestamp(track_offset),
+            "silence_timestamps": [
+                s_to_timestamp(ts) for ts in track_options["silence_timestamps"]
+            ] if "silence_timestamps" in track_options else [],
+            "fX": track_options["fX"] if "fX" in track_options else []
+        }
+        if "gate_filter" in track_options:
+            track_settings["gate_filter"] = track_options["gate_filter"]
+        settings_file["local_tracks"].append(track_settings)
 
     # perform alignment
     track_aligner.align(tracks, track_offsets).pad(tracks)
@@ -344,6 +364,14 @@ def get_mixed_track_filename():
     if mixed_track is not None:
         filename = os.path.split(mixed_track.audio_buffer._path)[-1]
         return filename
+
+
+@eel.expose
+def get_settings_filename():
+    if mixed_track is not None:
+        episode_id = os.path.splitext(os.path.split(mixed_track.audio_buffer._path)[-1])[0][:-9]
+        settings_filename = "%s_settings.json" % episode_id
+        return settings_filename
 
 
 @eel.expose
@@ -462,11 +490,8 @@ def get_global_track_overlays():
 def add_insert(filename, slice, timestamp):
     global global_track_options
     insert_path = os.path.join("gui/media/%s" % filename)
-    global_track_options["inserts"].append({
-        "path": insert_path,
-        "slice": slice,
-        "timestamp": timestamp
-    })
+    insert_options = AudioInserter(insert_path, slice, timestamp).to_config()
+    global_track_options["inserts"].append(insert_options)
 
 
 @eel.expose
@@ -474,11 +499,8 @@ def edit_insert(i_insert, filename, slice, timestamp):
     global global_track_options
     if 0 <= i_insert < len(global_track_options["inserts"]):
         insert_path = os.path.join("gui/media/%s" % filename)
-        global_track_options["inserts"][i_insert] = {
-            "path": insert_path,
-            "slice": slice,
-            "timestamp": timestamp
-        }
+        insert_options = AudioInserter(insert_path, slice, timestamp).to_config()
+        global_track_options["inserts"][i_insert] = insert_options
 
 
 @eel.expose
@@ -490,7 +512,7 @@ def remove_insert(i):
 
 @eel.expose
 def process():
-    global global_track_overlays, global_track_options, mixed_track
+    global global_track_overlays, global_track_options, mixed_track, settings_file
 
     global_track_options["overlays"].clear()
     if global_track_overlays["intro"]:
@@ -498,6 +520,28 @@ def process():
     if global_track_overlays["outro"]:
         global_track_options["overlays"].append(global_track_overlays["outro"])
     global_track_options["overlays"].extend(global_track_overlays["others"])
+
+    # write mixed track metadata to settings file
+    del settings_file["global_track"]
+    settings_file["global_track"] = {
+        "live_timestamps": [
+            [s_to_timestamp(ts[0]), s_to_timestamp(ts[1])] for ts in global_track_options["live_timestamps"]
+        ] if "live_timestamps" in global_track_options else [],
+        "silence_timestamps": [
+            [s_to_timestamp(ts[0]), s_to_timestamp(ts[1])] for ts in global_track_options["silence_timestamps"]
+        ] if "silence_timestamps" in global_track_options else [],
+        "min_silence_duration": global_track_options["min_silence_duration"],
+        "fX": global_track_options["fX"] if "fX" in global_track_options else [],
+        "overlays": global_track_options["overlays"],
+        "inserts": global_track_options["inserts"],
+    }
+    # write settings file to disk
+    cache_mixed_track_path = mixed_track.audio_buffer._path
+    episode_id = os.path.splitext(os.path.split(cache_mixed_track_path)[-1])[0]
+    settings_filename = "%s_settings.json" % episode_id
+    settings_path = os.path.abspath(os.path.join(bundle_dir, 'gui/media/%s' % settings_filename))
+    with open(settings_path, 'w') as settings_fp:
+        json.dump(settings_file, settings_fp, indent=4, sort_keys=True)
 
     silence_intervals = []
     if "live_timestamps" in global_track_options:
@@ -510,7 +554,6 @@ def process():
     SilenceRemover(global_track_options["min_silence_duration"]).remove(mixed_track, padding_s=0.2)
 
     # Audio Overlays
-    cache_mixed_track_path = mixed_track.audio_buffer._path
     for overlay_config in global_track_options["overlays"]:
         mixed_track = AudioOverlayer.from_config(overlay_config).overlay(mixed_track)
         mixed_track.audio_buffer.normalize()
@@ -526,7 +569,7 @@ def process():
 
     mixed_track.audio_buffer.normalize()
     mixed_track.audio_buffer.stereofy()
-    filename = "%s_mastered.flac" % os.path.splitext(os.path.split(cache_mixed_track_path)[-1])[0]
+    filename = "%s_mastered.flac" % episode_id
     mixed_track_path = os.path.abspath(os.path.join(bundle_dir, 'gui/media/%s' % filename))
     mixed_track.audio_buffer._path = mixed_track_path
     mixed_track.audio_buffer.write()

@@ -11,20 +11,26 @@
         <div class="row">
             <div class="col-md-6"></div>
         </div>
-        <a id="btn-download" class="splash-btn-cta" download="podomate_episode.flac" href="#" >SAVE <i class="fas fa-download"></i></a>
+        <a id="btn-download" class="splash-btn-cta" download="podomate_episode.flac" href="#" >SAVE EPISODE <i class="fas fa-download"></i></a>
+        <a id="btn-download-settings" class="splash-btn-cta" download="podomate_episode_settings.json" href="#" >SAVE SETTINGS <i class="fas fa-sliders-h"></i></a>
     </div>
 {% endblock %}
 
 {% block scripts %}
 <script type="text/javascript">
-    async function setDownloadPath() {
+    async function setDownloadPaths() {
         let masteredTrackFilename = await eel.get_mixed_track_filename()();
         let masteredTrackLink = "../media/" + masteredTrackFilename;
         $("#btn-download").attr("href", masteredTrackLink);
+
+        let settingsFilename = await eel.get_settings_filename()();
+        let settingsLink = "../media/" + settingsFilename;
+        console.log(settingsLink);
+        $("#btn-download-settings").attr("href", settingsLink);
     }
 
     $(document).ready(function() {
-        setDownloadPath();
+        setDownloadPaths();
     });
 </script>
 {% endblock %}

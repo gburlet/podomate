@@ -1,11 +1,11 @@
 from audio_buffer import AudioBuffer
 from track import Track
-from utils import read_config_timestamp
+from utils import read_config_timestamp, s_to_timestamp
 
 
 class AudioInserter(object):
 
-    def __init__(self, path, slice, timestamp, volume_automations):
+    def __init__(self, path, slice, timestamp, volume_automations=None):
         self._path = path
         self._slice = [read_config_timestamp(i) for i in slice] if slice else None
         self._timestamp = read_config_timestamp(timestamp)
@@ -28,3 +28,12 @@ class AudioInserter(object):
         track.insert(insert_track.audio_buffer, self._timestamp)
 
         return self._timestamp, insert_audio_buffer.get_duration_s()
+
+    def to_config(self):
+        insert_options = {
+            "path": self._path,
+            "slice": [s_to_timestamp(ts) for ts in self._slice] if self._slice else None,
+            "timestamp": s_to_timestamp(self._timestamp),
+            "volume_automations": self._volume_automations
+        }
+        return insert_options

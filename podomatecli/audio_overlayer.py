@@ -2,12 +2,12 @@ from audio_buffer import AudioBuffer
 from mixer import Mixer
 from track import Track
 from track_aligner import TrackAligner
-from utils import read_config_timestamp
+from utils import read_config_timestamp, s_to_timestamp
 
 
 class AudioOverlayer(object):
 
-    def __init__(self, overlay_path, overlay_slice, sync_point, volume_automations):
+    def __init__(self, overlay_path, overlay_slice, sync_point, volume_automations=None):
         self._overlay_path = overlay_path
         self._overlay_slice = [read_config_timestamp(i) for i in overlay_slice] if overlay_slice else None
         self._sync_point_overlay = read_config_timestamp(sync_point["overlay"])
@@ -132,10 +132,10 @@ class AudioOverlayer(object):
     def to_config(self):
         backtrack_options = {
             "path": self._overlay_path,
-            "slice": self._overlay_slice,
+            "slice": [s_to_timestamp(ts) for ts in self._overlay_slice] if self._overlay_slice else None,
             "sync_point": {
-                "overlay": self._sync_point_overlay,
-                "master": self._sync_point_master
+                "overlay": s_to_timestamp(self._sync_point_overlay),
+                "master": s_to_timestamp(self._sync_point_master)
             },
             "volume_automations": self._volume_automations
         }
