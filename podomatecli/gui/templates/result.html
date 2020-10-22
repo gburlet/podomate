@@ -25,7 +25,6 @@
 
         let settingsFilename = await eel.get_settings_filename()();
         let settingsLink = "../media/" + settingsFilename;
-        console.log(settingsLink);
         $("#btn-download-settings").attr("href", settingsLink);
     }
 

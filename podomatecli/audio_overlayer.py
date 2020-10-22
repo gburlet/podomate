@@ -17,7 +17,7 @@ class AudioOverlayer(object):
     @staticmethod
     def from_config(config):
         return AudioOverlayer(
-            config["path"], config.get("slice"), config["sync_point"], config["volume_automations"]
+            config["path"], config.get("slice"), config["sync_point"], config.get("volume_automations")
         )
 
     @staticmethod

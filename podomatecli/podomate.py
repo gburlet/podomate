@@ -515,9 +515,9 @@ def process():
     global global_track_overlays, global_track_options, mixed_track, settings_file
 
     global_track_options["overlays"].clear()
-    if global_track_overlays["intro"]:
+    if global_track_overlays["intro"] is not None:
         global_track_options["overlays"].append(global_track_overlays["intro"])
-    if global_track_overlays["outro"]:
+    if global_track_overlays["outro"] is not None:
         global_track_options["overlays"].append(global_track_overlays["outro"])
     global_track_options["overlays"].extend(global_track_overlays["others"])
 
