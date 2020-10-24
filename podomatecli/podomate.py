@@ -145,6 +145,7 @@ def load_episode(settings_path):
             global_track_overlays
     """
 
+
 @eel.expose
 def check_update():
     global latest_version, latest_mac_version_link
