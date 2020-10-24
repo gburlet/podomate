@@ -73,6 +73,13 @@ function setupInteractiveWaveform(audioFilename, containerID, regions=0) {
         $("#clear-regions").click(function() {
             wavesurfer.clearRegions();
             $("#del-region").hide();
+            $("#snap-cursor-region").hide();
+        });
+
+        $("#snap-cursor-region").click(function() {
+            if (selectedRegion != null && selectedRegion.end < wavesurfer.getCurrentTime()) {
+                selectedRegion.onResize(wavesurfer.getCurrentTime() - selectedRegion.end);
+            }
         });
 
         $("#del-region").click(function() {
@@ -126,6 +133,7 @@ function setupInteractiveWaveform(audioFilename, containerID, regions=0) {
 function selectRegion(region) {
     selectedRegion = region;
     $("#del-region").show();
+    $("#snap-cursor-region").show();
 }
 
 function deleteSelectedRegion() {
@@ -133,6 +141,7 @@ function deleteSelectedRegion() {
         selectedRegion.remove();
     }
     $("#del-region").hide();
+    $("#snap-cursor-region").hide();
 }
 
 function handleAddRegion(region) {
@@ -155,6 +164,7 @@ function handleUpdateRegion(region) {
 function handleSelectRegion(region) {
     selectedRegion = region;
     $("#del-region").show();
+    $("#snap-cursor-region").show();
 }
 
 function addRegion(start, end) {
