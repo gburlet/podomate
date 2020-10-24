@@ -71,6 +71,10 @@ body {
     margin-left: 15px;
 }
 
+#btn-load-episode {
+    margin-left: 15px;
+}
+
 #version-info {
     position: absolute;
     top: 5px;

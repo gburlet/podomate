@@ -1,0 +1,71 @@
+{% extends "base_edit.html" %}
+{% from "macros.html" import nav_link %}
+
+{% block header %}
+    <link href="../css/interactive_waveform.css" rel="stylesheet">
+    <link href="../css/mdb-file-upload.min.css" rel="stylesheet">
+{% endblock %}
+
+{% block title %}Load Episode{% endblock%}
+{% block subtitle %}Import a previous episode{% endblock %}
+
+{% block content %}
+<div style="margin: -1.5em 0em 2em 0em">
+    <h2>Load Episode</h2>
+    <p>Load up a previous episode that you created with Podomate for further editing. You will need to load up the settings
+    file that was available for download at the end of the editing process for that episode.</p>
+</div>
+
+<div id="intro-settings-upload" class="row">
+    <div class="col-lg-12">
+        <div class="settings-upload">
+            <h3 class="subheading text-muted">
+                Episode Settings
+                <a id="settings-badge" tabindex="-1" class="badge-pop badge badge-success align-middle" data-trigger="hover" data-container="body" data-toggle="popover" data-placement="bottom" data-content="<b>File Type</b>: .json">
+                    <i class="fas fa-info-circle"></i> Supported Files
+                </a>
+            </h3>
+            <div id="file-upload-wrapper" class="file-upload-wrapper">
+                <input class="file-upload" type="file" id="intro-audio" name="intro-audio" accept="audio/*" data-height="150" required>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row" style="margin: 2em 0em;">
+    <div class="col-md-3 offset-md-9">
+        <button id="btn-back" class="btn btn-light btn-lg btn-block">
+            Back <i class="fa fa-chevron-right"></i>
+        </button>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script type="text/javascript" src="../js/mdb.min.js"></script>
+<script type="text/javascript" src="../js/datatables.min.js"></script>
+<script type="text/javascript" src="../js/mdb-file-upload.min.js"></script>
+<script type="text/javascript">
+async function handleSettingsInput() {
+    $("#overlay").fadeIn();
+    var file = $(this)[0].files[0];
+    await eel.load_episode(file.path)();
+    location.href = "/templates/finish.html"
+}
+
+function setError(msg) {
+    $("#alert").html(msg);
+    $("#alert").show();
+}
+
+$(document).ready(function() {
+    $('[data-toggle="popover"]').popover({"html": true});
+    $('.file-upload').file_upload();
+    $("input[type='file']").change(handleSettingsInput);
+
+    $("#btn-back").click(function() {
+        location.href = "/templates/main.html";
+    });
+});
+</script>
+{% endblock %}
