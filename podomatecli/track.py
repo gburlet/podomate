@@ -18,7 +18,7 @@ class Track(object):
     @property
     def silence_ranges(self):
         # TODO: make min_silence_len_s parameterable, maybe to match config param min_silence_duration?
-        self.silence_range_cache = SilenceDetector(threshold=0.3, min_silence_len_s=0.5).detect_silences(self.audio_buffer)
+        self.silence_range_cache = SilenceDetector(threshold=0.125, min_silence_len_s=0.5).detect_silences(self.audio_buffer)
         self.activity_range_cache = self.get_activity_ranges_from_silence_ranges(self.silence_range_cache)
         return self.silence_range_cache
 
