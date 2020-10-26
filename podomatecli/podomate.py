@@ -22,9 +22,11 @@ from audio_buffer import AudioBuffer
 from audio_inserter import AudioInserter
 from audio_overlayer import AudioOverlayer
 from audio_preprocessors.gate_filter import GateFilter
+from episode import Episode
 from fx_chain import FXChain
 from mixer import Mixer
 from silence_remover import SilenceRemover
+from speaker_track_recipe import SpeakerTrackRecipe
 from track import Track
 from track_aligner import TrackAligner
 from utils import parse_version_string, s_to_timestamp
@@ -43,67 +45,7 @@ with open(os.path.join(bundle_dir, "version.txt"), "r") as vfile:
     version = vfile.readline().strip().lower()
 latest_version = None
 latest_mac_version_link = None
-tracks = []
-mixed_track = None
-default_local_track_options = {
-    "fX": [
-        {
-            "effect": "contrast",
-            "parameters": {
-                "amount": 80
-            }
-        },
-        {
-            "effect": "equalizer",
-            "parameters": {
-                "frequency": 100,
-                "width_q": 1,
-                "gain_db": 0
-            }
-        },
-        {
-            "effect": "equalizer",
-            "parameters": {
-                "frequency": 296.1,
-                "width_q": 1,
-                "gain_db": -1.6
-            }
-        },
-        {
-            "effect": "equalizer",
-            "parameters": {
-                "frequency": 3511,
-                "width_q": 1,
-                "gain_db": 1.8
-            }
-        },
-        {
-            "effect": "equalizer",
-            "parameters": {
-                "frequency": 10000,
-                "width_q": 1,
-                "gain_db": 2.2
-            }
-        }
-    ]
-}
-global_track_overlays = {
-    "intro": None,
-    "outro": None,
-    "others": []
-}
-global_track_options = {
-    "live_timestamps": [],
-    "silence_timestamps": [],
-    "min_silence_duration": 1.25,
-    "overlays": [],
-    "inserts": [],
-    "fX": []
-}
-settings_file = {
-    "local_tracks": [],
-    "global_track": {}
-}
+episode = Episode()
 
 
 ################################
@@ -295,114 +237,64 @@ def check_license():
 
 @eel.expose
 def set_speaker_track(audio_path, i_speaker):
-    # read
-    audio_buffer = AudioBuffer(audio_path)
-    audio_buffer.read(normalize=True)
-    track = Track(audio=audio_buffer)
-    if len(tracks) == 0 or i_speaker >= len(tracks):
-        tracks.append(track)
+    global episode
+    track = Track.from_audio_file(audio_path)
+    if 0 <= i_speaker < len(episode.speaker_tracks):
+        episode.update_speaker_track(i_speaker, track)
     else:
-        tracks[i_speaker] = track
+        episode.add_speaker_track(track)
 
 
 @eel.expose
 def del_speaker_track(i_speaker):
-    if 0 <= i_speaker < len(tracks):
-        del tracks[i_speaker]
+    global episode
+    episode.del_speaker_track(i_speaker)
 
 
 @eel.expose
 def mix_speaker_tracks(user_tracks_options):
-    global mixed_track, settings_file
-
-    # set master track to be longest track
-    tracks[np.argmax([t.audio_buffer.get_duration_s() for t in tracks])].master = True
+    global episode
 
     # set default track options and override with user-selected options
-    tracks_options = []
-    for user_track_options in user_tracks_options:
-        track_options = copy.copy(default_local_track_options)
-        track_options.update(user_track_options)
-        tracks_options.append(track_options)
+    for i_track, user_track_options in enumerate(user_tracks_options):
+        # inject default track fX
+        user_track_options["fX"] = SpeakerTrackRecipe.DEFAULT_FX
+        episode.recipe.speaker_track_recipes[i_track].update(
+            SpeakerTrackRecipe(**user_track_options)
+        )
 
-    # gate filter
-    for track, track_options in zip(tracks, tracks_options):
-        if "gate_filter" in track_options:
-            GateFilter(track_options["gate_filter"]).process(track)
-
-    # auto calculate track alignment (offsets) for non master tracks
-    track_aligner = TrackAligner(tracks_options)
-    track_offsets = track_aligner.auto_calc_offset(tracks)
-
-    # silence local timestamps
-    for track, track_options in zip(tracks, tracks_options):
-        if "silence_timestamps" in track_options:
-            for silence_interval in track_options["silence_timestamps"]:
-                track.apply_silence_to_interval(silence_interval)
-
-    # write local track metadata to settings file
-    settings_file["local_tracks"].clear()
-    for track, track_options, track_offset in zip(tracks, tracks_options, track_offsets):
-        track_settings = {
-            "path": track.audio_buffer._path,
-            "master": track.master,
-            "offset": s_to_timestamp(track_offset),
-            "silence_timestamps": [
-                s_to_timestamp(ts) for ts in track_options["silence_timestamps"]
-            ] if "silence_timestamps" in track_options else [],
-            "fX": track_options["fX"] if "fX" in track_options else []
-        }
-        if "gate_filter" in track_options:
-            track_settings["gate_filter"] = track_options["gate_filter"]
-        settings_file["local_tracks"].append(track_settings)
-
-    # perform alignment
-    track_aligner.align(tracks, track_offsets).pad(tracks)
-
-    # local fX chain
-    for track, track_options in zip(tracks, tracks_options):
-        if "fX" in track_options:
-            FXChain(track_options["fX"]).apply(track)
-        track.audio_buffer.normalize()
-
-    # mix global track
-    mixed_track = Mixer().mix_tracks(tracks)
-    mixed_track.audio_buffer.normalize()
-    _ = mixed_track.silence_ranges  # cache VAD for future operations
+    episode.mix_speaker_tracks()
 
     filename = "%s.flac" % str(uuid.uuid4())
     mixed_track_path = os.path.abspath(os.path.join(bundle_dir, 'gui/media/%s' % filename))
-    mixed_track.audio_buffer._path = mixed_track_path
-    mixed_track.audio_buffer.write()
-
+    episode.mixed_track.audio_buffer._path = mixed_track_path
+    episode.mixed_track.audio_buffer.write()
     return filename
 
 
 @eel.expose
 def get_mixed_track_filename():
-    if mixed_track is not None:
-        filename = os.path.split(mixed_track.audio_buffer._path)[-1]
+    if episode.mixed_track is not None:
+        filename = os.path.split(episode.mixed_track.audio_buffer._path)[-1]
         return filename
 
 
 @eel.expose
 def get_settings_filename():
-    if mixed_track is not None:
+    if episode.mixed_track is not None:
         episode_id = os.path.splitext(os.path.split(mixed_track.audio_buffer._path)[-1])[0][:-9]
-        settings_filename = "%s_settings.json" % episode_id
-        return settings_filename
+        return "%s_recipe.json" % episode_id
 
 
 @eel.expose
 def get_global_track_options():
-    global global_track_options
-    return global_track_options
+    return episode.recipe.mixed_track_recipe.to_json()
 
 
 @eel.expose
 def set_live_timestamps(live_timestamps):
-    global global_track_options
-    global_track_options["live_timestamps"] = live_timestamps
+    global episode
+    episode.recipe.mixed_track_recipe.live_timestamps = live_timestamps
 
 
 @eel.expose
@@ -415,183 +307,78 @@ def upload_audio(filepath):
 
 @eel.expose
 def add_intro_backtrack(filename, slice, overlay_sync_point):
-    global mixed_track, global_track_overlays
-
-    if mixed_track.activity_range_cache is None or len(mixed_track.activity_range_cache) == 0:
-        raise ValueError("We ran into an issue applying the intro backtrack. Is your mixed track of speakers silent?")
-
-    # find first voice timestamp
-    first_voice_timestamp = None
-    for lt in global_track_options["live_timestamps"]:
-        for va in mixed_track.activity_range_cache:
-            if va[0] <= lt[0] <= va[1]:
-                first_voice_timestamp = lt[0]
-                break
-            elif lt[0] <= va[0] <= lt[1]:
-                first_voice_timestamp = va[0]
-                break
-            elif va[0] > lt[1]:
-                # search optimization
-                break
-        if first_voice_timestamp is not None:
-            break
-
-    if first_voice_timestamp is None:
-        raise ValueError("We ran into an issue applying the intro backtrack. Are your selected live segments silent?")
-
-    duration_until_sync_point_s = overlay_sync_point - slice[0]
-    backtrack_duration_s = slice[1] - slice[0]
-    if not 0 < duration_until_sync_point_s < backtrack_duration_s:
-        raise ValueError("We ran into an issue applying the intro backtrack. The talking start point should be within the segment of selected music.")
-
-    overlay_path = os.path.join("gui/media/%s" % filename)
-    overlay_config = AudioOverlayer.automated_intro(
-        overlay_path, slice, overlay_sync_point, first_voice_timestamp
-    ).to_config()
-    global_track_overlays["intro"] = overlay_config
+    """
+    Creates recipe for intro audio overlay
+    """
+    global episode
+    episode.add_intro_overlay(filename, slice, overlay_sync_point)
 
 
 @eel.expose
 def remove_intro_backtrack():
-    global global_track_overlays
-    del global_track_overlays["intro"]
+    global episode
+    episode.recipe.mixed_track_recipe.remove_overlays_with_tag("intro")
 
 
 @eel.expose
 def add_outro_backtrack(filename, slice, overlay_sync_point):
-    global mixed_track, global_track_overlays
-
-    if mixed_track.activity_range_cache is None or len(mixed_track.activity_range_cache) == 0:
-        raise ValueError("We ran into an issue applying the outro backtrack. Is your mixed track of speakers silent?")
-
-    # find last voice timestamp
-    last_voice_timestamp = None
-    for lt in global_track_options["live_timestamps"]:
-        for va in mixed_track.activity_range_cache:
-            if va[0] <= lt[0] <= va[1] or lt[0] <= va[0] <= lt[1]:
-                last_voice_timestamp = va[1] if va[1] < lt[1] else lt[1]
-                break
-            elif va[0] > lt[1]:
-                # search optimization
-                break
-        if last_voice_timestamp is not None:
-            break
-
-    if last_voice_timestamp is None:
-        raise ValueError("We ran into an issue applying the intro backtrack. Are your selected live segments silent?")
-
-    last_voice_timestamp = mixed_track.activity_range_cache[-1][1]
-    duration_until_sync_point_s = overlay_sync_point - slice[0]
-    backtrack_duration_s = slice[1] - slice[0]
-    if not 0 < duration_until_sync_point_s < backtrack_duration_s:
-        raise ValueError("We ran into an issue applying the outro backtrack. The talking end point should be within the segment of selected music.")
-
-    overlay_path = os.path.join("gui/media/%s" % filename)
-    overlay_config = AudioOverlayer.automated_outro(
-        overlay_path, slice, overlay_sync_point, last_voice_timestamp
-    ).to_config()
-    global_track_overlays["outro"] = overlay_config
+    """
+    Creates recipe for outro audio overlay
+    """
+    global episode
+    episode.add_outro_overlay(filename, slice, overlay_sync_point)
 
 
 @eel.expose
 def remove_outro_backtrack():
-    global global_track_overlays
-    del global_track_overlays["outro"]
+    global episode
+    episode.recipe.mixed_track_recipe.remove_overlays_with_tag("outro")
 
 
 @eel.expose
 def get_global_track_overlays():
-    global global_track_overlays
-    return global_track_overlays
+    global episode
+    return episode.recipe.mixed_track_recipe.overlays
 
 
 @eel.expose
 def add_insert(filename, slice, timestamp):
-    global global_track_options
-    insert_path = os.path.join("gui/media/%s" % filename)
-    insert_options = AudioInserter(insert_path, slice, timestamp).to_config()
-    global_track_options["inserts"].append(insert_options)
+    """
+    Creates recipe for audio insert
+    """
+    global episode
+    episode.add_insert(filename, slice, timestamp)
 
 
 @eel.expose
 def edit_insert(i_insert, filename, slice, timestamp):
-    global global_track_options
-    if 0 <= i_insert < len(global_track_options["inserts"]):
-        insert_path = os.path.join("gui/media/%s" % filename)
-        insert_options = AudioInserter(insert_path, slice, timestamp).to_config()
-        global_track_options["inserts"][i_insert] = insert_options
+    global episode
+    episode.update_insert(i_insert, filename, slice, timestamp)
 
 
 @eel.expose
-def remove_insert(i):
-    global global_track_options
-    if 0 <= i < len(global_track_options["inserts"]):
-        del global_track_options["inserts"][i]
+def remove_insert(i_insert):
+    global episode
+    episode.del_insert(i_insert)
 
 
 @eel.expose
 def process():
-    global global_track_overlays, global_track_options, mixed_track, settings_file
+    global episode
 
-    global_track_options["overlays"].clear()
-    if global_track_overlays["intro"] is not None:
-        global_track_options["overlays"].append(global_track_overlays["intro"])
-    if global_track_overlays["outro"] is not None:
-        global_track_options["overlays"].append(global_track_overlays["outro"])
-    global_track_options["overlays"].extend(global_track_overlays["others"])
-
-    # write mixed track metadata to settings file
-    del settings_file["global_track"]
-    settings_file["global_track"] = {
-        "live_timestamps": [
-            [s_to_timestamp(ts[0]), s_to_timestamp(ts[1])] for ts in global_track_options["live_timestamps"]
-        ] if "live_timestamps" in global_track_options else [],
-        "silence_timestamps": [
-            [s_to_timestamp(ts[0]), s_to_timestamp(ts[1])] for ts in global_track_options["silence_timestamps"]
-        ] if "silence_timestamps" in global_track_options else [],
-        "min_silence_duration": global_track_options["min_silence_duration"],
-        "fX": global_track_options["fX"] if "fX" in global_track_options else [],
-        "overlays": global_track_options["overlays"],
-        "inserts": global_track_options["inserts"],
-    }
-    # write settings file to disk
+    # figure out where to write recipe file
     cache_mixed_track_path = mixed_track.audio_buffer._path
     episode_id = os.path.splitext(os.path.split(cache_mixed_track_path)[-1])[0]
-    settings_filename = "%s_settings.json" % episode_id
-    settings_path = os.path.abspath(os.path.join(bundle_dir, 'gui/media/%s' % settings_filename))
-    with open(settings_path, 'w') as settings_fp:
-        json.dump(settings_file, settings_fp, indent=4, sort_keys=True)
+    recipe_filename = "%s_recipe.json" % episode_id
+    recipe_path = os.path.abspath(os.path.join(bundle_dir, 'gui/media/%s' % recipe_filename))
 
-    silence_intervals = []
-    if "live_timestamps" in global_track_options:
-        silence_intervals.extend(mixed_track.get_silence_ranges_from_activity_ranges(global_track_options["live_timestamps"]))
-    if "silence_timestamps" in global_track_options:
-        silence_intervals.extend(global_track_options["silence_timestamps"])
-    for silence_interval in silence_intervals:
-        mixed_track.apply_silence_to_interval(silence_interval)
+    # figure out where to write audio file
+    audio_filename = "%s_mastered.flac" % episode_id
+    mixed_track_path = os.path.abspath(os.path.join(bundle_dir, 'gui/media/%s' % audio_filename))
 
-    SilenceRemover(global_track_options["min_silence_duration"]).remove(mixed_track, padding_s=0.2)
-
-    # Audio Overlays
-    for overlay_config in global_track_options["overlays"]:
-        mixed_track = AudioOverlayer.from_config(overlay_config).overlay(mixed_track)
-        mixed_track.audio_buffer.normalize()
-
-    # Ad Inserts
-    for insert_config in global_track_options["inserts"]:
-        AudioInserter.from_config(insert_config).insert_into(mixed_track)
-    mixed_track.audio_buffer.normalize()
-
-    # global fX chain
-    if "fX" in global_track_options:
-        FXChain(global_track_options["fX"]).apply(mixed_track)
-
-    mixed_track.audio_buffer.normalize()
-    mixed_track.audio_buffer.stereofy()
-    filename = "%s_mastered.flac" % episode_id
-    mixed_track_path = os.path.abspath(os.path.join(bundle_dir, 'gui/media/%s' % filename))
-    mixed_track.audio_buffer._path = mixed_track_path
-    mixed_track.audio_buffer.write()
+    episode.write_recipe(recipe_path)
+    episode.process()
+    episode.write_audio(mixed_track_path)
 
 
 eel.start(

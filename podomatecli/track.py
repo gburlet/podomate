@@ -1,3 +1,4 @@
+from audio_buffer import AudioBuffer
 from responsive_timeline import ResponsiveTimeline
 from silence_detector import SilenceDetector
 from utils import read_config_interval
@@ -5,7 +6,7 @@ from utils import read_config_interval
 
 class Track(object):
     """
-    Data structure containing data and metadata for each track
+    Data structure containing data and metadata for each generic audio track
     """
 
     def __init__(self, audio, master=False):
@@ -14,6 +15,12 @@ class Track(object):
         self.timeline = ResponsiveTimeline()
         self.silence_range_cache = None         # could be out of date
         self.activity_range_cache = None        # could be out of date
+
+    @staticmethod
+    def from_audio_file(path, master=False):
+        audio_buffer = AudioBuffer(path)
+        audio_buffer.read(normalize=True)
+        return Track(audio=audio_buffer, master=master)
 
     @property
     def silence_ranges(self):

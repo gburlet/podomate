@@ -7,17 +7,18 @@ from utils import read_config_timestamp, s_to_timestamp
 
 class AudioOverlayer(object):
 
-    def __init__(self, overlay_path, overlay_slice, sync_point, volume_automations=None):
+    def __init__(self, overlay_path, overlay_slice, sync_point, volume_automations=None, tag=None):
         self._overlay_path = overlay_path
         self._overlay_slice = [read_config_timestamp(i) for i in overlay_slice] if overlay_slice else None
         self._sync_point_overlay = read_config_timestamp(sync_point["overlay"])
         self._sync_point_master = read_config_timestamp(sync_point["master"])
         self._volume_automations = volume_automations
+        self._tag = tag
 
     @staticmethod
     def from_config(config):
         return AudioOverlayer(
-            config["path"], config.get("slice"), config["sync_point"], config.get("volume_automations")
+            config["path"], config.get("slice"), config["sync_point"], config.get("volume_automations"), config.get("tag")
         )
 
     @staticmethod
@@ -61,7 +62,8 @@ class AudioOverlayer(object):
                 "overlay": overlay_sync_point,
                 "master": master_sync_point
             },
-            "volume_automations": volume_automations
+            "volume_automations": volume_automations,
+            "tag": "intro"
         }
 
         return AudioOverlayer.from_config(backtrack_options)
@@ -108,7 +110,8 @@ class AudioOverlayer(object):
                 "overlay": overlay_sync_point,
                 "master": master_sync_point
             },
-            "volume_automations": volume_automations
+            "volume_automations": volume_automations,
+            "tag": "outro"
         }
 
         return AudioOverlayer.from_config(backtrack_options)
@@ -137,6 +140,7 @@ class AudioOverlayer(object):
                 "overlay": s_to_timestamp(self._sync_point_overlay),
                 "master": s_to_timestamp(self._sync_point_master)
             },
-            "volume_automations": self._volume_automations
+            "volume_automations": self._volume_automations,
+            "tag": self._tag
         }
         return backtrack_options
