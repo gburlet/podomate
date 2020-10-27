@@ -70,25 +70,6 @@ def check_version_active():
 
 
 @eel.expose
-def load_episode(settings_path):
-    """
-    # TODO: make program state read settings_file not individual data structures that then get transformed into settings_file
-    global settings_file, tracks, global_track_overlays, global_track_options
-
-    if os.path.isfile(settings_path):
-        with open(settings_path, 'r') as sfp:
-            settings_file = json.load(sfp)
-            # load local tracks
-            for i_track, local_track in enumerate(settings_file["local_tracks"]):
-                # TODO: load up track options like fX, etc.
-                set_speaker_track(local_track["path"], i_track)
-            global_track_options = settings_file["global_track"]
-            for overlay in global_track_options["overlays"]:
-            global_track_overlays
-    """
-
-
-@eel.expose
 def check_update():
     global latest_version, latest_mac_version_link
     api_endpoint = "%s/update" % API_ROOT
@@ -233,6 +214,24 @@ def check_license():
 
                 return True
     return False
+
+
+@eel.expose
+def load_episode_recipe(path):
+    global episode
+
+    if os.path.isfile(path):
+        episode = Episode.from_recipe_file(path)
+
+        # load audio assets into media directory for the web app
+        for speaker_track in episode.speaker_tracks:
+            upload_audio(speaker_track.audio_buffer._path)
+        for overlay in episode.recipe.mixed_track_recipe.overlays:
+            upload_audio(overlay["path"])
+        for insert in episode.recipe.mixed_track_recipe.inserts:
+            upload_audio(insert["path"])
+
+        mix_speaker_tracks([])
 
 
 @eel.expose
