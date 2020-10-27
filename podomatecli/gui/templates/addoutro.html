@@ -70,13 +70,15 @@
 <script type="text/javascript" src="../js/wavesurfer.regions.min.js"></script>
 <script type="text/javascript" src="../js/interactive_waveform.js"></script>
 <script type="text/javascript">
-var outroAudioFilepath = null;
+var outroAudioFilename = null;
+var outroAudioPath = null;
 
 async function handleAudioInput() {
     $("#overlay").fadeIn();
     var file = $(this)[0].files[0];
-    outroAudioFilepath = await eel.upload_audio(file.path)();
-    setupInteractiveWaveform(outroAudioFilepath, "waveform", 1);
+    outroAudioPath = file.path;
+    outroAudioFilename = await eel.upload_audio(outroAudioPath)();
+    setupInteractiveWaveform(outroAudioFilename, "waveform", 1);
 
     $("#outro-audio-upload").hide();
     $("#audio-interact").show();
@@ -84,19 +86,27 @@ async function handleAudioInput() {
 }
 
 async function setupUI() {
-    let overlayConfig = await eel.get_global_track_overlays()();
-    if (overlayConfig["outro"] == null) {
+    let overlayConfig = await eel.get_music_overlays()();
+    let outroOverlay = null;
+    overlayConfig.forEach(function(overlay) {
+        if (overlay.tag == "outro") {
+            outroOverlay = overlay;
+        }
+    });
+
+    if (outroOverlay == null) {
         // setup audio selection UI
         $("input[type='file']").change(handleAudioInput);
         $('[data-toggle="popover"]').popover({"html": true});
         $('.file-upload').file_upload();
     } else {
-        outroAudioFilepath = overlayConfig["outro"]["path"].slice(10);
-        setupInteractiveWaveform(outroAudioFilepath, "waveform", 1);
+        outroAudioPath = outroOverlay["path"];
+        outroAudioFilename = outroOverlay["filename"];
+        setupInteractiveWaveform(outroAudioFilename, "waveform", 1);
         wavesurfer.on('ready', function() {
-            wavesurfer.seekAndCenter(overlayConfig["outro"]["sync_point"]["overlay"]/wavesurfer.getDuration());
+            wavesurfer.seekAndCenter(outroOverlay["sync_point"]["overlay"]/wavesurfer.getDuration());
         });
-        addRegion(overlayConfig["outro"]["slice"][0], overlayConfig["outro"]["slice"][1]);
+        addRegion(outroOverlay["slice"][0], outroOverlay["slice"][1]);
 
         $("#outro-audio-upload").hide();
         $("#audio-interact").show();
@@ -106,7 +116,7 @@ async function setupUI() {
 async function handleAddOutro() {
     $("#alert").hide();
 
-    if (outroAudioFilepath == null) {
+    if (outroAudioFilename == null) {
         setError("<b>Oh Snap!</b> You need to select an audio file first.");
         return;
     }
@@ -128,7 +138,7 @@ async function handleAddOutro() {
     }
 
     $("#overlay").fadeIn();
-    await eel.add_outro_backtrack(outroAudioFilepath, slice, overlaySyncPoint)();
+    await eel.add_outro_backtrack(outroAudioPath, slice, overlaySyncPoint)();
     $("#overlay").fadeOut();
     location.href = "/templates/music.html";
 }

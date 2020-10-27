@@ -1,16 +1,15 @@
 import numpy as np
 
-from utils import read_config_timestamp
+from utils import time_to_s
 
 
 class TrackAligner(object):
 
-    def __init__(self, tracks_config=None):
-        if tracks_config:
-            self._track_offsets = [0.]*len(tracks_config)
-            for i_track, track_config in enumerate(tracks_config):
-                if "offset" in track_config:
-                    self._track_offsets[i_track] = read_config_timestamp(track_config["offset"])
+    def __init__(self, track_offsets=None):
+        if track_offsets and len(track_offsets) > 0:
+            self._track_offsets = [
+                time_to_s(offset) if offset else None for offset in track_offsets
+            ]
 
     def align(self, tracks, track_offsets=None):
         if track_offsets is None:
@@ -171,8 +170,12 @@ class TrackAligner(object):
         master_silence_ranges = master_track.silence_ranges
         master_activity_ranges = master_track.get_activity_ranges_from_silence_ranges(master_silence_ranges)
         for islave, slave_track in enumerate(tracks):
-            if islave == imaster or self._track_offsets[islave] != 0:
-                # skip offset calculation if master track or manual offset provided
+            if islave == imaster:
+                # skip offset calculation if master track
+                self._track_offsets[imaster] = 0.
+                continue
+            elif self._track_offsets[islave] is not None:
+                # skip offset calculation if manual offset provided
                 continue
 
             # locate longest audio_buffer activity near the middle of the slave track

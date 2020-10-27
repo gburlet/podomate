@@ -1,11 +1,12 @@
+from audio_buffer import AudioBuffer
 from responsive_timeline import ResponsiveTimeline
 from silence_detector import SilenceDetector
-from utils import read_config_interval
+from utils import time_interval_to_s
 
 
 class Track(object):
     """
-    Data structure containing data and metadata for each track
+    Data structure containing data and metadata for each generic audio track
     """
 
     def __init__(self, audio, master=False):
@@ -15,10 +16,16 @@ class Track(object):
         self.silence_range_cache = None         # could be out of date
         self.activity_range_cache = None        # could be out of date
 
+    @staticmethod
+    def from_audio_file(path, master=False):
+        audio_buffer = AudioBuffer(path)
+        audio_buffer.read(normalize=True)
+        return Track(audio=audio_buffer, master=master)
+
     @property
     def silence_ranges(self):
         # TODO: make min_silence_len_s parameterable, maybe to match config param min_silence_duration?
-        self.silence_range_cache = SilenceDetector(threshold=0.125, min_silence_len_s=0.5).detect_silences(self.audio_buffer)
+        self.silence_range_cache = SilenceDetector(threshold=0.3, min_silence_len_s=0.5).detect_silences(self.audio_buffer)
         self.activity_range_cache = self.get_activity_ranges_from_silence_ranges(self.silence_range_cache)
         return self.silence_range_cache
 
@@ -34,7 +41,7 @@ class Track(object):
             activity_ranges = []
             time_cursor = 0.
             for silence in silence_ranges:
-                silence = read_config_interval(silence)
+                silence = time_interval_to_s(silence)
                 if time_cursor < silence[0]:
                     activity_ranges.append((time_cursor, silence[0]))
                 time_cursor = silence[1]

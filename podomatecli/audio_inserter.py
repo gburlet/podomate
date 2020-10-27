@@ -1,14 +1,18 @@
+import copy
+
+import os
+
 from audio_buffer import AudioBuffer
 from track import Track
-from utils import read_config_timestamp, s_to_timestamp
+from utils import time_to_s, time_to_timestamp, time_interval_to_timestamp, time_interval_to_s
 
 
 class AudioInserter(object):
 
     def __init__(self, path, slice, timestamp, volume_automations=None):
         self._path = path
-        self._slice = [read_config_timestamp(i) for i in slice] if slice else None
-        self._timestamp = read_config_timestamp(timestamp)
+        self._slice = [time_to_s(i) for i in slice] if slice else None
+        self._timestamp = time_to_s(timestamp)
         self._volume_automations = volume_automations
 
     @staticmethod
@@ -29,11 +33,18 @@ class AudioInserter(object):
 
         return self._timestamp, insert_audio_buffer.get_duration_s()
 
-    def to_config(self):
+    def to_json(self, str_timestamps=False):
         insert_options = {
             "path": self._path,
-            "slice": [s_to_timestamp(ts) for ts in self._slice] if self._slice else None,
-            "timestamp": s_to_timestamp(self._timestamp),
-            "volume_automations": self._volume_automations
+            "filename": os.path.split(self._path)[-1],
+            "timestamp": time_to_timestamp(self._timestamp) if str_timestamps else time_to_s(self._timestamp),
         }
+        if self._slice:
+            insert_options["slice"] = time_interval_to_timestamp(self._slice) if str_timestamps else time_interval_to_s(self._slice)
+        if self._volume_automations:
+            formatted_volume_automations = copy.copy(self._volume_automations)
+            for va in formatted_volume_automations:
+                va["timestamp"] = time_to_timestamp(va["timestamp"]) if str_timestamps else time_to_s(va["timestamp"])
+                insert_options["volume_automations"] = formatted_volume_automations
+
         return insert_options

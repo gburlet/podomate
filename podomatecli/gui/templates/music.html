@@ -63,19 +63,20 @@
 <script type="text/javascript">
 async function setupUI() {
     // get state and populate UI accordingly
-    let trackOverlays = await eel.get_global_track_overlays()();
-    if (trackOverlays["intro"] != null) {
-        $("#delete-backtrack-intro").show();
-        $("#intro-text").text("Change Intro");
-        $("#backtrack-intro").addClass("backtrack");
-        $("#backtrack-intro").removeClass("new-backtrack");
-    }
-    if (trackOverlays["outro"] != null) {
-        $("#delete-backtrack-outro").show();
-        $("#outro-text").text("Change Outro");
-        $("#backtrack-outro").addClass("backtrack");
-        $("#backtrack-outro").removeClass("new-backtrack");
-    }
+    let trackOverlays = await eel.get_music_overlays()();
+    trackOverlays.forEach(function(overlay) {
+        if (overlay.tag == "intro") {
+            $("#delete-backtrack-intro").show();
+            $("#intro-text").text("Change Intro");
+            $("#backtrack-intro").addClass("backtrack");
+            $("#backtrack-intro").removeClass("new-backtrack");
+        } else if (overlay.tag == "outro") {
+            $("#delete-backtrack-outro").show();
+            $("#outro-text").text("Change Outro");
+            $("#backtrack-outro").addClass("backtrack");
+            $("#backtrack-outro").removeClass("new-backtrack");
+        }
+    });
 }
 
 function toTitleCase(str) {

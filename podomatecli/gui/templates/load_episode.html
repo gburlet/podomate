@@ -12,15 +12,14 @@
 {% block content %}
 <div style="margin: -1.5em 0em 2em 0em">
     <h2>Load Episode</h2>
-    <p>Load up a previous episode that you created with Podomate for further editing. You will need to load up the settings
-    file that was available for download at the end of the editing process for that episode.</p>
+    <p>Load up a previous episode's recipe file that was created by Podomate for further editing.</p>
 </div>
 
 <div id="intro-settings-upload" class="row">
     <div class="col-lg-12">
         <div class="settings-upload">
             <h3 class="subheading text-muted">
-                Episode Settings
+                Episode Recipe
                 <a id="settings-badge" tabindex="-1" class="badge-pop badge badge-success align-middle" data-trigger="hover" data-container="body" data-toggle="popover" data-placement="bottom" data-content="<b>File Type</b>: .json">
                     <i class="fas fa-info-circle"></i> Supported Files
                 </a>
@@ -49,7 +48,7 @@
 async function handleSettingsInput() {
     $("#overlay").fadeIn();
     var file = $(this)[0].files[0];
-    await eel.load_episode(file.path)();
+    await eel.load_episode_recipe(file.path)();
     location.href = "/templates/finish.html"
 }
 

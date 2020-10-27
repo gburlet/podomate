@@ -6,7 +6,7 @@ import soundfile as sf
 from scipy.io import wavfile
 import numpy as np
 import warnings
-from utils import read_config_timestamp
+from utils import time_to_s
 
 
 class AudioBuffer(object):
@@ -184,7 +184,7 @@ class AudioBuffer(object):
             start_ts (timestamp): where to start the fade in
             length_s (float): length of fade in
         """
-        start_s = read_config_timestamp(start_ts)
+        start_s = time_to_s(start_ts)
         fade_start_sample = self.get_sample_from_timestamp(start_s)
         fade_end_sample = self.get_sample_from_timestamp(start_s+length_s)
         envelope = np.linspace(0., 1., fade_end_sample-fade_start_sample, endpoint=True)
@@ -198,7 +198,7 @@ class AudioBuffer(object):
             end_ts (timestamp): where to end the fade out
             length_s (float): length of fade in
         """
-        end_s = read_config_timestamp(end_ts)
+        end_s = time_to_s(end_ts)
         fade_start_sample = self.get_sample_from_timestamp(end_s-length_s)
         fade_end_sample = self.get_sample_from_timestamp(end_s)
         envelope = np.linspace(1., 0., fade_end_sample-fade_start_sample, endpoint=True)
