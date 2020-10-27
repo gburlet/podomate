@@ -288,6 +288,12 @@ def get_recipe_filename():
 
 
 @eel.expose
+def reset():
+    global episode
+    episode.reset()
+
+
+@eel.expose
 def set_speaker_track(audio_path, i_speaker):
     global episode
     track = Track.from_audio_file(audio_path)

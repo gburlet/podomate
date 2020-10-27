@@ -11,8 +11,9 @@
         <div class="row">
             <div class="col-md-6"></div>
         </div>
-        <a id="btn-download" class="splash-btn-cta" download="podomate_episode.flac" href="#" >SAVE EPISODE <i class="fas fa-download"></i></a>
-        <a id="btn-download-settings" class="splash-btn-cta" download="podomate_episode_recipe.json" href="#" >SAVE RECIPE <i class="fas fa-sliders-h"></i></a>
+        <a id="btn-download" class="splash-btn-cta" download="podomate_episode.flac" href="#"><i class="fas fa-download btn-icon"></i> SAVE EPISODE</a>
+        <a id="btn-download-settings" class="splash-btn-cta" download="podomate_episode_recipe.json" href="#"><i class="fas fa-tasks btn-icon"></i> SAVE RECIPE</a>
+        <button id="btn-start-again" class="splash-btn-cta"><i class="fas fa-redo btn-icon"></i> START AGAIN</button>
     </div>
 {% endblock %}
 
@@ -28,8 +29,17 @@
         $("#btn-download-settings").attr("href", recipeLink);
     }
 
+    async function startAgain() {
+        await eel.reset()();
+        location.href = "/templates/main.html";
+    }
+
     $(document).ready(function() {
         setDownloadPaths();
+    });
+
+    $("#btn-start-again").click(function() {
+        startAgain();
     });
 </script>
 {% endblock %}

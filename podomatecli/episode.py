@@ -42,6 +42,11 @@ class Episode(object):
 
         return episode
 
+    def reset(self):
+        self.recipe = EpisodeRecipe()
+        self.speaker_tracks.clear()
+        self.mixed_track = None
+
     def add_speaker_track(self, track, recipe=None):
         self.speaker_tracks.append(track)
         if recipe is None:

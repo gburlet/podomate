@@ -110,3 +110,13 @@ body {
     font-size: 1em;
     margin-left: 1em;
 }
+
+#btn-start-again {
+    height: 50px;
+    width: 200px;
+    margin-left: 1em;
+}
+
+.btn-icon {
+    padding-right: 0.5em;
+}
