@@ -144,9 +144,17 @@ function deleteSelectedRegion() {
     $("#snap-cursor-region").hide();
 }
 
+function tweakRegion(region) {
+    if (region.start < 0) region.start = 0;
+    if (region.end > wavesurfer.getDuration()) {
+        region.end = wavesurfer.getDuration();
+    }
+}
+
 function handleAddRegion(region) {
     $("#alert").hide();
     numRegions++;
+    tweakRegion(region);
     if (numRegions > regionLimit) {
         setError("<b>Oh Snap!</b> You can only select " + regionLimit + " segment(s) of music for the backtrack");
         region.remove();
@@ -158,6 +166,7 @@ function handleRemoveRegion(region) {
 }
 
 function handleUpdateRegion(region) {
+    tweakRegion(region);
     selectRegion(region);
 }
 

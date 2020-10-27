@@ -65,6 +65,10 @@
             $("#alert").hide();
             var liveTimestamps = [];
             $.each(wavesurfer.regions.list, function(rid, region) {
+                // ensure region bounds are sane
+                if (region.start < 0) region.start = 0;
+                if (region.end > wavesurfer.getDuration()) region.end = wavesurfer.getDuration();
+
                 // skip really short (< 1s) erroneously input sections
                 if (region.end - region.start < 1) return;
                 liveTimestamps.push([region.start, region.end]);
