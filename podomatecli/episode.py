@@ -195,7 +195,7 @@ class Episode(object):
 
         # Audio Overlays
         for overlay_config in self.recipe.mixed_track_recipe.overlays:
-            AudioOverlayer.from_config(overlay_config).overlay(self.mixed_track)
+            self.mixed_track = AudioOverlayer.from_config(overlay_config).overlay(self.mixed_track)
             self.mixed_track.audio_buffer.normalize()
 
         # Ad Inserts
