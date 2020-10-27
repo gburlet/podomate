@@ -1,6 +1,6 @@
 import numpy as np
 
-from utils import read_config_timestamp
+from utils import time_to_s
 
 
 class TrackAligner(object):
@@ -8,7 +8,7 @@ class TrackAligner(object):
     def __init__(self, track_offsets=None):
         if track_offsets and len(track_offsets) > 0:
             self._track_offsets = [
-                read_config_timestamp(offset) if offset else None for offset in track_offsets
+                time_to_s(offset) if offset else None for offset in track_offsets
             ]
 
     def align(self, tracks, track_offsets=None):

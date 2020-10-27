@@ -82,11 +82,13 @@
 <script type="text/javascript" src="../js/wavesurfer.regions.min.js"></script>
 <script type="text/javascript" src="../js/interactive_waveform.js"></script>
 <script type="text/javascript">
+var snippetAudioPath = null;
 var snippetAudioFilename = null;
 var mixedTrackFilename = null;
 var iInsert = NaN;
 var snippetConfig = {
     "path": null,
+    "filename": null,
     "slice": null,
     "timestamp": null
 };
@@ -95,12 +97,12 @@ async function setupUI() {
     mixedTrackFilename = await eel.get_mixed_track_filename()();
     const urlParams = new URLSearchParams(window.location.search);
     iInsert = parseInt(urlParams.get('iInsert'));
-    let globalTrackOptions = await eel.get_global_track_options()();
-    let trackInserts = globalTrackOptions["inserts"];
+    let trackInserts = await eel.get_snippet_inserts()();
     if (!isNaN(iInsert) && iInsert >= 0 && iInsert < trackInserts.length) {
         // we found a saved insert, load it up for editing
         snippetConfig = trackInserts[iInsert];
-        snippetAudioFilename = snippetConfig["path"].slice(10);
+        snippetAudioPath = snippetConfig["path"];
+        snippetAudioFilename = snippetConfig["filename"];
         showSelectRegion();
     } else {
         showAudioSelector();
@@ -155,7 +157,8 @@ function showSelectPlacement() {
 async function handleAudioInput() {
     $("#overlay").fadeIn();
     var file = $(this)[0].files[0];
-    snippetAudioFilename = await eel.upload_audio(file.path)();
+    snippetAudioPath = file.path;
+    snippetAudioFilename = await eel.upload_audio(snippetAudioPath)();
     showSelectRegion();
     $("#overlay").fadeOut();
 }
@@ -194,9 +197,9 @@ async function handleAddSnippet() {
     $("#overlay").fadeIn();
     snippetConfig["timestamp"] = wavesurfer.getCurrentTime();
     if (isNaN(iInsert)) {
-        await eel.add_insert(snippetAudioFilename, snippetConfig["slice"], snippetConfig["timestamp"])();
+        await eel.add_insert(snippetAudioPath, snippetConfig["slice"], snippetConfig["timestamp"])();
     } else {
-        await eel.update_insert(iInsert, snippetAudioFilename, snippetConfig["slice"], snippetConfig["timestamp"])();
+        await eel.update_insert(iInsert, snippetAudioPath, snippetConfig["slice"], snippetConfig["timestamp"])();
     }
     $("#overlay").fadeOut();
     location.href = "/templates/snippets.html";

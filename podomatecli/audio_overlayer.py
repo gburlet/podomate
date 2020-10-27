@@ -1,17 +1,21 @@
+import copy
+
+import os
+
 from audio_buffer import AudioBuffer
 from mixer import Mixer
 from track import Track
 from track_aligner import TrackAligner
-from utils import read_config_timestamp, s_to_timestamp
+from utils import time_to_s, time_to_timestamp, time_interval_to_timestamp, time_interval_to_s
 
 
 class AudioOverlayer(object):
 
     def __init__(self, overlay_path, overlay_slice, sync_point, volume_automations=None, tag=None):
-        self._overlay_path = overlay_path
-        self._overlay_slice = [read_config_timestamp(i) for i in overlay_slice] if overlay_slice else None
-        self._sync_point_overlay = read_config_timestamp(sync_point["overlay"])
-        self._sync_point_master = read_config_timestamp(sync_point["master"])
+        self._path = overlay_path
+        self._slice = [time_to_s(i) for i in overlay_slice] if overlay_slice else None
+        self._sync_point_overlay = time_to_s(sync_point["overlay"])
+        self._sync_point_master = time_to_s(sync_point["master"])
         self._volume_automations = volume_automations
         self._tag = tag
 
@@ -57,6 +61,7 @@ class AudioOverlayer(object):
 
         backtrack_options = {
             "path": overlay_path,
+            "filename": os.path.split(overlay_path)[-1],
             "slice": overlay_slice,
             "sync_point": {
                 "overlay": overlay_sync_point,
@@ -105,6 +110,7 @@ class AudioOverlayer(object):
 
         backtrack_options = {
             "path": overlay_path,
+            "filename": os.path.split(overlay_path)[-1],
             "slice": overlay_slice,
             "sync_point": {
                 "overlay": overlay_sync_point,
@@ -117,11 +123,11 @@ class AudioOverlayer(object):
         return AudioOverlayer.from_config(backtrack_options)
 
     def overlay(self, track):
-        overlay_audio_buffer = AudioBuffer(self._overlay_path)
+        overlay_audio_buffer = AudioBuffer(self._path)
         overlay_audio_buffer.read(normalize=False)
         overlay_track = Track(audio=overlay_audio_buffer, master=False)
-        if self._overlay_slice:
-            overlay_track.slice(self._overlay_slice)
+        if self._slice:
+            overlay_track.slice(self._slice)
         if self._volume_automations and len(self._volume_automations) > 0:
             overlay_track.apply_volume_automation(self._volume_automations)
 
@@ -132,15 +138,22 @@ class AudioOverlayer(object):
 
         return Mixer().mix_tracks(tracks)
 
-    def to_config(self):
+    def to_json(self, str_timestamps=False):
         backtrack_options = {
-            "path": self._overlay_path,
-            "slice": [s_to_timestamp(ts) for ts in self._overlay_slice] if self._overlay_slice else None,
+            "path": self._path,
+            "filename": os.path.split(self._path)[-1],
             "sync_point": {
-                "overlay": s_to_timestamp(self._sync_point_overlay),
-                "master": s_to_timestamp(self._sync_point_master)
+                "overlay": time_to_timestamp(self._sync_point_overlay) if str_timestamps else time_to_s(self._sync_point_overlay),
+                "master": time_to_timestamp(self._sync_point_master) if str_timestamps else time_to_s(self._sync_point_master)
             },
-            "volume_automations": self._volume_automations,
             "tag": self._tag
         }
+        if self._slice:
+            backtrack_options["slice"] = time_interval_to_timestamp(self._slice) if str_timestamps else time_interval_to_s(self._slice)
+        if self._volume_automations:
+            formatted_volume_automations = copy.copy(self._volume_automations)
+            for va in formatted_volume_automations:
+                va["timestamp"] = time_to_timestamp(va["timestamp"]) if str_timestamps else time_to_s(va["timestamp"])
+            backtrack_options["volume_automations"] = formatted_volume_automations
+
         return backtrack_options

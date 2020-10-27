@@ -13,7 +13,7 @@ from audio_buffer import AudioBuffer
 from silence_remover import SilenceRemover
 from track import Track
 from track_aligner import TrackAligner
-from utils import read_config_timestamp, read_config_interval
+from utils import time_to_s, time_interval_to_s
 
 parser = argparse.ArgumentParser(description='Edit a podcast')
 parser.add_argument('config', type=str, help='Parameter JSON file')
@@ -32,9 +32,8 @@ if __name__ == "__main__":
     #pbar = tqdm(total=total_steps)
 
     episode = Episode.from_recipe_file(args.config)
-    #episode.mix_speaker_tracks()
-    #episode.process()
-    #episode.write_audio(args.output)
-    episode.write_recipe(args.output)
+    episode.mix_speaker_tracks()
+    episode.process()
+    episode.write_audio(args.output)
 
     # pbar.close()

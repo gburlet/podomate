@@ -1,3 +1,8 @@
+from audio_inserter import AudioInserter
+from audio_overlayer import AudioOverlayer
+from utils import time_interval_to_timestamp, time_interval_to_s
+
+
 class MixedTrackRecipe(object):
 
     def __init__(self, **kwargs):
@@ -8,15 +13,36 @@ class MixedTrackRecipe(object):
         self.inserts = kwargs.get("inserts", [])
         self.overlays = kwargs.get("overlays", [])
 
-    def to_json(self):
+    def to_json(self, str_timestamps=False):
+        formatted_silence_timestamps = [
+            time_interval_to_timestamp(sinterval) for sinterval in self.silence_timestamps
+        ] if str_timestamps else [
+            time_interval_to_s(sinterval) for sinterval in self.silence_timestamps
+        ]
+        formatted_live_timestamps = [
+            time_interval_to_timestamp(linterval) for linterval in self.live_timestamps
+        ] if str_timestamps else [
+            time_interval_to_s(linterval) for linterval in self.live_timestamps
+        ]
+
         return {
             "min_silence_duration": self.min_silence_duration,
-            "silence_timestamps": self.silence_timestamps,
-            "live_timestamps": self.live_timestamps,
+            "silence_timestamps": formatted_silence_timestamps,
+            "live_timestamps": formatted_live_timestamps,
             "fX": self.fX,
-            "inserts": self.inserts,
-            "overlays": self.overlays
+            "inserts": [AudioInserter.from_config(insert).to_json(str_timestamps) for insert in self.inserts],
+            "overlays": [AudioOverlayer.from_config(overlay).to_json(str_timestamps) for overlay in self.overlays]
         }
+
+    def add_overlay(self, overlay, allow_duplicate_tags=False):
+        """
+        Args:
+            overlay: overlay recipe
+            allow_duplicate_tags: if False, replace any overlay recipe matching tag with the overlay
+        """
+        if not allow_duplicate_tags:
+            self.remove_overlays_with_tag(overlay["tag"])
+        self.overlays.append(overlay)
 
     def remove_overlays_with_tag(self, tag):
         for i_overlay in range(len(self.overlays)-1,-1,-1):

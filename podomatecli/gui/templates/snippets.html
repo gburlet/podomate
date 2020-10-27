@@ -46,11 +46,10 @@
 <script type="text/javascript">
 var numInserts = 0;
 async function setupUI() {
-    let globalTrackConfig = await eel.get_global_track_options()();
-    let trackInserts = globalTrackConfig["inserts"];
+    let trackInserts = await eel.get_snippet_inserts()();
     numInserts = trackInserts.length;
     for (var iInsert = 0; iInsert < numInserts; iInsert++) {
-        let insertFilename = trackInserts[iInsert]["path"].slice(10);
+        let insertFilename = trackInserts[iInsert]["filename"];
         var insertHTML = `{% with insert_id=-666 %}{% include "insert_snippet.html" %}{% endwith %}`.replace(/(-666)/g, iInsert);
         $(insertHTML).insertBefore("#new-insert");
         $("#filename-insert-"+iInsert).text(insertFilename);

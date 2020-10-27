@@ -12,7 +12,7 @@
             <div class="col-md-6"></div>
         </div>
         <a id="btn-download" class="splash-btn-cta" download="podomate_episode.flac" href="#" >SAVE EPISODE <i class="fas fa-download"></i></a>
-        <a id="btn-download-settings" class="splash-btn-cta" download="podomate_episode_settings.json" href="#" >SAVE SETTINGS <i class="fas fa-sliders-h"></i></a>
+        <a id="btn-download-settings" class="splash-btn-cta" download="podomate_episode_recipe.json" href="#" >SAVE RECIPE <i class="fas fa-sliders-h"></i></a>
     </div>
 {% endblock %}
 
@@ -23,9 +23,9 @@
         let masteredTrackLink = "../media/" + masteredTrackFilename;
         $("#btn-download").attr("href", masteredTrackLink);
 
-        let settingsFilename = await eel.get_settings_filename()();
-        let settingsLink = "../media/" + settingsFilename;
-        $("#btn-download-settings").attr("href", settingsLink);
+        let recipeFilename = await eel.get_recipe_filename()();
+        let recipeLink = "../media/" + recipeFilename;
+        $("#btn-download-settings").attr("href", recipeLink);
     }
 
     $(document).ready(function() {

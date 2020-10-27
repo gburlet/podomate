@@ -35,12 +35,15 @@ class EpisodeRecipe(object):
         return recipe
 
     def to_file(self, path):
-        recipe_data = {
-            "local_tracks": [trecipe.to_json() for trecipe in self.speaker_track_recipes],
-            "global_track": self.mixed_track_recipe.to_json()
-        }
         with open(path, 'w') as fp:
-            json.dump(recipe_data, fp, indent=4, sort_keys=True)
+            fp.write(self.to_json(str_timestamps=True))
+
+    def to_json(self, str_timestamps=False):
+        recipe_data = {
+            "local_tracks": [trecipe.to_json(str_timestamps) for trecipe in self.speaker_track_recipes],
+            "global_track": self.mixed_track_recipe.to_json(str_timestamps)
+        }
+        return json.dumps(recipe_data, indent=4, sort_keys=True)
 
     def add_speaker_track(self, recipe):
         self.speaker_track_recipes.append(recipe)
@@ -57,8 +60,4 @@ class EpisodeRecipe(object):
             del self.speaker_track_recipes[i_speaker]
 
     def __str__(self):
-        return json.dumps({
-                "local_tracks": [trecipe.to_json() for trecipe in self.speaker_track_recipes],
-                "global_track": self.mixed_track_recipe.to_json()
-            }, indent=4, sort_keys=True
-        )
+        return self.to_json()

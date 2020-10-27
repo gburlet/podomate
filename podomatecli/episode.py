@@ -131,8 +131,9 @@ class Episode(object):
 
         overlay_config = AudioOverlayer.automated_intro(
             filename, slice, overlay_sync_point, first_voice_timestamp
-        ).to_config()
-        self.recipe.mixed_track_recipe.overlays.append(overlay_config)
+        ).to_json(str_timestamps=False)
+
+        self.recipe.mixed_track_recipe.add_overlay(overlay_config, allow_duplicate_tags=False)
 
     def add_outro_overlay(self, filename, slice, overlay_sync_point):
         if self.mixed_track.activity_range_cache is None or len(self.mixed_track.activity_range_cache) == 0:
@@ -162,17 +163,17 @@ class Episode(object):
 
         overlay_config = AudioOverlayer.automated_outro(
             filename, slice, overlay_sync_point, last_voice_timestamp
-        ).to_config()
-        self.recipe.mixed_track_recipe.overlays.append(overlay_config)
+        ).to_json(str_timestamps=False)
+        self.recipe.mixed_track_recipe.add_overlay(overlay_config, allow_duplicate_tags=False)
 
     def add_insert(self, filename, slice, timestamp):
         self.recipe.mixed_track_recipe.inserts.append(
-            AudioInserter(filename, slice, timestamp).to_config()
+            AudioInserter(filename, slice, timestamp).to_json(str_timestamps=False)
         )
 
     def update_insert(self, i_insert, filename, slice, timestamp):
         if 0 <= i_insert < len(self.recipe.mixed_track_recipe.inserts):
-            insert_options = AudioInserter(filename, slice, timestamp).to_config()
+            insert_options = AudioInserter(filename, slice, timestamp).to_json(str_timestamps=False)
             self.recipe.mixed_track_recipe.inserts[i_insert] = insert_options
 
     def del_insert(self, i_insert):

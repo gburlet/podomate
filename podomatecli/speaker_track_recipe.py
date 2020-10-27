@@ -1,4 +1,6 @@
-from utils import s_to_timestamp
+import os
+
+from utils import time_interval_to_s, time_interval_to_timestamp, time_to_timestamp, time_to_s
 
 
 class SpeakerTrackRecipe(object):
@@ -51,15 +53,22 @@ class SpeakerTrackRecipe(object):
         self.gate_filter = kwargs.get("gate_filter")
         self.fX = kwargs.get("fX", [])
 
-    def to_json(self):
+    def to_json(self, str_timestamps=False):
+        formatted_silence_timestamps = [
+            time_interval_to_timestamp(sinterval) for sinterval in self.silence_timestamps
+        ] if str_timestamps else [
+            time_interval_to_s(sinterval) for sinterval in self.silence_timestamps
+        ]
+
         recipe_data = {
-            "silence_timestamps": self.silence_timestamps,
+            "silence_timestamps": formatted_silence_timestamps,
             "master": self.master,
             "path": self.path,
+            "filename": os.path.split(self.path)[-1],
             "fX": self.fX
         }
         if self.offset:
-            recipe_data["offset"] = s_to_timestamp(self.offset) if isinstance(self.offset, float) else self.offset
+            recipe_data["offset"] = time_to_timestamp(self.offset) if str_timestamps else time_to_s(self.offset)
         if self.gate_filter:
             recipe_data["gate_filter"] = self.gate_filter
         return recipe_data

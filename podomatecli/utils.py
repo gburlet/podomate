@@ -1,36 +1,60 @@
 import re
 
 
-def read_config_timestamp(timestamp):
+def time_to_s(time):
     """
-    Reads in config time and returns seconds
-
     Args:
-        timestamp (str or float): string in format HH:MM:SS.MSS or float in seconds
+        time (float or str): timestamp
 
     Returns:
-        seconds (float): seconds
+        s (float): seconds
     """
-    if isinstance(timestamp, str):
-        return timestamp_to_s(timestamp)
-    elif isinstance(timestamp, float) or isinstance(timestamp, int):
-        return timestamp
-    raise TypeError("Invalid timestamp (%s)" % str(timestamp))
+    if isinstance(time, str):
+        return timestamp_to_s(time)
+    elif isinstance(time, float) or isinstance(time, int):
+        return time
+    raise TypeError("Invalid timestamp (%s)" % str(time))
 
 
-def read_config_interval(interval):
+def time_to_timestamp(time):
     """
-    Reads in config pair of timestamps and returns pair of seconds
-
     Args:
-        interval (timestamp, timestamp): pair of timestamps
+        time (float or str): timestamp
 
     Returns:
-        (timestamp_s, timestamp_s)
+        s (str): timestamp
+    """
+    if isinstance(time, str) and re.search("^-?(\d{2}:){2}\d{2}\.\d{3}$", time):
+        return time
+    elif isinstance(time, float) or isinstance(time, int):
+        return s_to_timestamp(time)
+    raise TypeError("Invalid timestamp (%s)" % str(time))
+
+
+def time_interval_to_s(interval):
+    """
+    Args:
+        interval: pair of float or str timestamps
+
+    Returns:
+        interval: pair of float timestamps
     """
     if len(interval) != 2:
         raise ValueError("Invalid interval: %s" % str(interval))
-    return [read_config_timestamp(interval[0]), read_config_timestamp(interval[1])]
+    return [time_to_s(interval[0]), time_to_s(interval[1])]
+
+
+def time_interval_to_timestamp(interval):
+    """
+    Args:
+        interval: pair of float or str timestamps
+
+    Returns:
+        interval: pair of str timestamps
+    """
+    if len(interval) != 2:
+        raise ValueError("Invalid interval: %s" % str(interval))
+    return [time_to_timestamp(interval[0]), time_to_timestamp(interval[1])]
 
 
 def timestamp_to_s(timestamp):

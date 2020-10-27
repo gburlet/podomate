@@ -236,6 +236,59 @@ def check_license():
 
 
 @eel.expose
+def get_episode_recipe():
+    global episode
+    return episode.recipe.to_json(str_timestamps=False)
+
+
+@eel.expose
+def get_speaker_track_recipe(i_track):
+    global episode
+    if 0 <= i_track < len(episode.speaker_tracks):
+        return episode.recipe.speaker_track_recipes[i_track].to_json(str_timestamps=False)
+
+
+@eel.expose
+def get_speaker_track_recipes():
+    global episode
+    return [trecipe.to_json(str_timestamps=False) for trecipe in episode.recipe.speaker_track_recipes]
+
+
+@eel.expose
+def get_mixed_track_recipe():
+    global episode
+    return episode.recipe.mixed_track_recipe.to_json(str_timestamps=False)
+
+
+@eel.expose
+def get_music_overlays():
+    global episode
+    return get_mixed_track_recipe()["overlays"]
+
+
+@eel.expose
+def get_snippet_inserts():
+    global episode
+    return get_mixed_track_recipe()["inserts"]
+
+
+@eel.expose
+def get_mixed_track_filename():
+    global episode
+    if episode.mixed_track is not None:
+        filename = os.path.split(episode.mixed_track.audio_buffer._path)[-1]
+        return filename
+
+
+@eel.expose
+def get_recipe_filename():
+    global episode
+    if episode.mixed_track is not None:
+        episode_id = os.path.splitext(os.path.split(episode.mixed_track.audio_buffer._path)[-1])[0][:-9]
+        return "%s_recipe.json" % episode_id
+
+
+@eel.expose
 def set_speaker_track(audio_path, i_speaker):
     global episode
     track = Track.from_audio_file(audio_path)
@@ -249,6 +302,71 @@ def set_speaker_track(audio_path, i_speaker):
 def del_speaker_track(i_speaker):
     global episode
     episode.del_speaker_track(i_speaker)
+
+
+@eel.expose
+def set_live_timestamps(live_timestamps):
+    global episode
+    episode.recipe.mixed_track_recipe.live_timestamps = live_timestamps
+
+
+@eel.expose
+def upload_audio(filepath):
+    filename = os.path.split(filepath)[-1]
+    audio_sink_path = os.path.abspath(os.path.join(bundle_dir, 'gui/media/%s' % filename))
+    shutil.copy(filepath, audio_sink_path)
+    return filename
+
+
+@eel.expose
+def add_intro_backtrack(path, slice, overlay_sync_point):
+    """
+    Creates recipe for intro audio overlay
+    """
+    global episode
+    episode.add_intro_overlay(path, slice, overlay_sync_point)
+
+
+@eel.expose
+def remove_intro_backtrack():
+    global episode
+    episode.recipe.mixed_track_recipe.remove_overlays_with_tag("intro")
+
+
+@eel.expose
+def add_outro_backtrack(path, slice, overlay_sync_point):
+    """
+    Creates recipe for outro audio overlay
+    """
+    global episode
+    episode.add_outro_overlay(path, slice, overlay_sync_point)
+
+
+@eel.expose
+def remove_outro_backtrack():
+    global episode
+    episode.recipe.mixed_track_recipe.remove_overlays_with_tag("outro")
+
+
+@eel.expose
+def add_insert(filename, slice, timestamp):
+    """
+    Creates recipe for audio insert
+    """
+    global episode
+    episode.add_insert(filename, slice, timestamp)
+
+
+@eel.expose
+def update_insert(i_insert, filename, slice, timestamp):
+    global episode
+    episode.update_insert(i_insert, filename, slice, timestamp)
+
+
+@eel.expose
+def remove_insert(i_insert):
+    global episode
+    episode.del_insert(i_insert)
 
 
 @eel.expose
@@ -273,101 +391,11 @@ def mix_speaker_tracks(user_tracks_options):
 
 
 @eel.expose
-def get_mixed_track_filename():
-    if episode.mixed_track is not None:
-        filename = os.path.split(episode.mixed_track.audio_buffer._path)[-1]
-        return filename
-
-
-@eel.expose
-def get_settings_filename():
-    if episode.mixed_track is not None:
-        episode_id = os.path.splitext(os.path.split(mixed_track.audio_buffer._path)[-1])[0][:-9]
-        return "%s_recipe.json" % episode_id
-
-
-@eel.expose
-def get_global_track_options():
-    return episode.recipe.mixed_track_recipe.to_json()
-
-
-@eel.expose
-def set_live_timestamps(live_timestamps):
-    global episode
-    episode.recipe.mixed_track_recipe.live_timestamps = live_timestamps
-
-
-@eel.expose
-def upload_audio(filepath):
-    filename = os.path.split(filepath)[-1]
-    audio_sink_path = os.path.abspath(os.path.join(bundle_dir, 'gui/media/%s' % filename))
-    shutil.copy(filepath, audio_sink_path)
-    return filename
-
-
-@eel.expose
-def add_intro_backtrack(filename, slice, overlay_sync_point):
-    """
-    Creates recipe for intro audio overlay
-    """
-    global episode
-    episode.add_intro_overlay(filename, slice, overlay_sync_point)
-
-
-@eel.expose
-def remove_intro_backtrack():
-    global episode
-    episode.recipe.mixed_track_recipe.remove_overlays_with_tag("intro")
-
-
-@eel.expose
-def add_outro_backtrack(filename, slice, overlay_sync_point):
-    """
-    Creates recipe for outro audio overlay
-    """
-    global episode
-    episode.add_outro_overlay(filename, slice, overlay_sync_point)
-
-
-@eel.expose
-def remove_outro_backtrack():
-    global episode
-    episode.recipe.mixed_track_recipe.remove_overlays_with_tag("outro")
-
-
-@eel.expose
-def get_global_track_overlays():
-    global episode
-    return episode.recipe.mixed_track_recipe.overlays
-
-
-@eel.expose
-def add_insert(filename, slice, timestamp):
-    """
-    Creates recipe for audio insert
-    """
-    global episode
-    episode.add_insert(filename, slice, timestamp)
-
-
-@eel.expose
-def edit_insert(i_insert, filename, slice, timestamp):
-    global episode
-    episode.update_insert(i_insert, filename, slice, timestamp)
-
-
-@eel.expose
-def remove_insert(i_insert):
-    global episode
-    episode.del_insert(i_insert)
-
-
-@eel.expose
 def process():
     global episode
 
     # figure out where to write recipe file
-    cache_mixed_track_path = mixed_track.audio_buffer._path
+    cache_mixed_track_path = episode.mixed_track.audio_buffer._path
     episode_id = os.path.splitext(os.path.split(cache_mixed_track_path)[-1])[0]
     recipe_filename = "%s_recipe.json" % episode_id
     recipe_path = os.path.abspath(os.path.join(bundle_dir, 'gui/media/%s' % recipe_filename))
