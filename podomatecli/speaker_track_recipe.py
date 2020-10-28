@@ -85,3 +85,7 @@ class SpeakerTrackRecipe(object):
             self.gate_filter = new_recipe.gate_filter
         if len(new_recipe.fX):
             self.fX.extend(new_recipe.fX)
+
+    def set_silence_timestamps(self, silence_timestamps):
+        self.silence_timestamps = silence_timestamps
+

@@ -261,14 +261,17 @@ def get_mixed_track_recipe():
 
 @eel.expose
 def get_music_overlays():
-    global episode
     return get_mixed_track_recipe()["overlays"]
 
 
 @eel.expose
 def get_snippet_inserts():
-    global episode
     return get_mixed_track_recipe()["inserts"]
+
+
+@eel.expose
+def get_speaker_track_filename(i_track):
+    return get_speaker_track_recipe(i_track)["filename"]
 
 
 @eel.expose
@@ -307,6 +310,20 @@ def set_speaker_track(audio_path, i_speaker):
 def del_speaker_track(i_speaker):
     global episode
     episode.del_speaker_track(i_speaker)
+
+
+@eel.expose
+def get_speaker_track_silence_timestamps(i_speaker):
+    global episode
+    if 0 <= i_speaker < len(episode.speaker_tracks):
+        return get_speaker_track_recipe(i_speaker)["silence_timestamps"]
+
+
+@eel.expose
+def set_speaker_track_silence_timestamps(silence_timestamps, i_speaker):
+    global episode
+    if 0 <= i_speaker < len(episode.speaker_tracks):
+        episode.recipe.speaker_track_recipes[i_speaker].silence_timestamps = silence_timestamps
 
 
 @eel.expose

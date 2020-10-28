@@ -34,7 +34,7 @@
                                 <div class="col">
                                     <div class="switch-container">
                                         <label class="switch">
-                                          <input type="checkbox" id="speaker{{speaker_id}}-noisereduction" checked>
+                                          <input type="checkbox" id="speaker{{speaker_id}}-noisereduction">
                                           <span class="slider round"></span>
                                         </label>
                                         Noise Reduction
@@ -43,10 +43,13 @@
                             </div>
                             <div class="form-row">
                                 <div class="col">
-                                    <div class="col">
-                                        <label for="speaker{{speaker_id}}-offset">Track Offset</label>
-                                        <input type="text" class="form-control" id="speaker{{speaker_id}}-offset" placeholder="HH:MM:SS.MSS">
-                                    </div>
+                                    <label for="speaker{{speaker_id}}-offset">Track Offset</label>
+                                    <input type="text" class="form-control" id="speaker{{speaker_id}}-offset" placeholder="HH:MM:SS.MSS">
+                                </div>
+                            </div>
+                            <div class="form-row" style="margin-top: 1.5em;">
+                                <div class="col">
+                                    <a id="speaker{{speaker_id}}-setsilence" class="btn btn-light" href="/templates/speaker_silence.html?iSpeaker={{speaker_id-1}}">Silence Regions <i class="fas fa-chevron-right"></i></a>
                                 </div>
                             </div>
                         </div>

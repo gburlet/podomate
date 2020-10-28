@@ -1,0 +1,100 @@
+{% extends "base_edit.html" %}
+{% from "macros.html" import nav_link %}
+
+{% block header %}
+<link href="../css/interactive_waveform.css" rel="stylesheet">
+{% endblock %}
+
+{% block title %}Silencer{% endblock%}
+{% block subtitle %}Select audio segments to silence{% endblock %}
+
+{% block navbar %}
+    {{ nav_link('mixer', 'sliders-h', 'true', 'true') }}
+    {{ nav_link('trim', 'cut', 'true') }}
+    {{ nav_link('music', 'music') }}
+    {{ nav_link('snippets', 'file-audio') }}
+    {{ nav_link('finish', 'check') }}
+{% endblock %}
+
+{% block content %}
+    <h2>What do you want silenced?</h2>
+    <p>Drag to select small segments you want to silence in the recording. Good for removing sneezes, coughs, and curses.</p>
+
+    {% with waveformID="waveform", regionLimit=999999 %}
+    {% include "interactive_waveform.html" %}
+    {% endwith %}
+
+    <div class="row" style="margin-bottom: 2em;">
+        <div class="col-md-9">
+            <button id="btn-silence" class="btn btn-success btn-lg btn-block">
+                Silence
+            </button>
+        </div>
+        <div class="col-md-3">
+            <button id="btn-skip" class="btn btn-light btn-lg btn-block">
+                Skip <i class="fa fa-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+<script type="text/javascript" src="../js/wavesurfer.min.js"></script>
+<script type="text/javascript" src="../js/wavesurfer.timeline.min.js"></script>
+<script type="text/javascript" src="../js/wavesurfer.regions.min.js"></script>
+<script type="text/javascript" src="../js/interactive_waveform.js"></script>
+<script type="text/javascript">
+    var iSpeaker = NaN;
+    var audioFilename = null;
+    var silenceRegions = null;
+
+    async function setupUI() {
+        const urlParams = new URLSearchParams(window.location.search);
+        iSpeaker = parseInt(urlParams.get('iSpeaker'));
+        audioFilename = await eel.get_speaker_track_filename(iSpeaker)();
+        silenceRegions = await eel.get_speaker_track_silence_timestamps(iSpeaker)();
+
+        setupInteractiveWaveform(audioFilename, "waveform", Infinity);
+        wavesurfer.on('ready', function() {
+            loadSilenceRegions();
+        });
+    }
+
+    async function loadSilenceRegions() {
+        $.each(silenceRegions, function(rid, region) {
+            addRegion(region[0], region[1]);
+            if (rid == 0) {
+                wavesurfer.seekAndCenter(region[0]/wavesurfer.getDuration());
+            }
+        });
+    }
+
+    async function setSilenceRegions(silenceTimestamps) {
+        $("#overlay").fadeIn();
+        await eel.set_speaker_track_silence_timestamps(silenceTimestamps, iSpeaker)();
+        $("#overlay").fadeOut();
+        location.href = "/templates/mixer.html";
+    }
+
+    function setError(msg) {
+        $("#alert").html(msg);
+        $("#alert").show();
+    }
+
+    $(document).ready(function() {
+        $("#progressbar li.active").prevAll("li").addClass("active");
+        setupUI();
+
+        $("#btn-silence").click(function() {
+            var silenceTimestamps = [];
+            $.each(wavesurfer.regions.list, function(rid, region) {
+                silenceTimestamps.push([region.start, region.end]);
+            });
+            setSilenceRegions(silenceTimestamps);
+        });
+        $("#btn-skip").click(function() {
+            location.href = "/templates/mixer.html";
+        });
+    });
+</script>
+{% endblock %}
