@@ -310,6 +310,12 @@ def del_speaker_track(i_speaker):
 
 
 @eel.expose
+def get_live_timestamps():
+    global episode
+    return episode.recipe.mixed_track_recipe.live_timestamps
+
+
+@eel.expose
 def set_live_timestamps(live_timestamps):
     global episode
     episode.recipe.mixed_track_recipe.live_timestamps = live_timestamps

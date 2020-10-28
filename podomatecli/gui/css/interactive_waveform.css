@@ -10,3 +10,30 @@
 #waveform-controls-top, #waveform-controls-bottom {
     margin: 1em 0;
 }
+
+input:focus {
+    outline-color: transparent;
+}
+
+input[type="range"] {
+    -webkit-appearance:none;
+    -moz-apperance:none;
+    height: 8px;
+    background-color: #b6b6b6;
+    outline-color: transparent;
+    border-radius: 8px;
+}
+
+input::-webkit-slider-thumb {
+    -webkit-appearance:none;
+    -moz-apperance:none;
+    width:16px;
+    height:16px;
+    -webkit-border-radius:10px;
+    -moz-border-radius:10px;
+    -ms-border-radius:10px;
+    -o-border-radius:10px;
+    border-radius:10px;
+    background-color: #20b373;
+    overflow: visible;
+}

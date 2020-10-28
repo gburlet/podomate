@@ -40,9 +40,23 @@
 <script type="text/javascript" src="../js/wavesurfer.regions.min.js"></script>
 <script type="text/javascript" src="../js/interactive_waveform.js"></script>
 <script type="text/javascript">
-    async function getAudioFilename() {
+    async function setupUI() {
+        // load audio
         let audioFilename = await eel.get_mixed_track_filename()();
         setupInteractiveWaveform(audioFilename, "waveform", Infinity);
+        wavesurfer.on('ready', function() {
+            loadLiveRegions();
+        });
+    }
+
+    async function loadLiveRegions() {
+        let liveRegions = await eel.get_live_timestamps()();
+        $.each(liveRegions, function(rid, region) {
+            addRegion(region[0], region[1]);
+            if (rid == 0) {
+                wavesurfer.seekAndCenter(region[0]/wavesurfer.getDuration());
+            }
+        });
     }
 
     async function setLiveRegions(liveTimestamps) {
@@ -59,16 +73,12 @@
 
     $(document).ready(function() {
         $("#progressbar li.active").prevAll("li").addClass("active");
-        getAudioFilename();
+        setupUI();
 
         $("#btn-edit").click(function() {
             $("#alert").hide();
             var liveTimestamps = [];
             $.each(wavesurfer.regions.list, function(rid, region) {
-                // ensure region bounds are sane
-                if (region.start < 0) region.start = 0;
-                if (region.end > wavesurfer.getDuration()) region.end = wavesurfer.getDuration();
-
                 // skip really short (< 1s) erroneously input sections
                 if (region.end - region.start < 1) return;
                 liveTimestamps.push([region.start, region.end]);
