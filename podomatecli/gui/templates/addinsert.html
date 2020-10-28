@@ -85,6 +85,7 @@
 var snippetAudioPath = null;
 var snippetAudioFilename = null;
 var mixedTrackFilename = null;
+var liveRegions = null;
 var iInsert = NaN;
 var snippetConfig = {
     "path": null,
@@ -95,6 +96,7 @@ var snippetConfig = {
 
 async function setupUI() {
     mixedTrackFilename = await eel.get_mixed_track_filename()();
+    liveRegions = await eel.get_live_timestamps()();
     const urlParams = new URLSearchParams(window.location.search);
     iInsert = parseInt(urlParams.get('iInsert'));
     let trackInserts = await eel.get_snippet_inserts()();
@@ -139,11 +141,17 @@ function showSelectRegion() {
 function showSelectPlacement() {
     if (mixedTrackFilename != null) {
         $("#audio-interact-snippet").remove();
-        setupInteractiveWaveform(mixedTrackFilename, "waveform-snippet-insertion-point", 0);
-    }
-    if (snippetConfig["timestamp"] != null) {
+        setupInteractiveWaveform(mixedTrackFilename, "waveform-snippet-insertion-point", Infinity, false);
         wavesurfer.on('ready', function() {
-            wavesurfer.seekAndCenter(snippetConfig["timestamp"]/wavesurfer.getDuration());
+            // load live regions
+            $.each(liveRegions, function(rid, region) {
+                addRegion(region[0], region[1], false);
+            });
+
+            // center cursor
+            if (snippetConfig["timestamp"] != null) {
+                wavesurfer.seekAndCenter(snippetConfig["timestamp"]/wavesurfer.getDuration());
+            }
         });
     }
 

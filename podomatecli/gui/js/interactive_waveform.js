@@ -11,7 +11,7 @@ var regionLimit = 0;
  *  containerID (string): id for the wavesurfer object
  *  regionLimit (int): 0 = no region selections, x = x region selections. Make x = Infinity for no limit
  */
-function setupInteractiveWaveform(audioFilename, containerID, regions=0) {
+function setupInteractiveWaveform(audioFilename, containerID, regions=0, regionDrag=true) {
     if (wavesurfer == null) {
         // one-time setups
         $(document).keydown(function(event) {
@@ -51,11 +51,13 @@ function setupInteractiveWaveform(audioFilename, containerID, regions=0) {
                 })
             ]
         });
-        wavesurfer.enableDragSelection({
-            drag: true,
-            resize: true,
-            color: "rgba(45, 255, 25, 0.1)"
-        });
+        if (regionDrag) {
+            wavesurfer.enableDragSelection({
+                drag: true,
+                resize: true,
+                color: "rgba(45, 255, 25, 0.1)"
+            });
+        }
 
         wavesurfer.on('region-created', handleAddRegion);
         wavesurfer.on('region-removed', handleRemoveRegion);
@@ -176,12 +178,12 @@ function handleSelectRegion(region) {
     $("#snap-cursor-region").show();
 }
 
-function addRegion(start, end) {
+function addRegion(start, end, editable=true) {
     let region = wavesurfer.addRegion({
         start: start,
         end: end,
-        drag: true,
-        resize: true,
+        drag: editable,
+        resize: editable,
         color: "rgba(45, 255, 25, 0.1)"
     });
     selectRegion(region);
