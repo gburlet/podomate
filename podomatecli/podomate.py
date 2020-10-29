@@ -304,6 +304,7 @@ def set_speaker_track(audio_path, i_speaker):
         episode.update_speaker_track(i_speaker, track)
     else:
         episode.add_speaker_track(track)
+    upload_audio(audio_path)
 
 
 @eel.expose

@@ -1,4 +1,4 @@
-<div id="speaker{{speaker_id}}-row" class="row">
+<div id="speaker{{speaker_id}}-row" class="row speaker-row">
     <div class="col-lg-12">
         <div class="speaker">
             <h3 class="subheading text-muted">
@@ -10,7 +10,7 @@
             <div id="file-upload-wrapper" class="file-upload-wrapper">
                 <input class="file-upload" type="file" id="speaker{{speaker_id}}-audio" name="speaker{{speaker_id}}-audio" accept="audio/*" data-height="150" required>
             </div>
-            <div id="accordion-speaker{{speaker_id}}">
+            <div id="accordion-speaker{{speaker_id}}" style="display: none;">
                 <div class="card">
                     <div class="card-header" id="heading-speaker{{speaker_id}}">
                         <h5 class="mb-0">
@@ -29,6 +29,9 @@
                                           <span class="slider round"></span>
                                         </label>
                                         Noise Gate
+                                        <a id="speaker{{speaker_id}}-gate-badge" tabindex="-1" class="badge-pop badge badge-success align-middle" data-trigger="hover" data-container="body" data-toggle="popover" data-placement="bottom" data-content="Silences this speaker's audio when they're not talking. Turn this on if they're intermittently clicking a pen or have a creaky chair.">
+                                            <i class="fas fa-info-circle"></i> Info
+                                        </a>
                                     </div>
                                 </div>
                                 <div class="col">
@@ -38,18 +41,31 @@
                                           <span class="slider round"></span>
                                         </label>
                                         Noise Reduction
+                                        <a id="speaker{{speaker_id}}-noisereduction-badge" tabindex="-1" class="badge-pop badge badge-success align-middle" data-trigger="hover" data-container="body" data-toggle="popover" data-placement="bottom" data-content="Reduces the background noise of this speaker's audio recording. Turn this on if they're using a cheap microphone or have a fan on in the background.">
+                                            <i class="fas fa-info-circle"></i> Info
+                                        </a>
                                     </div>
                                 </div>
                             </div>
+                            <hr/>
                             <div class="form-row">
                                 <div class="col">
-                                    <label for="speaker{{speaker_id}}-offset">Track Offset</label>
+                                    <label for="speaker{{speaker_id}}-offset">
+                                        Track Offset
+                                        <a id="speaker{{speaker_id}}-offset-badge" tabindex="-1" class="badge-pop badge badge-success align-middle" data-trigger="hover" data-container="body" data-toggle="popover" data-placement="bottom" data-content="Input the offset time of this audio track to manually shift it over in relation to the other speakers. You might have an offset if speakers start recording at different times. We calculate this automatically, but maybe we messed up and you need to do this manually.">
+                                            <i class="fas fa-info-circle"></i> Info
+                                        </a>
+                                    </label>
                                     <input type="text" class="form-control" id="speaker{{speaker_id}}-offset" placeholder="HH:MM:SS.MSS">
+
                                 </div>
                             </div>
                             <div class="form-row" style="margin-top: 1.5em;">
                                 <div class="col">
-                                    <a id="speaker{{speaker_id}}-setsilence" class="btn btn-light" href="/templates/speaker_silence.html?iSpeaker={{speaker_id-1}}">Silence Regions <i class="fas fa-chevron-right"></i></a>
+                                    <a id="speaker{{speaker_id}}-setsilence" class="btn btn-light" href="/templates/speaker_silence.html?iSpeaker={{speaker_id}}">Silence Regions <i class="fas fa-chevron-right"></i></a>
+                                    <a id="speaker{{speaker_id}}-setsilence-badge" tabindex="-1" class="badge-pop badge badge-success align-middle" data-trigger="hover" data-container="body" data-toggle="popover" data-placement="bottom" data-content="Tag small segments you want to silence in this speaker's audio. Good for removing sneezes, coughs, throat clears and curses.">
+                                        <i class="fas fa-info-circle"></i> Info
+                                    </a>
                                 </div>
                             </div>
                         </div>

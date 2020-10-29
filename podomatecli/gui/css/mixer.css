@@ -93,3 +93,7 @@ input:checked + .slider:before {
 .form-row {
     margin: 0.5em 0em;
 }
+
+.badge {
+    margin-left: 5px;
+}

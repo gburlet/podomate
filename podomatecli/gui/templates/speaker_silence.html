@@ -50,7 +50,7 @@
 
     async function setupUI() {
         const urlParams = new URLSearchParams(window.location.search);
-        iSpeaker = parseInt(urlParams.get('iSpeaker'));
+        iSpeaker = parseInt(urlParams.get('iSpeaker'))-1;
         audioFilename = await eel.get_speaker_track_filename(iSpeaker)();
         silenceRegions = await eel.get_speaker_track_silence_timestamps(iSpeaker)();
 

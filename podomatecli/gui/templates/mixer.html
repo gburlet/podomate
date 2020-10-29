@@ -19,10 +19,6 @@
 {% endblock %}
 
 {% block content %}
-    {% with speaker_id=1 %}
-    {% include "speaker_track.html" %}
-    {% endwith %}
-
     <div id="new-speaker" style="display: none;">
         <span><i class="fas fa-2x fa-user-plus"></i></span>
     </div>
@@ -41,16 +37,69 @@
 <script type="text/javascript" src="../js/datatables.min.js"></script>
 <script type="text/javascript" src="../js/mdb-file-upload.min.js"></script>
 <script type="text/javascript">
+    async function setupUI() {
+        let speakerTracks = await eel.get_speaker_track_recipes()();
+
+        // populate GUI elements
+        if (speakerTracks.length > 0) {
+            $.each(speakerTracks, function(sid, track) {
+                const newSpeakerID = sid + 1;
+                var newSpeakerHTML = `{% with speaker_id=-666 %}{% include "speaker_track.html" %}{% endwith %}`.replace(/(-666)/g, newSpeakerID);
+                $(newSpeakerHTML).insertBefore("#new-speaker");
+            });
+        } else {
+            var newSpeakerHTML = `{% with speaker_id=-666 %}{% include "speaker_track.html" %}{% endwith %}`.replace(/(-666)/g, 1);
+            $(newSpeakerHTML).insertBefore("#new-speaker");
+        }
+
+        // initialize GUI elements
+        $("input[type='file']").change(handleAudioInput);
+        $('[data-toggle="popover"]').popover({"html": true});
+        $('.file-upload').file_upload();
+
+        // finish GUI element setup
+        $.each(speakerTracks, function(sid, track) {
+            const speakerID = sid + 1;
+            const filename = track["filename"];
+            const extension = track["filename"].split('.').pop();
+            $("#speaker"+speakerID+"-row").find(".file-upload-render").html('<i class="fas fa-file"></i><span class="file-upload-extension">'+extension+'</span>');
+            $("#speaker"+speakerID+"-row").find(".file-upload-filename-inner").text(filename);
+            $("#speaker"+speakerID+"-row").find(".mask").hide();
+            $("#speaker"+speakerID+"-row").find(".file-upload-preview").show();
+            var btnDelSpeaker = $("#speaker"+speakerID+"-row").find(".file-upload > button");
+            btnDelSpeaker.show();
+            btnDelSpeaker.click({speakerID: speakerID}, handleDeleteSpeaker);
+            $("#accordion-speaker"+speakerID).show();
+        });
+
+        if (speakerTracks.length > 0) {
+            $("#new-speaker").show();
+        }
+    }
+
     async function handleAudioInput() {
         $("#overlay").fadeIn();
         let speakerID = parseInt($(this).attr('id').split('-')[0].slice(7));
         var file = $(this)[0].files[0];
         await eel.set_speaker_track(file.path, speakerID-1)();
+        $("#speaker"+speakerID+"-row").find(".file-upload > button").click({speakerID: speakerID}, handleDeleteSpeaker);
+        $("#accordion-speaker"+speakerID).show();
         var numSpeakers = $("input[type='file']").length;
         if (speakerID == numSpeakers) {
             $("#new-speaker").show();
         }
         $("#overlay").fadeOut();
+    }
+
+    async function handleDeleteSpeaker(event) {
+        const speakerID = event.data.speakerID;
+        $("#speaker"+speakerID+"-row").find("button").hide();
+        await eel.del_speaker_track(speakerID-1);
+
+        // clear everything and repopulate
+        $(".speaker-row").remove();
+        $("#new-speaker").hide();
+        setupUI();
     }
 
     async function mixTracks() {
@@ -77,9 +126,7 @@
 
     $(document).ready(function() {
         $("#progressbar li.active").prevAll("li").addClass("active");
-        $("input[type='file']").change(handleAudioInput);
-        $('[data-toggle="popover"]').popover({"html": true});
-        $('.file-upload').file_upload();
+        setupUI();
 
         $("#new-speaker").click(function() {
             const numSpeakers = $("input[type='file']").length;
