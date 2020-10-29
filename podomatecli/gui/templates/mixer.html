@@ -112,6 +112,11 @@
             if ($("#speaker"+i+"-noisegate").is(':checked')) {
                 track_config["gate_filter"] = -20.0;
             }
+            if ($("#speaker"+i+"-noisereduction").is(':checked')) {
+                track_config["noise_reducer"] = {
+                    id: "logmsse", params: {noise_threshold: 0.3}
+                }
+            }
             // TODO: offset format validation
             var trackOffset = $("#speaker"+i+"-offset").val();
             if (trackOffset) {

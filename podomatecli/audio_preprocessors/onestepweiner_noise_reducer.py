@@ -3,7 +3,7 @@ import scipy.signal as sg
 import numpy as np
 import librosa
 
-from mir.mir.transcription.audio_preprocessors.noise_reducer import NoiseReducer
+from audio_preprocessors.noise_reducer import NoiseReducer
 
 
 class OneStepWeinerNoiseReducer(NoiseReducer):
@@ -41,16 +41,16 @@ class OneStepWeinerNoiseReducer(NoiseReducer):
             X_frame = fft(frame*window, self._window_size)
             self._Sbb = i_frame * self._Sbb/(i_frame + 1) + np.abs(X_frame)**2/(i_frame + 1)
 
-    def reduce_noise(self, sa):
+    def reduce_noise(self, track):
         """
         Performs the noise reduction
         Note: auto_analyze_silence or analyze_silence must be called prior to calling this function
 
         Parameters
         ----------
-        sa (SongAudio): audio_buffer waveform to reduce noise on
+        track (Track) to reduce noise on
 
-        Note: modifies SongAudio waveform in place!
+        Note: modifies track AudioBuffer in place!
         """
 
         if np.count_nonzero(self._Sbb) == 0:
@@ -59,8 +59,8 @@ class OneStepWeinerNoiseReducer(NoiseReducer):
 
         window = sg.hann(self._window_size)
         ew = np.sum(window)
-        s_est = np.zeros_like(sa.x)
-        for i_frame, frame in enumerate(librosa.util.frame(sa.x, frame_length=self._window_size, hop_length=self._hop_size).T):
+        s_est = np.zeros_like(track.audio_buffer.x)
+        for i_frame, frame in enumerate(librosa.util.frame(track.audio_buffer.x, frame_length=self._window_size, hop_length=self._hop_size).T):
             X_frame = fft(frame*window, self._window_size)
 
             # Apply a priori wiener gains G to X_framed to get output S
@@ -70,9 +70,9 @@ class OneStepWeinerNoiseReducer(NoiseReducer):
             # Estimated signals at each frame normalized by the shift value
             temp_s_est = np.real(ifft(S)) * self._hop_size/self._window_size
             frame_start_sample = int(i_frame*self._hop_size)
-            frame_end_sample = min(int(i_frame*self._hop_size + self._window_size), len(sa.x))
+            frame_end_sample = min(int(i_frame*self._hop_size + self._window_size), len(track.audio_buffer.x))
             signal_duration = frame_end_sample - frame_start_sample
             # truncate zero padding
             s_est[frame_start_sample:frame_end_sample] += temp_s_est[:min(self._window_size, signal_duration)]
 
-        sa.x = s_est
+        track.audio_buffer.x = s_est

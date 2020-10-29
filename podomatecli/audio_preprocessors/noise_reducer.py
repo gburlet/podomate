@@ -1,6 +1,5 @@
 from abc import ABCMeta, abstractmethod
-
-from mir.mir.transcription.audio_preprocessors.silence_detector import SilenceDetector
+import numpy as np
 
 
 class NoiseReducer(object):
@@ -21,42 +20,51 @@ class NoiseReducer(object):
         self._window_size = window_size
         self._hop_size = hop_size
 
-    def auto_analyze_silence(self, sa):
+    def auto_reduce_noise(self, track):
         """
-        Automatically detects largest portion of silence in raw signal waveform and analyzes it,
-        setting relevant state variables on the class
-
         Parameters
         ----------
-        sa (SongAudio): the audio_buffer waveform to analyze
+        track (Track)
+        """
+
+        silence_ranges = track.silence_range_cache if track.silence_range_cache is None else track.silence_ranges
+        max_silence_range = self._get_sample_of_silence(silence_ranges, method="max")
+        if max_silence_range is not None:
+            silence_start_sample = track.audio_buffer.get_sample_from_timestamp(max_silence_range[0])
+            silence_end_sample = track.audio_buffer.get_sample_from_timestamp(max_silence_range[1])
+            # analyze noise profile
+            self.analyze_silence(track.audio_buffer.x[silence_start_sample:silence_end_sample])
+            # reduce noise
+            self.reduce_noise(track)
+
+    def _get_sample_of_silence(self, silent_ranges_s, method="max"):
+        """
+        Helper function to return a silent portion of audio from the waveform using the provided method
+        Parameters
+        ----------
+        silent_ranges_s (list of float timestamp pairs)
+        method (string): selection method for silence range in {max, first, last, maxfirstlast}
 
         Returns
         -------
-        max_silent_range (pair of float timestamps): indicating beginning and end timestamp of max duration silence
+        max_silence_range (pair of floats) or None if no found silent ranges
         """
 
-        silence_detector = SilenceDetector(window_size=self._window_size, hop_size=self._hop_size)
-        selected_silence = silence_detector.get_sample_of_silence(sa, method='first')
-        if selected_silence is not None:
-            silence_start_sample = max(0, int(selected_silence[0] * sa.fs))
-            silence_end_sample = min(int(selected_silence[1] * sa.fs), len(sa.x))
-            self.analyze_silence(sa.x[silence_start_sample:silence_end_sample])
+        if method not in {"max", "first", "last", "maxfirstlast"}:
+            raise NotImplementedError("Unknown silence selector method: %s" % method)
 
-        return selected_silence
-
-    def auto_reduce_noise(self, sa):
-        """
-        Automatically detects silence, analyzes silence, and performs noise reduction
-
-        Parameters
-        ----------
-        sa (SongAudio): audio_buffer waveform to reduce noise on
-
-        Note: modifies SongAudio waveform in place!
-        """
-
-        self.auto_analyze_silence(sa)
-        self.reduce_noise(sa)
+        if len(silent_ranges_s):
+            if method == "max":
+                return silent_ranges_s[np.argmax(map(lambda r: r[1]-r[0], silent_ranges_s))]
+            elif method == "first":
+                return silent_ranges_s[0]
+            elif method == "last":
+                return silent_ranges_s[-1]
+            elif method == "maxfirstlast":
+                first_silence_duration = silent_ranges_s[0][1] - silent_ranges_s[0][0]
+                last_silence_duration = silent_ranges_s[-1][1] - silent_ranges_s[-1][0]
+                i_selected_silence = 0 if first_silence_duration > last_silence_duration else -1
+                return silent_ranges_s[i_selected_silence]
 
     @abstractmethod
     def analyze_silence(self, x_silence):
@@ -71,15 +79,15 @@ class NoiseReducer(object):
         pass
 
     @abstractmethod
-    def reduce_noise(self, sa):
+    def reduce_noise(self, track):
         """
         Performs the noise reduction
         Note: auto_analyze_silence or analyze_silence must be called prior to calling this function
 
         Parameters
         ----------
-        sa (SongAudio): audio_buffer waveform to reduce noise on
+        track (Track) to reduce noise on
 
-        Note: modifies SongAudio waveform in place!
+        Note: modifies track AudioBuffer in place!
         """
         pass

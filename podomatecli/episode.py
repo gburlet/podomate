@@ -4,6 +4,7 @@ import numpy as np
 from audio_inserter import AudioInserter
 from audio_overlayer import AudioOverlayer
 from audio_preprocessors.gate_filter import GateFilter
+from audio_preprocessors.noise_reducer_factory import NoiseReducerFactory
 from episode_recipe import EpisodeRecipe
 from fx_chain import FXChain
 from mixer import Mixer
@@ -81,6 +82,13 @@ class Episode(object):
         track_offsets = track_aligner.auto_calc_offset(self.speaker_tracks)
 
         for i_track in range(len(self.speaker_tracks)):
+            # apply noise reducer
+            noise_reducer = self.recipe.speaker_track_recipes[i_track].noise_reducer
+            if noise_reducer:
+                NoiseReducerFactory.construct_noise_reducer(
+                    noise_reducer["id"], noise_reducer.get("params", {})
+                ).auto_reduce_noise(self.speaker_tracks[i_track])
+
             # apply gate filter
             gate_filter_db = self.recipe.speaker_track_recipes[i_track].gate_filter
             if gate_filter_db:

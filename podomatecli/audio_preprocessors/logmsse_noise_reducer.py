@@ -5,7 +5,7 @@ import numpy as np
 from scipy.special import expn
 import librosa
 
-from mir.mir.transcription.audio_preprocessors.noise_reducer import NoiseReducer
+from audio_preprocessors.noise_reducer import NoiseReducer
 
 
 class LogMSSENoiseReducer(NoiseReducer):
@@ -42,20 +42,20 @@ class LogMSSENoiseReducer(NoiseReducer):
         num_silence_frames = np.shape(silence_frames)[1]
 
         noise_mean = np.zeros(nFFT)
-        for i_frame in xrange(num_silence_frames):
+        for i_frame in range(num_silence_frames):
             noise_mean = noise_mean + np.absolute(np.fft.fft(win * silence_frames[:,i_frame], nFFT, axis=0))
         self._noise_mu2 = (noise_mean / float(num_silence_frames)) ** 2
 
-    def reduce_noise(self, sa):
+    def reduce_noise(self, track):
         """
         Performs the noise reduction
         Note: auto_analyze_silence or analyze_silence must be called prior to calling this function
 
         Parameters
         ----------
-        sa (SongAudio): audio_buffer waveform to reduce noise on
+        track: (Track) to reduce noise on
 
-        Note: modifies SongAudio waveform in place!
+        Note: modifies track AudioBuffer in place!
         """
 
         if np.count_nonzero(self._noise_mu2) == 0:
@@ -68,7 +68,7 @@ class LogMSSENoiseReducer(NoiseReducer):
         win = win * len2 / np.sum(win)
         nFFT = 2 * self._window_size
 
-        Nframes = int(math.floor(len(sa.x) / len2) - math.floor(self._window_size / len2))
+        Nframes = int(math.floor(len(track.audio_buffer.x) / len2) - math.floor(self._window_size / len2))
         xfinal = np.zeros(Nframes * len2)
 
         aa = 0.98
@@ -76,7 +76,7 @@ class LogMSSENoiseReducer(NoiseReducer):
         ksi_min = 10 ** (-25 / 10)
 
         for k in range(0, Nframes*len2, len2):
-            insign = win * sa.x[k:k + self._window_size]
+            insign = win * track.audio_buffer.x[k:k + self._window_size]
 
             spec = np.fft.fft(insign, nFFT, axis=0)
             sig = np.absolute(spec)
@@ -109,4 +109,4 @@ class LogMSSENoiseReducer(NoiseReducer):
             xfinal[k:k + len2] = self._x_old + xi_w[0:self._hop_size]
             self._x_old = xi_w[self._hop_size:self._window_size]
 
-        sa.x = xfinal
+        track.audio_buffer.x = xfinal

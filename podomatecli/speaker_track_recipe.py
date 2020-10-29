@@ -8,7 +8,7 @@ class SpeakerTrackRecipe(object):
         {
             "effect": "contrast",
             "parameters": {
-                "amount": 80
+                "amount": 33
             }
         },
         {
@@ -51,6 +51,7 @@ class SpeakerTrackRecipe(object):
         self.path = kwargs.get("path")
         self.offset = kwargs.get("offset")
         self.gate_filter = kwargs.get("gate_filter")
+        self.noise_reducer = kwargs.get("noise_reducer")
         self.fX = kwargs.get("fX", [])
 
     def to_json(self, str_timestamps=False):
@@ -71,6 +72,8 @@ class SpeakerTrackRecipe(object):
             recipe_data["offset"] = time_to_timestamp(self.offset) if str_timestamps else time_to_s(self.offset)
         if self.gate_filter:
             recipe_data["gate_filter"] = self.gate_filter
+        if self.noise_reducer:
+            recipe_data["noise_reducer"] = self.noise_reducer
         return recipe_data
 
     def update(self, new_recipe):
@@ -83,6 +86,8 @@ class SpeakerTrackRecipe(object):
             self.offset = new_recipe.offset
         if new_recipe.gate_filter:
             self.gate_filter = new_recipe.gate_filter
+        if new_recipe.noise_reducer:
+            self.noise_reducer = new_recipe.noise_reducer
         if len(new_recipe.fX):
             self.fX.extend(new_recipe.fX)
 

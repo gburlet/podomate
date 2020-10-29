@@ -3,7 +3,7 @@ import scipy.signal as sg
 import numpy as np
 import librosa
 
-from mir.mir.transcription.audio_preprocessors.noise_reducer import NoiseReducer
+from audio_preprocessors.noise_reducer import NoiseReducer
 
 
 class TwoStepWeinerNoiseReducer(NoiseReducer):
@@ -43,16 +43,16 @@ class TwoStepWeinerNoiseReducer(NoiseReducer):
             X_frame = fft(frame*window, self._window_size)
             self._Sbb = i_frame * self._Sbb/(i_frame + 1) + np.abs(X_frame)**2/(i_frame + 1)
 
-    def reduce_noise(self, sa):
+    def reduce_noise(self, track):
         """
         Performs the noise reduction
         Note: auto_analyze_silence or analyze_silence must be called prior to calling this function
 
         Parameters
         ----------
-        sa (SongAudio): audio_buffer waveform to reduce noise on
+        track (Track) to reduce noise on
 
-        Note: modifies SongAudio waveform in place!
+        Note: modifies track AudioBuffer in place!
         """
 
         if np.count_nonzero(self._Sbb) == 0:
@@ -60,7 +60,7 @@ class TwoStepWeinerNoiseReducer(NoiseReducer):
             return
 
         # Initialising output estimated signal
-        s_est_tsnr = np.zeros_like(sa.x)
+        s_est_tsnr = np.zeros_like(track.audio_buffer.x)
 
         window = sg.hann(self._window_size)
         ew = np.sum(window)
@@ -68,7 +68,7 @@ class TwoStepWeinerNoiseReducer(NoiseReducer):
         # Initialising matrix to store previous values.
         # For readability purposes, -1 represents past frame values and 0 represents actual frame values.
         S = np.zeros((2, self._window_size), dtype='cfloat')
-        for i_frame, frame in enumerate(librosa.util.frame(sa.x, frame_length=self._window_size, hop_length=self._hop_size).T):
+        for i_frame, frame in enumerate(librosa.util.frame(track.audio_buffer.x, frame_length=self._window_size, hop_length=self._hop_size).T):
             X_frame = fft(frame*window, self._window_size)
 
             # Weiner filter: Computation of spectral gain G using SNR a posteriori
@@ -86,7 +86,7 @@ class TwoStepWeinerNoiseReducer(NoiseReducer):
             # Estimated temporal signal at frame normalized by the shift value
             temp_s_est_tsnr = np.real(ifft(S_tsnr)) * self._hop_size/self._window_size
             frame_start_sample = int(i_frame*self._hop_size)
-            frame_end_sample = min(int(i_frame*self._hop_size + self._window_size), len(sa.x))
+            frame_end_sample = min(int(i_frame*self._hop_size + self._window_size), len(track.audio_buffer.x))
             signal_duration = frame_end_sample - frame_start_sample
             # truncate zero padding
             s_est_tsnr[frame_start_sample:frame_end_sample] += temp_s_est_tsnr[:min(self._window_size, signal_duration)]
@@ -94,7 +94,7 @@ class TwoStepWeinerNoiseReducer(NoiseReducer):
             # Rolling matrix to update old values (Circshift in Matlab)
             S = np.roll(S, 1, axis=0)
 
-        sa.x = s_est_tsnr
+        track.audio_buffer.x = s_est_tsnr
 
     def _halfwave_rectification(self, x):
         """
