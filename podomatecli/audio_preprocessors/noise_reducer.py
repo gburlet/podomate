@@ -1,6 +1,8 @@
 from abc import ABCMeta, abstractmethod
 import numpy as np
 
+from audio_buffer import AudioBuffer
+
 
 class NoiseReducer(object):
     """
@@ -27,13 +29,17 @@ class NoiseReducer(object):
         track (Track)
         """
 
-        silence_ranges = track.silence_range_cache if track.silence_range_cache is None else track.silence_ranges
+        silence_ranges = track.silence_range_cache if track.silence_range_cache else track.silence_ranges
         max_silence_range = self._get_sample_of_silence(silence_ranges, method="max")
         if max_silence_range is not None:
             silence_start_sample = track.audio_buffer.get_sample_from_timestamp(max_silence_range[0])
             silence_end_sample = track.audio_buffer.get_sample_from_timestamp(max_silence_range[1])
+            audio_buffer_sample = AudioBuffer(
+                x=np.copy(track.audio_buffer.x[silence_start_sample:silence_end_sample]),
+                fs=track.audio_buffer.fs
+            )
             # analyze noise profile
-            self.analyze_silence(track.audio_buffer.x[silence_start_sample:silence_end_sample])
+            self.analyze_silence(audio_buffer_sample)
             # reduce noise
             self.reduce_noise(track)
 
@@ -67,14 +73,14 @@ class NoiseReducer(object):
                 return silent_ranges_s[i_selected_silence]
 
     @abstractmethod
-    def analyze_silence(self, x_silence):
+    def analyze_silence(self, audio_buffer_sample):
         """
         Analyze an audio_buffer waveform to form a silence profile to use for noise reduction.
         Sets instance member variables with state.
 
         Parameters
         ----------
-        x_silence (np.array): audio_buffer waveform
+        audio_buffer_sample (AudioBuffer): audio buffer sample of silence
         """
         pass
 

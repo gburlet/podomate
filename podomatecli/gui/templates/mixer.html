@@ -110,11 +110,11 @@
         for (var i = 1; i < numSpeakers+1; i++) {
             var track_config = {};
             if ($("#speaker"+i+"-noisegate").is(':checked')) {
-                track_config["gate_filter"] = -20.0;
+                track_config["gate_filter"] = -10.0;
             }
             if ($("#speaker"+i+"-noisereduction").is(':checked')) {
                 track_config["noise_reducer"] = {
-                    id: "logmsse", params: {noise_threshold: 0.3}
+                    id: "sox", params: {noise_threshold: 0.3}
                 }
             }
             // TODO: offset format validation

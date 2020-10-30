@@ -23,7 +23,7 @@ class OneStepWeinerNoiseReducer(NoiseReducer):
 
         self._Sbb = np.zeros(self._window_size)
 
-    def analyze_silence(self, x_silence):
+    def analyze_silence(self, audio_buffer_sample):
         """
         Estimation of the Power Spectral Density (Sbb) of the stationnary noise
         with Welch's periodogram given prior knowledge of n_noise points where
@@ -32,12 +32,12 @@ class OneStepWeinerNoiseReducer(NoiseReducer):
                 Sbb : 1D np.array, Power Spectral Density of stationnary noise
         """
 
-        if len(x_silence) < self._window_size:
-            x_silence = np.pad(x_silence, self._window_size, mode="constant", constant_values=0)
+        if len(audio_buffer_sample.x) < self._window_size:
+            audio_buffer_sample.x = np.pad(audio_buffer_sample.x, self._window_size, mode="constant", constant_values=0)
 
         self._Sbb = np.zeros(self._window_size)
         window = sg.hann(self._window_size)
-        for i_frame, frame in enumerate(librosa.util.frame(x_silence, frame_length=self._window_size, hop_length=self._hop_size).T):
+        for i_frame, frame in enumerate(librosa.util.frame(audio_buffer_sample.x, frame_length=self._window_size, hop_length=self._hop_size).T):
             X_frame = fft(frame*window, self._window_size)
             self._Sbb = i_frame * self._Sbb/(i_frame + 1) + np.abs(X_frame)**2/(i_frame + 1)
 

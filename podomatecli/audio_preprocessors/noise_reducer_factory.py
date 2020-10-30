@@ -1,5 +1,6 @@
 from audio_preprocessors.logmsse_noise_reducer import LogMSSENoiseReducer
 from audio_preprocessors.onestepweiner_noise_reducer import OneStepWeinerNoiseReducer
+from audio_preprocessors.sox_noise_reducer import SoxNoiseReducer
 from audio_preprocessors.twostepweiner_noise_reducer import TwoStepWeinerNoiseReducer
 
 
@@ -10,6 +11,7 @@ class NoiseReducerFactory(object):
 
     ALGORITHMS = {
         LogMSSENoiseReducer.ID: LogMSSENoiseReducer,
+        SoxNoiseReducer.ID: SoxNoiseReducer,
         OneStepWeinerNoiseReducer.ID: OneStepWeinerNoiseReducer,
         TwoStepWeinerNoiseReducer.ID: TwoStepWeinerNoiseReducer
     }

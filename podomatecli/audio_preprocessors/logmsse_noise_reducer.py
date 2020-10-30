@@ -30,15 +30,15 @@ class LogMSSENoiseReducer(NoiseReducer):
         self._Xk_prev = np.zeros(self._hop_size)
         self._x_old = np.zeros(self._hop_size)
 
-    def analyze_silence(self, x_silence):
-        if len(x_silence) < self._window_size:
-            x_silence = np.pad(x_silence, self._window_size, mode="constant", constant_values=0)
+    def analyze_silence(self, audio_buffer_sample):
+        if len(audio_buffer_sample.x) < self._window_size:
+            audio_buffer_sample.x = np.pad(audio_buffer_sample.x, self._window_size, mode="constant", constant_values=0)
         len2 = self._window_size - self._hop_size
         win = np.hanning(self._window_size)
         win = win * len2 / float(np.sum(win))
         nFFT = 2 * self._window_size
 
-        silence_frames = librosa.util.frame(x_silence, frame_length=self._window_size, hop_length=self._hop_size)
+        silence_frames = librosa.util.frame(audio_buffer_sample.x, frame_length=self._window_size, hop_length=self._hop_size)
         num_silence_frames = np.shape(silence_frames)[1]
 
         noise_mean = np.zeros(nFFT)
