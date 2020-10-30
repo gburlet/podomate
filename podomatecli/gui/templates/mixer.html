@@ -62,6 +62,15 @@
             const speakerID = sid + 1;
             const filename = track["filename"];
             const extension = track["filename"].split('.').pop();
+            if ("gate_filter" in track) {
+                $("#speaker"+speakerID+"-noisegate").prop("checked", true);
+            }
+            if ("noise_reducer" in track) {
+                $("#speaker"+speakerID+"-noisereduction").prop("checked", true);
+            }
+            if ("offset" in track) {
+                $("#speaker"+speakerID+"-offset").val(secondsToTimestamp(track["offset"]));
+            }
             $("#speaker"+speakerID+"-row").find(".file-upload-render").html('<i class="fas fa-file"></i><span class="file-upload-extension">'+extension+'</span>');
             $("#speaker"+speakerID+"-row").find(".file-upload-filename-inner").text(filename);
             $("#speaker"+speakerID+"-row").find(".mask").hide();
