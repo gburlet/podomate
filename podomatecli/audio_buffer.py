@@ -25,6 +25,10 @@ class AudioBuffer(object):
         self.x = x
         self.fs = fs
 
+    @property
+    def nyquist(self):
+        return self.fs / 2
+
     def read(self, fs=DEFAULT_SAMPLING_RATE, normalize=True, min_length_s=0.2):
         """
         Reads in audio_buffer samples from disk
@@ -141,6 +145,9 @@ class AudioBuffer(object):
     def get_sample_from_timestamp(self, timestamp):
         return int(min(max(0, np.ceil(timestamp*float(self.fs))), self.get_num_samples()))
 
+    def get_timestamp_from_sample(self, sample):
+        return max(min(sample / float(self.fs), self.get_duration_s()), 0)
+
     def get_num_samples(self):
         return len(self.x)
 
@@ -150,6 +157,56 @@ class AudioBuffer(object):
             self.x = np.hstack((np.zeros(offset_samples), self.x))
         elif offset_s < 0:
             self.x = self.x[abs(offset_samples):]
+
+    def get_previous_zero_crossing(self, i_sample, zero_tol=1e-8, sign_change=False):
+        """
+        Parameters
+        ----------
+        i_sample (sample index)
+        zero_tol (float) how close we can be to 0 before tagging as 0x
+        sign_change (boolean): whether 1st sign change denotes 0x or whether sample must be close to 0 (within zero_tol)
+
+        Returns
+        -------
+        index of 0x sample
+        """
+        if 0 <= i_sample < self.get_num_samples():
+            if sign_change:
+                prev_sign = np.sign(self.x[i_sample])
+                for j_sample in range(i_sample-1, -1, -1):
+                    this_sign = np.sign(self.x[j_sample])
+                    if this_sign != prev_sign:
+                        return j_sample
+            else:
+                for j_sample in range(i_sample-1, -1, -1):
+                    if abs(self.x[j_sample]) < zero_tol:
+                        return j_sample
+            return 0
+
+    def get_next_zero_crossing(self, i_sample, zero_tol=1e-8, sign_change=False):
+        """
+        Parameters
+        ----------
+        sample (sample index)
+        zero_tol how close we can be to 0 before tagging as 0x
+        sign_change (boolean): whether 1st sign change denotes 0x or whether sample must be close to 0 (within zero_tol)
+
+        Returns
+        -------
+        index of 0x sample
+        """
+        if 0 <= i_sample < self.get_num_samples():
+            if sign_change:
+                prev_sign = np.sign(self.x[i_sample])
+                for j_sample in range(i_sample+1, self.get_num_samples()):
+                    this_sign = np.sign(self.x[j_sample])
+                    if this_sign != prev_sign:
+                        return j_sample
+            else:
+                for j_sample in range(i_sample+1, self.get_num_samples()):
+                    if abs(self.x[j_sample]) < zero_tol:
+                        return j_sample
+            return self.get_num_samples()-1
 
     def pad(self, num_samples):
         """
