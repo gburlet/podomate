@@ -25,6 +25,18 @@
                                 <div class="col">
                                     <div class="switch-container">
                                         <label class="switch">
+                                          <input type="checkbox" id="speaker{{speaker_id}}-noisereduction">
+                                          <span class="slider round"></span>
+                                        </label>
+                                        Noise Reduction
+                                        <a id="speaker{{speaker_id}}-noisereduction-badge" tabindex="-1" class="badge-pop badge badge-success align-middle" data-trigger="hover" data-container="body" data-toggle="popover" data-placement="bottom" data-content="Reduces the background noise of this speaker's audio recording. Turn this on if they're using a cheap microphone or have a fan on in the background.">
+                                            <i class="fas fa-info-circle"></i> Info
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="switch-container">
+                                        <label class="switch">
                                           <input type="checkbox" id="speaker{{speaker_id}}-noisegate">
                                           <span class="slider round"></span>
                                         </label>
@@ -37,11 +49,11 @@
                                 <div class="col">
                                     <div class="switch-container">
                                         <label class="switch">
-                                          <input type="checkbox" id="speaker{{speaker_id}}-noisereduction">
+                                          <input type="checkbox" id="speaker{{speaker_id}}-deplosives">
                                           <span class="slider round"></span>
                                         </label>
-                                        Noise Reduction
-                                        <a id="speaker{{speaker_id}}-noisereduction-badge" tabindex="-1" class="badge-pop badge badge-success align-middle" data-trigger="hover" data-container="body" data-toggle="popover" data-placement="bottom" data-content="Reduces the background noise of this speaker's audio recording. Turn this on if they're using a cheap microphone or have a fan on in the background.">
+                                        Deplosives
+                                        <a id="speaker{{speaker_id}}-deplosives-badge" tabindex="-1" class="badge-pop badge badge-success align-middle" data-trigger="hover" data-container="body" data-toggle="popover" data-placement="bottom" data-content="Reduces the intensity of plosives (harsh p's, b's) that can make a harsh popping sound. Turn this on if the speaker is close to the microphone without a pop filter.">
                                             <i class="fas fa-info-circle"></i> Info
                                         </a>
                                     </div>

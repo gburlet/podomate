@@ -51,6 +51,7 @@ class SpeakerTrackRecipe(object):
         self.path = kwargs.get("path")
         self.offset = kwargs.get("offset")
         self.gate_filter = kwargs.get("gate_filter")
+        self.deplosive_filter = kwargs.get("deplosive_filter")
         self.noise_reducer = kwargs.get("noise_reducer")
         self.fX = kwargs.get("fX", [])
 
@@ -72,6 +73,8 @@ class SpeakerTrackRecipe(object):
             recipe_data["offset"] = time_to_timestamp(self.offset) if str_timestamps else time_to_s(self.offset)
         if self.gate_filter:
             recipe_data["gate_filter"] = self.gate_filter
+        if self.deplosive_filter:
+            recipe_data["deplosive_filter"] = self.deplosive_filter
         if self.noise_reducer:
             recipe_data["noise_reducer"] = self.noise_reducer
         return recipe_data
@@ -86,6 +89,8 @@ class SpeakerTrackRecipe(object):
             self.offset = new_recipe.offset
         if new_recipe.gate_filter:
             self.gate_filter = new_recipe.gate_filter
+        if new_recipe.deplosive_filter:
+            self.deplosive_filter = new_recipe.deplosive_filter
         if new_recipe.noise_reducer:
             self.noise_reducer = new_recipe.noise_reducer
         if len(new_recipe.fX):

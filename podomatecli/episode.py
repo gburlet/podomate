@@ -3,6 +3,7 @@ import numpy as np
 
 from audio_inserter import AudioInserter
 from audio_overlayer import AudioOverlayer
+from audio_preprocessors.deplosive_filter import DeplosiveFilter
 from audio_preprocessors.gate_filter import GateFilter
 from audio_preprocessors.noise_reducer_factory import NoiseReducerFactory
 from episode_recipe import EpisodeRecipe
@@ -98,6 +99,11 @@ class Episode(object):
             silence_timestamps = self.recipe.speaker_track_recipes[i_track].silence_timestamps
             for silence_interval in silence_timestamps:
                 self.speaker_tracks[i_track].apply_silence_to_interval(silence_interval)
+
+            # apply deplosive filter
+            deplosive_filter_params = self.recipe.speaker_track_recipes[i_track].deplosive_filter
+            if deplosive_filter_params:
+                DeplosiveFilter(**deplosive_filter_params).process(self.speaker_tracks[i_track])
 
         # perform alignment
         track_aligner.align(self.speaker_tracks, track_offsets).pad(self.speaker_tracks)
