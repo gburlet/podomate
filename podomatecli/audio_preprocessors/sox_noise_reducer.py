@@ -59,7 +59,8 @@ class SoxNoiseReducer(NoiseReducer):
         tfm.noisered(self._noise_profile_path, self._noise_threshold)
         track.audio_buffer.x = tfm.build_array(
             input_array=track.audio_buffer.x, sample_rate_in=track.audio_buffer.fs
-        )
+        ).copy()
+        # copy required to make output array mutable
 
         os.remove(self._noise_profile_path)
 

@@ -22,7 +22,7 @@ class DeplosiveFilter(object):
     HIGH_ENERGY_RMS_MULTIPLIER = 1.75
     ENERGY_BURST_RMS_PERCENT_DIFF = 1.0
 
-    def __init__(self, window_size=1024, hop_size=1024, cutoff=225, db_attenuation=-3.5, min_plosive_length_s=0.03, max_plosive_length_s=0.2):
+    def __init__(self, window_size=1536, hop_size=512, cutoff=225, db_attenuation=-3.5, min_plosive_length_s=0.03, max_plosive_length_s=0.2):
         """
         Parameters
         ----------

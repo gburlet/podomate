@@ -118,14 +118,20 @@
         var tracks_configs = [];
         for (var i = 1; i < numSpeakers+1; i++) {
             var track_config = {};
-            if ($("#speaker"+i+"-noisegate").is(':checked')) {
-                track_config["gate_filter"] = -10.0;
-            }
             if ($("#speaker"+i+"-noisereduction").is(':checked')) {
                 track_config["noise_reducer"] = {
                     id: "sox", params: {noise_threshold: 0.3}
                 }
             }
+            if ($("#speaker"+i+"-noisegate").is(':checked')) {
+                track_config["gate_filter"] = -10.0;
+            }
+            if ($("#speaker"+i+"-deplosives").is(':checked')) {
+                track_config["deplosive_filter"] = {
+                    "cutoff": 225, "db_attenuation": -3.5
+                }
+            }
+
             // TODO: offset format validation
             var trackOffset = $("#speaker"+i+"-offset").val();
             if (trackOffset) {
