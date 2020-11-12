@@ -74,7 +74,7 @@ var outroAudioFilename = null;
 var outroAudioPath = null;
 
 async function handleAudioInput() {
-    $("#overlay").fadeIn();
+    $("#overlay-indeterminant").fadeIn();
     var file = $(this)[0].files[0];
     outroAudioPath = file.path;
     outroAudioFilename = await eel.upload_audio(outroAudioPath)();
@@ -82,7 +82,7 @@ async function handleAudioInput() {
 
     $("#outro-audio-upload").hide();
     $("#audio-interact").show();
-    $("#overlay").fadeOut();
+    $("#overlay-indeterminant").fadeOut();
 }
 
 async function setupUI() {
@@ -137,9 +137,9 @@ async function handleAddOutro() {
         return;
     }
 
-    $("#overlay").fadeIn();
+    $("#overlay-indeterminant").fadeIn();
     await eel.add_outro_backtrack(outroAudioPath, slice, overlaySyncPoint)();
-    $("#overlay").fadeOut();
+    $("#overlay-indeterminant").fadeOut();
     location.href = "/templates/music.html";
 }
 

@@ -1,0 +1,68 @@
+<div id="overlay-indeterminant" class="text-center" style="display: none;">
+    <div class="row">
+        <div class="col-lg-12">
+            <img id="loading-animation" src="../img/loading_animation.gif" />
+        </div>
+    </div>
+    <div class="row" style="margin-top: -7em;">
+        <div class="col-lg-8 offset-lg-2">
+            <div id="loading-spinner" class="spinner-border text-success" role="status"></div><br/>
+            <span id="loading-text" class="align-middle">&nbsp;WORKING ...</span>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+const workingMessages = [
+    "Swapping time and space ...",
+    "Tokenizing real life ...",
+    "Bending the spoon with our minds ...",
+    "Don't think of purple hippos ...",
+    "The architects are still drafting ...",
+    "Pay no attention to the man behind the curtain ...",
+    "Would you like fries with that?",
+    "Checking the gravitational constant in your locale ...",
+    "Go ahead -- hold your breath!",
+    "At least you're not on hold ...",
+    "Hum something loud while others stare ...",
+    "Did you know this software is powered by a potato and two electrodes?",
+    "Would you like the red pill or the blue pill?",
+    "Following the white rabbit ...",
+    "Reconfoobling energymotron ...",
+    "Embiggening Prototypes ...",
+    "Creating time-loop inversion field ...",
+    "Spinning the wheel of fortune ...",
+    "Loading the enchanted bunny ...",
+    "Accelerating to 88mph ...",
+    "Adjusting flux capacitor ...",
+    "Please wait until the sloth starts moving ...",
+    "Looking for more dilithium crystals ...",
+    "99 bottles of beer on the wall ...",
+    "Stay awhile and listen ...",
+    "Convincing AI not to turn evil ...",
+    "Computing the secret to life, the universe, and everything ...",
+    "May the forks be with you ...",
+    "Constructing additional pylons ...",
+    "Dividing by zero ...",
+    "Entangling superstrings ...",
+    "Distracted by cat gifs ...",
+    "Whatever you do, don't look behind you ...",
+    "Consulting the manual ...",
+    "Waiting for Daenerys to say all her titles ...",
+    "Feel free to spin in your chair ...",
+    "Initializing the initializer ...",
+    "Shovelling coal into the engine ...",
+    "How about this weather, eh?",
+    "Everything in this universe is either a potato or not a potato ...",
+    "Discovering new ways of making you wait ...",
+    "Two men walked into a bar, the third ducked ...",
+    "Still faster than a Windows update ...",
+    "Waking up the minions ..."
+];
+$(document).ready(function() {
+    setInterval(function() {
+        var selectedMessage = workingMessages[Math.floor(Math.random() * workingMessages.length)];
+        $("#loading-text").text(selectedMessage);
+    }, 6500);
+});
+</script>

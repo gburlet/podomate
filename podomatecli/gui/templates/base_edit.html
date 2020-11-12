@@ -12,7 +12,17 @@
     {% block header %}{% endblock %}
 </head>
 <body>
-    {% include "loading_overlay.html" %}
+    <script type="text/javascript">
+    // for nodeIntegration namespace clash
+    window.nodeRequire = require;
+    delete window.require;
+    delete window.exports;
+    delete window.module;
+    </script>
+    <script type="text/javascript" src="../js/jquery.min.js"></script>
+
+    {% include "loading_overlay_determinant.html" %}
+    {% include "loading_overlay_indeterminant.html" %}
 
     <div id="hero">
         <h1 id="hero-header">{% block title %}{% endblock %}</h1>
@@ -31,14 +41,6 @@
         </div>
     </section>
 
-    <script type="text/javascript">
-    // for nodeIntegration namespace clash
-    window.nodeRequire = require;
-    delete window.require;
-    delete window.exports;
-    delete window.module;
-    </script>
-    <script type="text/javascript" src="../js/jquery.min.js"></script>
     <script type="text/javascript" src="../js/bootstrap.bundle.min.js"></script>
     <script type="text/javascript" src="../js/utils.js"></script>
     <script type="text/javascript" src="/eel.js"></script>

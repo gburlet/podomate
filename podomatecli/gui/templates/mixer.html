@@ -87,7 +87,7 @@
     }
 
     async function handleAudioInput() {
-        $("#overlay").fadeIn();
+        $("#overlay-indeterminant").fadeIn();
         let speakerID = parseInt($(this).attr('id').split('-')[0].slice(7));
         var file = $(this)[0].files[0];
         await eel.set_speaker_track(file.path, speakerID-1)();
@@ -97,7 +97,7 @@
         if (speakerID == numSpeakers) {
             $("#new-speaker").show();
         }
-        $("#overlay").fadeOut();
+        $("#overlay-indeterminant").fadeOut();
     }
 
     async function handleDeleteSpeaker(event) {
@@ -112,7 +112,7 @@
     }
 
     async function mixTracks() {
-        $("#overlay").fadeIn();
+        $("#overlay-indeterminant").fadeIn();
         // get track options
         const numSpeakers = $("input[type='file']").length;
         var tracks_configs = [];
@@ -140,7 +140,7 @@
             tracks_configs.push(track_config);
         }
         let mixed_track_path = await eel.mix_speaker_tracks(tracks_configs)();
-        $("#overlay").fadeOut();
+        $("#overlay-indeterminant").fadeOut();
         location.href = "/templates/trim.html";
     }
 

@@ -163,12 +163,12 @@ function showSelectPlacement() {
 }
 
 async function handleAudioInput() {
-    $("#overlay").fadeIn();
+    $("#overlay-indeterminant").fadeIn();
     var file = $(this)[0].files[0];
     snippetAudioPath = file.path;
     snippetAudioFilename = await eel.upload_audio(snippetAudioPath)();
     showSelectRegion();
-    $("#overlay").fadeOut();
+    $("#overlay-indeterminant").fadeOut();
 }
 
 async function handleSelectSnippetRegion() {
@@ -178,7 +178,7 @@ async function handleSelectSnippetRegion() {
         return;
     }
 
-    $("#overlay").fadeIn();
+    $("#overlay-indeterminant").fadeIn();
     var region = null;
     $.each(wavesurfer.regions.list, function(rid, firstRegion) {
         region = firstRegion;
@@ -187,7 +187,7 @@ async function handleSelectSnippetRegion() {
     let slice = [region.start, region.end];
     snippetConfig["slice"] = slice;
     showSelectPlacement();
-    $("#overlay").fadeOut();
+    $("#overlay-indeterminant").fadeOut();
 }
 
 async function handleAddSnippet() {
@@ -202,14 +202,14 @@ async function handleAddSnippet() {
         return;
     }
 
-    $("#overlay").fadeIn();
+    $("#overlay-indeterminant").fadeIn();
     snippetConfig["timestamp"] = wavesurfer.getCurrentTime();
     if (isNaN(iInsert)) {
         await eel.add_insert(snippetAudioPath, snippetConfig["slice"], snippetConfig["timestamp"])();
     } else {
         await eel.update_insert(iInsert, snippetAudioPath, snippetConfig["slice"], snippetConfig["timestamp"])();
     }
-    $("#overlay").fadeOut();
+    $("#overlay-indeterminant").fadeOut();
     location.href = "/templates/snippets.html";
 }
 

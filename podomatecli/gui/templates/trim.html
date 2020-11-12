@@ -60,9 +60,9 @@
     }
 
     async function setLiveRegions(liveTimestamps) {
-        $("#overlay").fadeIn();
+        $("#overlay-indeterminant").fadeIn();
         await eel.set_live_timestamps(liveTimestamps)();
-        $("#overlay").fadeOut();
+        $("#overlay-indeterminant").fadeOut();
         location.href = "/templates/music.html";
     }
 

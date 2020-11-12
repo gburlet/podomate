@@ -46,7 +46,7 @@
 <script type="text/javascript" src="../js/mdb-file-upload.min.js"></script>
 <script type="text/javascript">
 async function handleSettingsInput() {
-    $("#overlay").fadeIn();
+    $("#overlay-indeterminant").fadeIn();
     var file = $(this)[0].files[0];
     await eel.load_episode_recipe(file.path)();
     location.href = "/templates/finish.html"
