@@ -1,13 +1,10 @@
 import base64
-import copy
-import json
 import shutil
 import sys
 import uuid
 import eel
 import eel.browsers
 import os
-import numpy as np
 import requests
 import subprocess
 from tempfile import NamedTemporaryFile
@@ -18,18 +15,11 @@ from cryptography.hazmat.primitives import serialization, hashes
 from cryptography.hazmat.primitives.asymmetric import padding
 from getmac import get_mac_address
 
-from audio_buffer import AudioBuffer
-from audio_inserter import AudioInserter
-from audio_overlayer import AudioOverlayer
-from audio_preprocessors.gate_filter import GateFilter
 from episode import Episode
-from fx_chain import FXChain
-from mixer import Mixer
-from silence_remover import SilenceRemover
 from speaker_track_recipe import SpeakerTrackRecipe
 from track import Track
-from track_aligner import TrackAligner
-from utils import parse_version_string, s_to_timestamp
+from utils import parse_version_string
+
 
 ################################
 #            GLOBALS           #
@@ -410,7 +400,10 @@ def mix_speaker_tracks(user_tracks_options):
             SpeakerTrackRecipe(**user_track_options)
         )
 
-    episode.mix_speaker_tracks()
+    def update_gui_progress(step, steps, message):
+        eel.update_determinant_loader(int(step/float(steps)*100), message)
+
+    episode.mix_speaker_tracks(progress_callback=update_gui_progress)
 
     filename = "%s.flac" % str(uuid.uuid4())
     mixed_track_path = os.path.abspath(os.path.join(bundle_dir, 'gui/media/%s' % filename))

@@ -99,3 +99,13 @@ class SpeakerTrackRecipe(object):
     def set_silence_timestamps(self, silence_timestamps):
         self.silence_timestamps = silence_timestamps
 
+    def processing_steps(self):
+        """
+        Returns: int number of operations to be run on the track
+        """
+
+        operations = [
+            self.noise_reducer, self.gate_filter, self.silence_timestamps, self.deplosive_filter, self.fX
+        ]
+        num_steps = sum([((isinstance(o, list) and len(o) > 0) or (not isinstance(o, list) and o is not None)) for o in operations])
+        return num_steps

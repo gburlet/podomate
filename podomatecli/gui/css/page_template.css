@@ -62,7 +62,7 @@ section {
     margin-right: 2em;
 }
 
-#overlay-indeterminant {
+#overlay-indeterminant, #overlay-determinant {
     background: #434743ff;
     color: #666666;
     position: fixed;

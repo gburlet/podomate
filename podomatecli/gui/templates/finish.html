@@ -45,9 +45,9 @@ async function startProcessing() {
     $("#row-process").hide();
     $("#progressbar").hide();
     $("#ready").hide();
-    $("#overlay-indeterminant").show();
+    $("#overlay-determinant").show();
     await eel.process()();
-    $("#overlay-indeterminant").hide();
+    $("#overlay-determinant").hide();
     location.href = "/templates/result.html";
 }
 

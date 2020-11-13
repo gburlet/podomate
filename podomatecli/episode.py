@@ -1,4 +1,6 @@
 import os
+
+import eel
 import numpy as np
 
 from audio_inserter import AudioInserter
@@ -72,11 +74,26 @@ class Episode(object):
             self.speaker_tracks[i_speaker].master = True
             self.recipe.speaker_track_recipes[i_speaker].master = True
 
-    def mix_speaker_tracks(self):
+    def mix_speaker_tracks(self, progress_callback=None):
+        """
+        Perform the mixdown of all input speaker tracks
+
+        Parameters
+        ----------
+        progress_callback: function (tick, total, message str)
+        """
+
+        current_step = 0
+        processing_steps = self.recipe.mix_processing_steps()
+
         # set master track if it has not already been set
         if not any([t.master for t in self.speaker_tracks]):
             i_master_track = np.argmax([t.audio_buffer.get_duration_s() for t in self.speaker_tracks])
             self.set_master_speaker_track(i_master_track)
+
+        current_step += 1
+        if progress_callback:
+            progress_callback(current_step, processing_steps, "Calculating track alignments ...")
 
         # auto calculate track alignment (offsets) for non master tracks
         track_aligner = TrackAligner(track_offsets=[trecipe.offset for trecipe in self.recipe.speaker_track_recipes])
@@ -86,6 +103,10 @@ class Episode(object):
             # apply noise reducer
             noise_reducer = self.recipe.speaker_track_recipes[i_track].noise_reducer
             if noise_reducer:
+                current_step += 1
+                if progress_callback:
+                    progress_callback(current_step, processing_steps, "Reducing noise levels (Track %d) ..." % (i_track+1))
+
                 NoiseReducerFactory.construct_noise_reducer(
                     noise_reducer["id"], noise_reducer.get("params", {})
                 ).auto_reduce_noise(self.speaker_tracks[i_track])
@@ -93,17 +114,34 @@ class Episode(object):
             # apply gate filter
             gate_filter_db = self.recipe.speaker_track_recipes[i_track].gate_filter
             if gate_filter_db:
+                current_step += 1
+                if progress_callback:
+                    progress_callback(current_step, processing_steps, "Applying gate filter (Track %d) ..." % (i_track+1))
+
                 GateFilter(gate_filter_db).process(self.speaker_tracks[i_track])
 
             # silence timestamps
             silence_timestamps = self.recipe.speaker_track_recipes[i_track].silence_timestamps
-            for silence_interval in silence_timestamps:
-                self.speaker_tracks[i_track].apply_silence_to_interval(silence_interval)
+            if len(silence_timestamps):
+                current_step += 1
+                if progress_callback:
+                    progress_callback(current_step, processing_steps, "Silencing regions (Track %d) ..." % (i_track+1))
+
+                for silence_interval in silence_timestamps:
+                    self.speaker_tracks[i_track].apply_silence_to_interval(silence_interval)
 
             # apply deplosive filter
             deplosive_filter_params = self.recipe.speaker_track_recipes[i_track].deplosive_filter
             if deplosive_filter_params:
+                current_step += 1
+                if progress_callback:
+                    progress_callback(current_step, processing_steps, "Reducing intensity of plosives (Track %d) ..." % (i_track+1))
+
                 DeplosiveFilter(**deplosive_filter_params).process(self.speaker_tracks[i_track])
+
+        current_step += 1
+        if progress_callback:
+            progress_callback(current_step, processing_steps, "Performing track alignment ...")
 
         # perform alignment
         track_aligner.align(self.speaker_tracks, track_offsets).pad(self.speaker_tracks)
@@ -112,13 +150,25 @@ class Episode(object):
         for i_track in range(len(self.speaker_tracks)):
             fX_chain = self.recipe.speaker_track_recipes[i_track].fX
             if len(fX_chain):
+                current_step += 1
+                if progress_callback:
+                    progress_callback(current_step, processing_steps, "Applying effects (Track %d) ..." % (i_track+1))
+
                 FXChain(fX_chain).apply(self.speaker_tracks[i_track])
                 self.speaker_tracks[i_track].audio_buffer.normalize()
+
+        current_step += 1
+        if progress_callback:
+            progress_callback(current_step, processing_steps, "Mixing tracks ...")
 
         # mix global track
         self.mixed_track = Mixer().mix_tracks(self.speaker_tracks)
         self.mixed_track.audio_buffer.normalize()
         _ = self.mixed_track.silence_ranges  # cache VAD for future operations
+
+        current_step += 1
+        if progress_callback:
+            progress_callback(current_step, processing_steps, "Writing mixed track ...")
 
     def add_intro_overlay(self, filename, slice, overlay_sync_point):
         if self.mixed_track.activity_range_cache is None or len(self.mixed_track.activity_range_cache) == 0:
@@ -199,7 +249,14 @@ class Episode(object):
         if 0 <= i_insert < len(self.recipe.mixed_track_recipe.inserts):
             del self.recipe.mixed_track_recipe.inserts[i_insert]
 
-    def process(self):
+    def process(self, progress_callback=None):
+        current_step = 0
+        processing_steps = self.recipe.edit_master_processing_steps()
+
+        current_step += 1
+        if progress_callback:
+            progress_callback(current_step, processing_steps, "Trimming live audio ...")
+
         silence_intervals = []
         if len(self.recipe.mixed_track_recipe.live_timestamps):
             silence_intervals.extend(
@@ -212,15 +269,27 @@ class Episode(object):
 
         SilenceRemover(self.recipe.mixed_track_recipe.min_silence_duration).remove(self.mixed_track, padding_s=0.2)
 
+        current_step += 1
+        if progress_callback:
+            progress_callback(current_step, processing_steps, "Adding music underlays ...")
+
         # Audio Overlays
         for overlay_config in self.recipe.mixed_track_recipe.overlays:
             self.mixed_track = AudioOverlayer.from_config(overlay_config).overlay(self.mixed_track)
             self.mixed_track.audio_buffer.normalize()
 
+        current_step += 1
+        if progress_callback:
+            progress_callback(current_step, processing_steps, "Inserting audio snippets ...")
+
         # Ad Inserts
         for insert_config in self.recipe.mixed_track_recipe.inserts:
             AudioInserter.from_config(insert_config).insert_into(self.mixed_track)
         self.mixed_track.audio_buffer.normalize()
+
+        current_step += 1
+        if progress_callback:
+            progress_callback(current_step, processing_steps, "Applying effects ...")
 
         # global fX chain
         if len(self.recipe.mixed_track_recipe.fX):
@@ -228,6 +297,10 @@ class Episode(object):
 
         self.mixed_track.audio_buffer.normalize()
         self.mixed_track.audio_buffer.stereofy()
+
+        current_step += 1
+        if progress_callback:
+            progress_callback(current_step, processing_steps, "Writing podcast audio ...")
 
     def write_audio(self, path):
         self.mixed_track.audio_buffer._path = path

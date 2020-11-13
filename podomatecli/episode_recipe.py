@@ -59,5 +59,19 @@ class EpisodeRecipe(object):
         if 0 <= i_speaker < len(self.speaker_track_recipes):
             del self.speaker_track_recipes[i_speaker]
 
+    def processing_steps(self):
+        return self.mix_processing_steps() + self.edit_master_processing_steps()
+
+    def mix_processing_steps(self):
+        num_steps = 1   # calculate track alignments
+        num_steps += sum([trecipe.processing_steps() for trecipe in self.speaker_track_recipes])    # individual track processing
+        num_steps += 3  # align tracks + mix tracks + write track
+        return num_steps
+
+    def edit_master_processing_steps(self):
+        num_steps = self.mixed_track_recipe.processing_steps()
+        num_steps += 1  # write track
+        return num_steps
+
     def __str__(self):
         return self.to_json()

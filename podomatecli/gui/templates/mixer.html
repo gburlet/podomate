@@ -112,7 +112,7 @@
     }
 
     async function mixTracks() {
-        $("#overlay-indeterminant").fadeIn();
+        $("#overlay-determinant").fadeIn();
         // get track options
         const numSpeakers = $("input[type='file']").length;
         var tracks_configs = [];
@@ -140,7 +140,7 @@
             tracks_configs.push(track_config);
         }
         let mixed_track_path = await eel.mix_speaker_tracks(tracks_configs)();
-        $("#overlay-indeterminant").fadeOut();
+        $("#overlay-determinant").fadeOut();
         location.href = "/templates/trim.html";
     }
 

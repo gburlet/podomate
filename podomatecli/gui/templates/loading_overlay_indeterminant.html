@@ -1,7 +1,7 @@
 <div id="overlay-indeterminant" class="text-center" style="display: none;">
     <div class="row">
         <div class="col-lg-12">
-            <img id="loading-animation" src="../img/loading_animation.gif" />
+            <img id="loading-animation-indeterminant" src="../img/loading_animation.gif" />
         </div>
     </div>
     <div class="row" style="margin-top: -7em;">
@@ -62,7 +62,7 @@ const workingMessages = [
 $(document).ready(function() {
     setInterval(function() {
         var selectedMessage = workingMessages[Math.floor(Math.random() * workingMessages.length)];
-        $("#loading-text").text(selectedMessage);
+        $("#loading-text").text(" " + selectedMessage);
     }, 6500);
 });
 </script>

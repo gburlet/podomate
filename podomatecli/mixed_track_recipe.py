@@ -48,3 +48,14 @@ class MixedTrackRecipe(object):
         for i_overlay in range(len(self.overlays)-1,-1,-1):
             if self.overlays[i_overlay]["tag"] == tag:
                 del self.overlays[i_overlay]
+
+    def processing_steps(self):
+        """
+        Returns: int number of operations to be run on the track
+        """
+
+        operations = [
+            self.silence_timestamps or self.live_timestamps, self.inserts, self.overlays, self.fX
+        ]
+        num_steps = sum([((isinstance(o, list) and len(o) > 0) or o is not None) for o in operations])
+        return num_steps
