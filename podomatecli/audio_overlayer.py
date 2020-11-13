@@ -99,9 +99,9 @@ class AudioOverlayer(object):
         volume_automations.append({"timestamp": overlay_sync_point, "volume": 0.2})
 
         # handle automation critical points after the vox ends
-        automation_ramp_s = min_automation_segment_length_s/3.
+        automation_ramp_s = min_automation_segment_length_s/2.
         if overlay_sync_point + min_automation_segment_length_s + 2*automation_ramp_s < overlay_slice[1]:
-            # we have enough room to play the outro audio for a bit before winding downs
+            # we have enough room to play the outro audio for a bit before winding down
             volume_automations.append({"timestamp": overlay_sync_point+automation_ramp_s, "volume": 0.9})
             volume_automations.append({"timestamp": overlay_slice[1]-automation_ramp_s, "volume": 0.9})
 

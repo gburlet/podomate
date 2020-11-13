@@ -171,6 +171,12 @@ class Episode(object):
             progress_callback(current_step, processing_steps, "Writing audio ...")
 
     def add_intro_overlay(self, filename, slice, overlay_sync_point):
+        """
+        Args:
+            filename: intro music audio filename
+            slice: (start, stop)
+            overlay_sync_point (float): timestamp of where to align overlay with track
+        """
         if self.mixed_track.activity_range_cache is None or len(self.mixed_track.activity_range_cache) == 0:
             raise ValueError("We ran into an issue applying the intro backtrack. Is your mixed track of speakers silent?")
 
@@ -205,6 +211,12 @@ class Episode(object):
         self.recipe.mixed_track_recipe.add_overlay(overlay_config, allow_duplicate_tags=False)
 
     def add_outro_overlay(self, filename, slice, overlay_sync_point):
+        """
+        Args:
+            filename: intro music audio filename
+            slice: (start, stop)
+            overlay_sync_point (float): timestamp of where to align overlay with track.
+        """
         if self.mixed_track.activity_range_cache is None or len(self.mixed_track.activity_range_cache) == 0:
             raise ValueError("We ran into an issue applying the outro backtrack. Is your mixed track of speakers silent?")
 

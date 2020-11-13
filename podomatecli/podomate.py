@@ -338,11 +338,12 @@ def upload_audio(filepath):
 
 
 @eel.expose
-def add_intro_backtrack(path, slice, overlay_sync_point):
+def add_intro_backtrack(path, slice):
     """
     Creates recipe for intro audio overlay
     """
     global episode
+    overlay_sync_point = min(slice[0] + 5, slice[1])
     episode.add_intro_overlay(path, slice, overlay_sync_point)
 
 
@@ -353,11 +354,12 @@ def remove_intro_backtrack():
 
 
 @eel.expose
-def add_outro_backtrack(path, slice, overlay_sync_point):
+def add_outro_backtrack(path, slice):
     """
     Creates recipe for outro audio overlay
     """
     global episode
+    overlay_sync_point = max(slice[0], slice[-1] - 5)
     episode.add_outro_overlay(path, slice, overlay_sync_point)
 
 

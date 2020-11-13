@@ -36,11 +36,7 @@
 
 <div id="audio-interact" style="display:none;">
     <h2>What part do you want to use?</h2>
-    <ol>
-        <li>Drag to select a segment of music to use.</li>
-        <li>Double click the selected segment and stop playback where you want the talking to end.</li>
-    </ol>
-    <p>We'll fade the outro music and make a seamless transition.</p>
+    <p>Drag to select a segment of music to use. We'll play the music quietly under the speakers until they're done talking and then play a bit at full volume to end the podcast.</p>
 
     {% with waveformID="waveform", regionLimit=1 %}
     {% include "interactive_waveform.html" %}
@@ -134,14 +130,14 @@ async function handleAddOutro() {
         return false;
     });
     let slice = [region.start, region.end];
-    let overlaySyncPoint = wavesurfer.getCurrentTime();
-    if (overlaySyncPoint < region.start || overlaySyncPoint > region.end) {
-        showError("Please stop playback within the segment of selected music.");
+    // make sure the music selection is long enough for our volume automations
+    if (region.end - region.start < 10) {
+        showError("Please select at least 10 seconds of music for your outro.");
         return;
     }
 
     showSpinner(false);
-    await eel.add_outro_backtrack(outroAudioPath, slice, overlaySyncPoint)().then(() => {
+    await eel.add_outro_backtrack(outroAudioPath, slice)().then(() => {
         location.href = "/templates/music.html";
     }).catch((err) => {
         showError("There was an error adding this outro music to the podcast. Please send a bug report on our website so we can fix it for you!");
