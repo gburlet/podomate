@@ -16,7 +16,6 @@
         <h3 id="hero-subheader">Edit, mix, and master your podcast</h3>
         <button id="btn-start" class="splash-btn-cta">CREATE EPISODE</button>
         <button id="btn-load-episode" class="splash-btn-cta">LOAD EPISODE</button>
-        <button id="btn-start-activation" class="splash-btn-cta" data-toggle="modal" data-target="#activationModal">ACTIVATE</button>
 
         <div id="update-notification-toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-autohide="false">
             <div class="toast-header">
@@ -31,17 +30,14 @@
         </div>
     </div>
 
-    {% include "activation_modal.html" %}
     {% include "update_modal.html" %}
 {% endblock %}
 
 {% block scripts %}
     <script type="text/javascript" src="../js/edit.js"></script>
-    <script type="text/javascript" src="../js/activate.js"></script>
     <script type="text/javascript" src="../js/update.js"></script>
     <script type="text/javascript">
     $(document).ready(function() {
-        checkActivation();
         checkUpdate();
         checkSunset();
     });

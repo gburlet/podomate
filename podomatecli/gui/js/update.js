@@ -42,7 +42,6 @@ async function checkSunset() {
         if (!isVersionActive) {
             $("#btn-start").hide();
             $("#btn-load-episode").hide();
-            $("#btn-start-activation").hide();
             showError("This version is too out of date. Please update before using!")
         }
     }).catch((err) => {
