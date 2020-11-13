@@ -87,17 +87,23 @@
     }
 
     async function handleAudioInput() {
-        $("#overlay-indeterminant").fadeIn();
-        let speakerID = parseInt($(this).attr('id').split('-')[0].slice(7));
         var file = $(this)[0].files[0];
-        await eel.set_speaker_track(file.path, speakerID-1)();
-        $("#speaker"+speakerID+"-row").find(".file-upload > button").click({speakerID: speakerID}, handleDeleteSpeaker);
-        $("#accordion-speaker"+speakerID).show();
-        var numSpeakers = $("input[type='file']").length;
-        if (speakerID == numSpeakers) {
-            $("#new-speaker").show();
-        }
-        $("#overlay-indeterminant").fadeOut();
+        if (file == null || file == undefined) return;
+
+        showSpinner(false);
+        let speakerID = parseInt($(this).attr('id').split('-')[0].slice(7));
+        await eel.set_speaker_track(file.path, speakerID-1)().then(() => {
+            $("#speaker"+speakerID+"-row").find(".file-upload > button").click({speakerID: speakerID}, handleDeleteSpeaker);
+            $("#accordion-speaker"+speakerID).show();
+            var numSpeakers = $("input[type='file']").length;
+            if (speakerID == numSpeakers) {
+                $("#new-speaker").show();
+            }
+        }).catch((err) => {
+            showError("There was an error loading that audio file.");
+            $(this).val('').change();
+        });
+        hideSpinners();
     }
 
     async function handleDeleteSpeaker(event) {
@@ -112,7 +118,15 @@
     }
 
     async function mixTracks() {
-        $("#overlay-determinant").fadeIn();
+        // check we have tracks to mix
+        let speakerTracks = await eel.get_speaker_track_recipes()();
+        var numPopulatedTracks = speakerTracks.length;
+        if (numPopulatedTracks <= 0) {
+            showError("We need some audio to start mixing the podcast! Drag and drop a file to begin.");
+            return;
+        }
+
+        showSpinner(true);
         // get track options
         const numSpeakers = $("input[type='file']").length;
         var tracks_configs = [];
@@ -139,9 +153,14 @@
             }
             tracks_configs.push(track_config);
         }
-        let mixed_track_path = await eel.mix_speaker_tracks(tracks_configs)();
-        $("#overlay-determinant").fadeOut();
-        location.href = "/templates/trim.html";
+
+        await eel.mix_speaker_tracks(tracks_configs)().then(() => {
+            hideSpinners();
+            location.href = "/templates/trim.html";
+        }).catch((err) => {
+            hideSpinners();
+            showError("There was an error mixing your speaker tracks. Please send a bug report on our website so we can fix it for you!");
+        });
     }
 
     $(document).ready(function() {
@@ -160,20 +179,7 @@
         });
 
         $("#btn-mix").click(function() {
-            $("#alert").hide();
-            const numTracks = $("input[type='file']").length;
-            var numPopulatedTracks = 0;
-            for (var i = 1; i < numTracks+1; i++) {
-                if ($("#speaker"+i+"-audio")[0].files.length > 0) {
-                    numPopulatedTracks++;
-                }
-            }
-            if (numPopulatedTracks != numTracks) {
-                $("#alert").text("Oh Snap! You are missing an audio file for one or more of the speakers.");
-                $("#alert").show();
-                return;
-            }
-
+            hideError();
             mixTracks();
         });
     });

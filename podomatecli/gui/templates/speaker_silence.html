@@ -70,9 +70,9 @@
     }
 
     async function setSilenceRegions(silenceTimestamps) {
-        $("#overlay-indeterminant").fadeIn();
+        showSpinner(false);
         await eel.set_speaker_track_silence_timestamps(silenceTimestamps, iSpeaker)();
-        $("#overlay-indeterminant").fadeOut();
+        hideSpinners();
         location.href = "/templates/mixer.html";
     }
 

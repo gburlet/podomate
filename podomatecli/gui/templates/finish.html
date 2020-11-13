@@ -45,10 +45,13 @@ async function startProcessing() {
     $("#row-process").hide();
     $("#progressbar").hide();
     $("#ready").hide();
-    $("#overlay-determinant").show();
-    await eel.process()();
-    $("#overlay-determinant").hide();
-    location.href = "/templates/result.html";
+    showSpinner(true);
+    await eel.process()().then(() => {
+        location.href = "/templates/result.html";
+    }).catch((err) => {
+        showError("There was an error editing and mastering your podcast. Please send a bug report on our website so we can fix it for you!");
+    });
+    hideSpinners();
 }
 
 $(document).ready(function() {

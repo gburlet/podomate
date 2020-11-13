@@ -60,9 +60,9 @@
     }
 
     async function setLiveRegions(liveTimestamps) {
-        $("#overlay-indeterminant").fadeIn();
+        showSpinner(false);
         await eel.set_live_timestamps(liveTimestamps)();
-        $("#overlay-indeterminant").fadeOut();
+        hideSpinners();
         location.href = "/templates/music.html";
     }
 

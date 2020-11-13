@@ -40,28 +40,37 @@ $("#btn-activate").click(function() {
 });
 
 async function performActivation(email, licenseKey) {
-    let response = await eel.activate(email, licenseKey)();
-    const activated = response["activated"];
-    const activations_remaining = response["activations_remaining"];
-    const msg = response["msg"];
+    await eel.activate(email, licenseKey)().then((response) => {
+        const activated = response["activated"];
+        const activations_remaining = response["activations_remaining"];
+        const msg = response["msg"];
 
-    if (activated) {
-        $("#activation-start").hide();
-        $("#activation-success").show();
-        $("#activation-footer").hide();
-        $("#btn-start-activation").hide();
-    } else {
+        if (activated) {
+            $("#activation-start").hide();
+            $("#activation-success").show();
+            $("#activation-footer").hide();
+            $("#btn-start-activation").hide();
+        } else {
+            $("#activation-key").addClass("is-invalid");
+        }
+
+    }).catch((err) => {
         $("#activation-key").addClass("is-invalid");
-    }
+    });
     $("#activation-spinner").hide();
     $("#btn-activate").attr("disabled", false);
 }
 
 async function checkActivation() {
-    let isActivated = await eel.check_license()();
-    if (isActivated) {
-        $("#btn-start-activation").hide();
-    }
+    await eel.check_license()().then((isActivated) => {
+        if (isActivated) {
+            $("#btn-start-activation").hide();
+        }
+    }).catch((err) => {
+        showError("There was an error checking product activation. Please send a bug report on our website so we can fix it for you!");
+        $("#btn-start").hide();
+        $("#btn-load-episode").hide();
+    });
 }
 
 $('#activationModal').on('hidden.bs.modal', function (e) {

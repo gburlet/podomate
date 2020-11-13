@@ -74,15 +74,18 @@ var introAudioFilename = null;
 var introAudioPath = null;
 
 async function handleAudioInput() {
-    $("#overlay-indeterminant").fadeIn();
+    showSpinner(false);
     var file = $(this)[0].files[0];
     introAudioPath = file.path;
-    introAudioFilename = await eel.upload_audio(introAudioPath)();
-    setupInteractiveWaveform(introAudioFilename, "waveform", 1);
-
-    $("#intro-audio-upload").hide();
-    $("#audio-interact").show();
-    $("#overlay-indeterminant").fadeOut();
+    await eel.upload_audio(introAudioPath)().then((audioFilename) => {
+        introAudioFilename = audioFilename;
+        setupInteractiveWaveform(introAudioFilename, "waveform", 1);
+        $("#intro-audio-upload").hide();
+        $("#audio-interact").show();
+    }).catch((err) => {
+        showError("There was an error loading the music file.");
+    });
+    hideSpinners();
 }
 
 async function setupUI() {
@@ -117,11 +120,11 @@ async function handleAddIntro() {
     $("#alert").hide();
 
     if (introAudioFilename == null) {
-        setError("<b>Oh Snap!</b> You need to select an audio file first.");
+        showError("You need to select an audio file first.");
         return;
     }
     if (Object.keys(wavesurfer.regions.list).length == 0) {
-        setError("<b>Oh Snap!</b> You need to select a segment of the music file to use.");
+        showError("You need to select a segment of the music file to use.");
         return;
     }
 
@@ -133,17 +136,20 @@ async function handleAddIntro() {
     let slice = [region.start, region.end];
     let overlaySyncPoint = wavesurfer.getCurrentTime();
     if (overlaySyncPoint < region.start || overlaySyncPoint > region.end) {
-        setError("<b>Oh Snap!</b> Please stop playback within the segment of selected music.");
+        showError("Please stop playback within the segment of selected music.");
         return;
     }
 
-    $("#overlay-indeterminant").fadeIn();
-    await eel.add_intro_backtrack(introAudioPath, slice, overlaySyncPoint)();
-    $("#overlay-indeterminant").fadeOut();
-    location.href = "/templates/music.html";
+    showSpinner(false);
+    await eel.add_intro_backtrack(introAudioPath, slice, overlaySyncPoint)().then(() => {
+        location.href = "/templates/music.html";
+    }).catch((err) => {
+        showError("There was an error adding this intro music to the podcast. Please send a bug report on our website so we can fix it for you!");
+    });
+    hideSpinners();
 }
 
-function setError(msg) {
+function showError(msg) {
     $("#alert").html(msg);
     $("#alert").show();
 }

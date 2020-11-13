@@ -163,12 +163,16 @@ function showSelectPlacement() {
 }
 
 async function handleAudioInput() {
-    $("#overlay-indeterminant").fadeIn();
+    showSpinner(false);
     var file = $(this)[0].files[0];
     snippetAudioPath = file.path;
-    snippetAudioFilename = await eel.upload_audio(snippetAudioPath)();
-    showSelectRegion();
-    $("#overlay-indeterminant").fadeOut();
+    await eel.upload_audio(snippetAudioPath)().then((audioFilename) => {
+        snippetAudioFilename = audioFilename;
+        showSelectRegion();
+    }).catch((err) => {
+        showError("There was an error loading the audio snippet.");
+    });
+    hideSpinners();
 }
 
 async function handleSelectSnippetRegion() {
@@ -178,7 +182,7 @@ async function handleSelectSnippetRegion() {
         return;
     }
 
-    $("#overlay-indeterminant").fadeIn();
+    showSpinner(false);
     var region = null;
     $.each(wavesurfer.regions.list, function(rid, firstRegion) {
         region = firstRegion;
@@ -187,7 +191,7 @@ async function handleSelectSnippetRegion() {
     let slice = [region.start, region.end];
     snippetConfig["slice"] = slice;
     showSelectPlacement();
-    $("#overlay-indeterminant").fadeOut();
+    hideSpinners();
 }
 
 async function handleAddSnippet() {
@@ -202,15 +206,22 @@ async function handleAddSnippet() {
         return;
     }
 
-    $("#overlay-indeterminant").fadeIn();
+    showSpinner(false);
     snippetConfig["timestamp"] = wavesurfer.getCurrentTime();
     if (isNaN(iInsert)) {
-        await eel.add_insert(snippetAudioPath, snippetConfig["slice"], snippetConfig["timestamp"])();
+        await eel.add_insert(snippetAudioPath, snippetConfig["slice"], snippetConfig["timestamp"])().then(() => {
+            location.href = "/templates/snippets.html";
+        }).catch((err) => {
+            showError("There was an error adding the audio snippet to the podcast. Please send a bug report on our website so we can fix it for you!");
+        });
     } else {
-        await eel.update_insert(iInsert, snippetAudioPath, snippetConfig["slice"], snippetConfig["timestamp"])();
+        await eel.update_insert(iInsert, snippetAudioPath, snippetConfig["slice"], snippetConfig["timestamp"])().then(() => {
+            location.href = "/templates/snippets.html";
+        }).catch((err) => {
+            showError("There was an error updating the audio snippet. Please send a bug report on our website so we can fix it for you!");
+        });
     }
-    $("#overlay-indeterminant").fadeOut();
-    location.href = "/templates/snippets.html";
+    hideSpinners();
 }
 
 function setError(msg) {

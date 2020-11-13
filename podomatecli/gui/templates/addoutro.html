@@ -74,15 +74,18 @@ var outroAudioFilename = null;
 var outroAudioPath = null;
 
 async function handleAudioInput() {
-    $("#overlay-indeterminant").fadeIn();
+    showSpinner(false);
     var file = $(this)[0].files[0];
     outroAudioPath = file.path;
-    outroAudioFilename = await eel.upload_audio(outroAudioPath)();
-    setupInteractiveWaveform(outroAudioFilename, "waveform", 1);
-
-    $("#outro-audio-upload").hide();
-    $("#audio-interact").show();
-    $("#overlay-indeterminant").fadeOut();
+    await eel.upload_audio(outroAudioPath)().then((audioFilename) => {
+        outroAudioFilename = audioFilename;
+        setupInteractiveWaveform(outroAudioFilename, "waveform", 1);
+        $("#outro-audio-upload").hide();
+        $("#audio-interact").show();
+    }).catch((err) => {
+        showError("There was an error loading the music file.");
+    });
+    hideSpinners();
 }
 
 async function setupUI() {
@@ -117,11 +120,11 @@ async function handleAddOutro() {
     $("#alert").hide();
 
     if (outroAudioFilename == null) {
-        setError("<b>Oh Snap!</b> You need to select an audio file first.");
+        showError("You need to select an audio file first.");
         return;
     }
     if (Object.keys(wavesurfer.regions.list).length == 0) {
-        setError("<b>Oh Snap!</b> You need to select a segment of the music file to use.");
+        showError("You need to select a segment of the music file to use.");
         return;
     }
 
@@ -133,19 +136,17 @@ async function handleAddOutro() {
     let slice = [region.start, region.end];
     let overlaySyncPoint = wavesurfer.getCurrentTime();
     if (overlaySyncPoint < region.start || overlaySyncPoint > region.end) {
-        setError("<b>Oh Snap!</b> Please stop playback within the segment of selected music.");
+        showError("Please stop playback within the segment of selected music.");
         return;
     }
 
-    $("#overlay-indeterminant").fadeIn();
-    await eel.add_outro_backtrack(outroAudioPath, slice, overlaySyncPoint)();
-    $("#overlay-indeterminant").fadeOut();
-    location.href = "/templates/music.html";
-}
-
-function setError(msg) {
-    $("#alert").html(msg);
-    $("#alert").show();
+    showSpinner(false);
+    await eel.add_outro_backtrack(outroAudioPath, slice, overlaySyncPoint)().then(() => {
+        location.href = "/templates/music.html";
+    }).catch((err) => {
+        showError("There was an error adding this outro music to the podcast. Please send a bug report on our website so we can fix it for you!");
+    });
+    hideSpinners();
 }
 
 $(document).ready(function() {
