@@ -168,7 +168,7 @@ class Episode(object):
 
         current_step += 1
         if progress_callback:
-            progress_callback(current_step, processing_steps, "Writing mixed track ...")
+            progress_callback(current_step, processing_steps, "Writing audio ...")
 
     def add_intro_overlay(self, filename, slice, overlay_sync_point):
         if self.mixed_track.activity_range_cache is None or len(self.mixed_track.activity_range_cache) == 0:
@@ -300,7 +300,7 @@ class Episode(object):
 
         current_step += 1
         if progress_callback:
-            progress_callback(current_step, processing_steps, "Writing podcast audio ...")
+            progress_callback(current_step, processing_steps, "Writing audio ...")
 
     def write_audio(self, path):
         self.mixed_track.audio_buffer._path = path

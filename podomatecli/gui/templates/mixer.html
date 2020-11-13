@@ -155,7 +155,7 @@
             $(newSpeakerHTML).insertBefore("#new-speaker");
             $("#speaker"+newSpeakerID+"-audio").file_upload();
             $("#speaker"+newSpeakerID+"-audio").change(handleAudioInput);
-            $("#speaker"+newSpeakerID+"-audio-badge").popover({"html": true});
+            $('[data-toggle="popover"]').popover({"html": true});
             $("#new-speaker").hide();
         });
 

@@ -79,7 +79,7 @@ section {
     vertical-align: middle;
 }
 
-#loading-text {
+#loading-text, #loading-text-determinant {
     color: #28a745!important;
     font-family: 'DeadRevolution', sans-serif;
     font-size: 25px;

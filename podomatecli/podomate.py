@@ -426,8 +426,11 @@ def process():
     audio_filename = "%s_mastered.flac" % episode_id
     mixed_track_path = os.path.abspath(os.path.join(bundle_dir, 'gui/media/%s' % audio_filename))
 
+    def update_gui_progress(step, steps, message):
+        eel.update_determinant_loader(int(step/float(steps)*100), message)
+
     episode.write_recipe(recipe_path)
-    episode.process()
+    episode.process(progress_callback=update_gui_progress)
     episode.write_audio(mixed_track_path)
 
 
