@@ -48,19 +48,19 @@
 async function handleSettingsInput() {
     showSpinner(false);
     var file = $(this)[0].files[0];
-    await eel.load_episode_recipe(file.path)();
-    location.href = "/templates/finish.html"
-}
-
-function setError(msg) {
-    $("#alert").html(msg);
-    $("#alert").show();
+    await eel.load_episode_recipe(file.path)().then(() => {
+        location.href = "/templates/finish.html"
+    }).catch((err) => {
+        showError("There was an error loading up your previous podcast episode. Please send a bug report on our website so we can fix it for you!");
+    });
+    hideSpinners();
 }
 
 $(document).ready(function() {
     $('[data-toggle="popover"]').popover({"html": true});
     $('.file-upload').file_upload();
     $("input[type='file']").change(handleSettingsInput);
+    $(".file-upload-message > p:first").text("Drag and drop a recipe file here or click");
 
     $("#btn-back").click(function() {
         location.href = "/templates/main.html";
