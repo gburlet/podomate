@@ -46,7 +46,7 @@
 <script type="text/javascript" src="../js/mdb-file-upload.min.js"></script>
 <script type="text/javascript">
 async function handleSettingsInput() {
-    showSpinner(false);
+    showSpinner(true);
     var file = $(this)[0].files[0];
     await eel.load_episode_recipe(file.path)().then(() => {
         location.href = "/templates/finish.html"

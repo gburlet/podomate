@@ -21,65 +21,69 @@
                     </div>
                     <div id="collapse-speaker{{speaker_id}}" class="collapse" aria-labelledby="heading-speaker{{speaker_id}}" data-parent="#accordion-speaker{{speaker_id}}">
                         <div class="card-body">
-                            <div class="form-row">
-                                <div class="col">
-                                    <div class="switch-container">
-                                        <label class="switch">
-                                          <input type="checkbox" id="speaker{{speaker_id}}-noisereduction">
-                                          <span class="slider round"></span>
+                            <form novalidate>
+                                <div class="form-row">
+                                    <div class="col">
+                                        <div class="switch-container">
+                                            <label class="switch">
+                                              <input type="checkbox" id="speaker{{speaker_id}}-noisereduction">
+                                              <span class="slider round"></span>
+                                            </label>
+                                            Noise Reduction
+                                            <a id="speaker{{speaker_id}}-noisereduction-badge" tabindex="-1" class="badge-pop badge badge-success align-middle" data-trigger="hover" data-container="body" data-toggle="popover" data-placement="bottom" data-content="Reduces the background noise of this speaker's audio recording. Turn this on if they're using a cheap microphone or have a fan on in the background.">
+                                                <i class="fas fa-info-circle"></i> Info
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <div class="switch-container">
+                                            <label class="switch">
+                                              <input type="checkbox" id="speaker{{speaker_id}}-noisegate">
+                                              <span class="slider round"></span>
+                                            </label>
+                                            Noise Gate
+                                            <a id="speaker{{speaker_id}}-gate-badge" tabindex="-1" class="badge-pop badge badge-success align-middle" data-trigger="hover" data-container="body" data-toggle="popover" data-placement="bottom" data-content="Silences this speaker's audio when they're not talking. Turn this on if they're intermittently clicking a pen or have a creaky chair.">
+                                                <i class="fas fa-info-circle"></i> Info
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <div class="switch-container">
+                                            <label class="switch">
+                                              <input type="checkbox" id="speaker{{speaker_id}}-deplosives">
+                                              <span class="slider round"></span>
+                                            </label>
+                                            Deplosives
+                                            <a id="speaker{{speaker_id}}-deplosives-badge" tabindex="-1" class="badge-pop badge badge-success align-middle" data-trigger="hover" data-container="body" data-toggle="popover" data-placement="bottom" data-content="Reduces the intensity of plosives (harsh p's, b's) that can make a harsh popping sound. Turn this on if the speaker is close to the microphone without a pop filter.">
+                                                <i class="fas fa-info-circle"></i> Info
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr/>
+                                <div class="form-row">
+                                    <div class="col">
+                                        <label for="speaker{{speaker_id}}-offset">
+                                            Track Offset
+                                            <a id="speaker{{speaker_id}}-offset-badge" tabindex="-1" class="badge-pop badge badge-success align-middle" data-trigger="hover" data-container="body" data-toggle="popover" data-placement="bottom" data-content="Input the offset time of this audio track to manually shift it over in relation to the other speakers. You might have an offset if speakers start recording at different times. We calculate this automatically, but maybe we messed up and you need to do this manually.">
+                                                <i class="fas fa-info-circle"></i> Info
+                                            </a>
                                         </label>
-                                        Noise Reduction
-                                        <a id="speaker{{speaker_id}}-noisereduction-badge" tabindex="-1" class="badge-pop badge badge-success align-middle" data-trigger="hover" data-container="body" data-toggle="popover" data-placement="bottom" data-content="Reduces the background noise of this speaker's audio recording. Turn this on if they're using a cheap microphone or have a fan on in the background.">
+                                        <input type="text" class="form-control" id="speaker{{speaker_id}}-offset" placeholder="HH:MM:SS.MSS">
+                                        <div class="invalid-feedback">
+                                            Invalid offset time format
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-row" style="margin-top: 1.5em;">
+                                    <div class="col">
+                                        <a id="speaker{{speaker_id}}-setsilence" class="btn btn-light" href="/templates/speaker_silence.html?iSpeaker={{speaker_id}}">Silence Regions <i class="fas fa-chevron-right"></i></a>
+                                        <a id="speaker{{speaker_id}}-setsilence-badge" tabindex="-1" class="badge-pop badge badge-success align-middle" data-trigger="hover" data-container="body" data-toggle="popover" data-placement="bottom" data-content="Tag small segments you want to silence in this speaker's audio. Good for removing sneezes, coughs, throat clears and curses.">
                                             <i class="fas fa-info-circle"></i> Info
                                         </a>
                                     </div>
                                 </div>
-                                <div class="col">
-                                    <div class="switch-container">
-                                        <label class="switch">
-                                          <input type="checkbox" id="speaker{{speaker_id}}-noisegate">
-                                          <span class="slider round"></span>
-                                        </label>
-                                        Noise Gate
-                                        <a id="speaker{{speaker_id}}-gate-badge" tabindex="-1" class="badge-pop badge badge-success align-middle" data-trigger="hover" data-container="body" data-toggle="popover" data-placement="bottom" data-content="Silences this speaker's audio when they're not talking. Turn this on if they're intermittently clicking a pen or have a creaky chair.">
-                                            <i class="fas fa-info-circle"></i> Info
-                                        </a>
-                                    </div>
-                                </div>
-                                <div class="col">
-                                    <div class="switch-container">
-                                        <label class="switch">
-                                          <input type="checkbox" id="speaker{{speaker_id}}-deplosives">
-                                          <span class="slider round"></span>
-                                        </label>
-                                        Deplosives
-                                        <a id="speaker{{speaker_id}}-deplosives-badge" tabindex="-1" class="badge-pop badge badge-success align-middle" data-trigger="hover" data-container="body" data-toggle="popover" data-placement="bottom" data-content="Reduces the intensity of plosives (harsh p's, b's) that can make a harsh popping sound. Turn this on if the speaker is close to the microphone without a pop filter.">
-                                            <i class="fas fa-info-circle"></i> Info
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                            <hr/>
-                            <div class="form-row">
-                                <div class="col">
-                                    <label for="speaker{{speaker_id}}-offset">
-                                        Track Offset
-                                        <a id="speaker{{speaker_id}}-offset-badge" tabindex="-1" class="badge-pop badge badge-success align-middle" data-trigger="hover" data-container="body" data-toggle="popover" data-placement="bottom" data-content="Input the offset time of this audio track to manually shift it over in relation to the other speakers. You might have an offset if speakers start recording at different times. We calculate this automatically, but maybe we messed up and you need to do this manually.">
-                                            <i class="fas fa-info-circle"></i> Info
-                                        </a>
-                                    </label>
-                                    <input type="text" class="form-control" id="speaker{{speaker_id}}-offset" placeholder="HH:MM:SS.MSS">
-
-                                </div>
-                            </div>
-                            <div class="form-row" style="margin-top: 1.5em;">
-                                <div class="col">
-                                    <a id="speaker{{speaker_id}}-setsilence" class="btn btn-light" href="/templates/speaker_silence.html?iSpeaker={{speaker_id}}">Silence Regions <i class="fas fa-chevron-right"></i></a>
-                                    <a id="speaker{{speaker_id}}-setsilence-badge" tabindex="-1" class="badge-pop badge badge-success align-middle" data-trigger="hover" data-container="body" data-toggle="popover" data-placement="bottom" data-content="Tag small segments you want to silence in this speaker's audio. Good for removing sneezes, coughs, throat clears and curses.">
-                                        <i class="fas fa-info-circle"></i> Info
-                                    </a>
-                                </div>
-                            </div>
+                            </form>
                         </div>
                     </div>
                 </div>

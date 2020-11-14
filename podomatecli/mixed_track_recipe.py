@@ -13,6 +13,19 @@ class MixedTrackRecipe(object):
         self.inserts = kwargs.get("inserts", [])
         self.overlays = kwargs.get("overlays", [])
 
+    def clear(self):
+        self.silence_timestamps = []
+        self.live_timestamps = []
+        self.fX = []
+        self.inserts = []
+        self.overlays = []
+
+    def clear_inserts(self):
+        self.inserts = []
+
+    def clear_overlays(self):
+        self.overlays = []
+
     def to_json(self, str_timestamps=False):
         formatted_silence_timestamps = [
             time_interval_to_timestamp(sinterval) for sinterval in self.silence_timestamps

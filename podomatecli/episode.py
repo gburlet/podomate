@@ -96,10 +96,19 @@ class Episode(object):
             progress_callback(current_step, processing_steps, "Calculating track alignments ...")
 
         # auto calculate track alignment (offsets) for non master tracks
-        track_aligner = TrackAligner(track_offsets=[trecipe.offset for trecipe in self.recipe.speaker_track_recipes])
-        track_offsets = track_aligner.auto_calc_offset(self.speaker_tracks)
+        recipe_track_offsets = [trecipe.offset for trecipe in self.recipe.speaker_track_recipes]
+        track_aligner = TrackAligner(track_offsets=recipe_track_offsets)
+        if any([o is not None for o in track_aligner._track_offsets]):
+            # a manual track offset has been set. Don't do automatic offset calculation
+            track_offsets = [o if o else 0. for o in track_aligner._track_offsets]
+        else:
+            # perform automatic track offset calculation
+            track_offsets = track_aligner.auto_calc_offset(self.speaker_tracks)
 
         for i_track in range(len(self.speaker_tracks)):
+            # set the calculated offset
+            self.recipe.speaker_track_recipes[i_track].offset = track_offsets[i_track]
+
             # apply noise reducer
             noise_reducer = self.recipe.speaker_track_recipes[i_track].noise_reducer
             if noise_reducer:

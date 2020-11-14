@@ -79,6 +79,14 @@
             btnDelSpeaker.show();
             btnDelSpeaker.click({speakerID: speakerID}, handleDeleteSpeaker);
             $("#accordion-speaker"+speakerID).show();
+            $("#speaker"+speakerID+"-offset").blur(function() {
+                if (checkValidTimestamp($(this).val())) {
+                    $(this).removeClass("is-invalid");
+                } else {
+                    $(this).addClass("is-invalid");
+                    $(this).val("");
+                }
+            });
         });
 
         if (speakerTracks.length > 0) {
@@ -95,6 +103,14 @@
         await eel.set_speaker_track(file.path, speakerID-1)().then(() => {
             $("#speaker"+speakerID+"-row").find(".file-upload > button").click({speakerID: speakerID}, handleDeleteSpeaker);
             $("#accordion-speaker"+speakerID).show();
+            $("#speaker"+speakerID+"-offset").blur(function() {
+                if (checkValidTimestamp($(this).val())) {
+                    $(this).removeClass("is-invalid");
+                } else {
+                    $(this).addClass("is-invalid");
+                    $(this).val("");
+                }
+            });
             var numSpeakers = $("input[type='file']").length;
             if (speakerID == numSpeakers) {
                 $("#new-speaker").show();

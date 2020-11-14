@@ -18,8 +18,7 @@ from getmac import get_mac_address
 from episode import Episode
 from speaker_track_recipe import SpeakerTrackRecipe
 from track import Track
-from utils import parse_version_string
-
+from utils import parse_version_string, time_interval_to_s
 
 ################################
 #            GLOBALS           #
@@ -221,7 +220,15 @@ def load_episode_recipe(path):
         for insert in episode.recipe.mixed_track_recipe.inserts:
             upload_audio(insert["path"])
 
-        mix_speaker_tracks([])
+        def update_gui_progress(step, steps, message):
+            eel.update_determinant_loader(int(step / float(steps) * 100), message)
+
+        episode.mix_speaker_tracks(progress_callback=update_gui_progress)
+
+        filename = "%s.flac" % str(uuid.uuid4())
+        mixed_track_path = os.path.abspath(os.path.join(bundle_dir, 'gui/media/%s' % filename))
+        episode.mixed_track.audio_buffer._path = mixed_track_path
+        episode.mixed_track.audio_buffer.write()
 
 
 @eel.expose
@@ -320,13 +327,17 @@ def set_speaker_track_silence_timestamps(silence_timestamps, i_speaker):
 @eel.expose
 def get_live_timestamps():
     global episode
-    return episode.recipe.mixed_track_recipe.live_timestamps
+    return [time_interval_to_s(linterval) for linterval in episode.recipe.mixed_track_recipe.live_timestamps]
 
 
 @eel.expose
 def set_live_timestamps(live_timestamps):
     global episode
     episode.recipe.mixed_track_recipe.live_timestamps = live_timestamps
+
+    # clear future recipe pipeline affected by this change
+    episode.recipe.mixed_track_recipe.clear_overlays()
+    episode.recipe.mixed_track_recipe.clear_inserts()
 
 
 @eel.expose
@@ -393,6 +404,9 @@ def remove_insert(i_insert):
 @eel.expose
 def mix_speaker_tracks(user_tracks_options):
     global episode
+
+    # clear future recipe pipeline affected by remixing
+    episode.recipe.mixed_track_recipe.clear()
 
     # set default track options and override with user-selected options
     for i_track, user_track_options in enumerate(user_tracks_options):

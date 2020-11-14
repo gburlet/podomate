@@ -22,6 +22,12 @@ function secondsToTimestamp(s) {
     return `${sign}${zeroPad(hours,2)}:${zeroPad(minutes,2)}:${zeroPad(seconds,2)}.${zeroPad(milliseconds,3)}`;
 }
 
+function checkValidTimestamp(timestamp) {
+    // checks that a given timestamp is in format HH:MM:SS.MSS
+    let re = /\d{2}:\d{2}:\d{2}\.\d{3}/;
+    return re.test(timestamp);
+}
+
 function zeroPad(num, numZeros) {
     var n = Math.abs(num);
     var zeros = Math.max(0, numZeros - Math.floor(n).toString().length );
